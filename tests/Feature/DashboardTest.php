@@ -29,7 +29,7 @@ it('menandai menu dashboard sebagai menu aktif', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('bg-[#FDBA12]/80 font-semibold text-white', false);
+        ->assertSee('bg-[#FDBA12]/40 font-semibold text-white', false);
 });
 
 it('mengarahkan halaman utama ke login untuk tamu', function () {

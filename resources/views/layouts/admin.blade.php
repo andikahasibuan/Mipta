@@ -39,8 +39,8 @@
                                     @if (request()->routeIs($menu['route'])) aria-current="page" @endif
                                     @class([
                                         'block rounded-md px-3 py-2 text-sm transition',
-                                        'bg-[#FDBA12]/80 font-semibold text-white' => request()->routeIs($menu['route']),
-                                        'text-[#A9C0D6] hover:bg-[#FDBA12]/80 hover:font-semibold hover:text-white' => ! request()->routeIs($menu['route']),
+                                        'bg-[#FDBA12]/40 font-semibold text-white' => request()->routeIs($menu['route']),
+                                        'text-[#A9C0D6] hover:bg-[#FDBA12]/40 hover:font-semibold hover:text-white' => ! request()->routeIs($menu['route']),
                                     ])
                                 >
                                     {{ $menu['label'] }}
@@ -55,7 +55,7 @@
                         @csrf
                         <button
                             type="submit"
-                            class="w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-medium text-[#A9C0D6] transition hover:bg-[#FDBA12]/80 hover:text-white"
+                            class="w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-medium text-[#A9C0D6] transition hover:bg-[#FDBA12]/40 hover:text-white"
                         >
                             Keluar dari Sistem
                         </button>
