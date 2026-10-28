@@ -1,14 +1,14 @@
 @php
-    // Menu masih statis sampai halaman tiap menu dibangun.
+    // Definisi menu sidebar admin.
     $menus = [
-        ['label' => 'Dashboard Monitoring', 'active' => true],
-        ['label' => 'Pengguna & Data Master', 'active' => false],
-        ['label' => 'Laporan Penyaluran', 'active' => false],
-        ['label' => 'Monitoring & Analisis', 'active' => false],
-        ['label' => 'Pengawasan & Tindak Lanjut', 'active' => false],
-        ['label' => 'Rekap & Ekspor Laporan', 'active' => false],
-        ['label' => 'Riwayat Aktivitas Sistem', 'active' => false],
-        ['label' => 'Manajemen Profil', 'active' => false],
+        ['label' => 'Dashboard Monitoring', 'route' => 'admin.dashboard'],
+        ['label' => 'Pengguna & Data Master', 'route' => 'admin.users.index'],
+        ['label' => 'Laporan Penyaluran', 'route' => 'admin.distribution.index'],
+        ['label' => 'Monitoring & Analisis', 'route' => 'admin.monitoring.index'],
+        ['label' => 'Pengawasan & Tindak Lanjut', 'route' => 'admin.supervision.index'],
+        ['label' => 'Rekap & Ekspor Laporan', 'route' => 'admin.reports.index'],
+        ['label' => 'Riwayat Aktivitas Sistem', 'route' => 'admin.activity.index'],
+        ['label' => 'Manajemen Profil', 'route' => 'admin.profile.edit'],
     ];
 @endphp
 
@@ -25,22 +25,26 @@
     </head>
     <body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
         <div class="flex min-h-screen">
-            <aside class="flex w-64 shrink-0 flex-col border-r border-blue-200 bg-blue-100">
+            <aside class="flex w-64 shrink-0 flex-col border-r border-blue-200 bg-[linear-gradient(to_bottom,#5191E4_3%,#2D507E_13%)]">
                 <div class="px-6 py-6">
-                    <p class="text-2xl font-bold tracking-[0.2em] text-blue-950">MIPTA</p>
+                    <p class="text-2xl font-bold tracking-[0.2em] text-[#A9C0D6]">MIPTA</p>
                 </div>
 
                 <nav class="flex-1 px-3 pb-6" aria-label="Menu utama">
                     <ul class="flex flex-col gap-1">
                         @foreach ($menus as $menu)
                             <li>
-                                <span @class([
-                                    'block rounded-md px-3 py-2 text-sm',
-                                    'bg-blue-200 font-semibold text-blue-950' => $menu['active'],
-                                    'text-blue-900' => ! $menu['active'],
-                                ])>
+                                <a
+                                    href="{{ route($menu['route']) }}"
+                                    @if (request()->routeIs($menu['route'])) aria-current="page" @endif
+                                    @class([
+                                        'block rounded-md px-3 py-2 text-sm transition',
+                                        'bg-[#FDBA12]/80 font-semibold text-white' => request()->routeIs($menu['route']),
+                                        'text-[#A9C0D6] hover:bg-[#FDBA12]/80 hover:font-semibold hover:text-white' => ! request()->routeIs($menu['route']),
+                                    ])
+                                >
                                     {{ $menu['label'] }}
-                                </span>
+                                </a>
                             </li>
                         @endforeach
                     </ul>
@@ -51,7 +55,7 @@
                         @csrf
                         <button
                             type="submit"
-                            class="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-blue-900 transition hover:bg-blue-200"
+                            class="w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-medium text-[#A9C0D6] transition hover:bg-[#FDBA12]/80 hover:text-white"
                         >
                             Keluar dari Sistem
                         </button>

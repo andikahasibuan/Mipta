@@ -70,7 +70,7 @@
 
         <button
             type="submit"
-            class="mt-2 w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            class="mt-2 w-full cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
         >
             Masuk
         </button>
