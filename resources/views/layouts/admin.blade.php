@@ -27,7 +27,13 @@
         <div class="flex min-h-screen">
             <aside class="flex w-64 shrink-0 flex-col border-r border-blue-200 bg-[linear-gradient(to_bottom,#5191E4_3%,#2D507E_13%)]">
                 <div class="px-6 py-6">
-                    <p class="text-2xl font-bold tracking-[0.2em] text-[#A9C0D6]">MIPTA</p>
+                    <div class="mx-auto w-30">
+                        <img
+                            src="{{ asset('images/mipta-logo.png') }}"
+                            alt="MIPTA"
+                            class="block h-auto w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
+                        >
+                    </div>
                 </div>
 
                 <nav class="flex-1 px-3 pb-6" aria-label="Menu utama">

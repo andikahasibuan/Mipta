@@ -4,8 +4,12 @@
 
 @section('content')
     <div class="text-center">
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-950">MIPTA</p>
-        <h1 class="mt-2 text-2xl font-semibold text-blue-600">Selamat Datang</h1>
+        <img
+            src="{{ asset('images/mipta-logo.png') }}"
+            alt="MIPTA"
+            class="mx-auto block w-28"
+        >
+        <h1 class="mt-2 text-2xl font-semibold text-[#2D507E]">Selamat Datang</h1>
         <p class="mt-1 text-sm text-slate-500">Silahkan masuk menggunakan akun yang telah terdaftar</p>
     </div>
 
@@ -19,11 +23,12 @@
                 name="identifier"
                 type="text"
                 value="{{ old('identifier') }}"
+                placeholder="Masukkan email atau username"
                 required
                 autofocus
                 autocomplete="username"
                 @class([
-                    'mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2',
+                    'mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.12)] focus:outline-none focus:ring-2',
                     'border-slate-300 focus:border-blue-500 focus:ring-blue-200' => ! $errors->has('identifier'),
                     'border-red-400 focus:border-red-500 focus:ring-red-200' => $errors->has('identifier'),
                 ])
@@ -39,10 +44,11 @@
                 id="password"
                 name="password"
                 type="password"
+                placeholder="Masukkan kata sandi"
                 required
                 autocomplete="current-password"
                 @class([
-                    'mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2',
+                    'mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.12)] focus:outline-none focus:ring-2',
                     'border-slate-300 focus:border-blue-500 focus:ring-blue-200' => ! $errors->has('password'),
                     'border-red-400 focus:border-red-500 focus:ring-red-200' => $errors->has('password'),
                 ])
@@ -70,7 +76,7 @@
 
         <button
             type="submit"
-            class="mt-2 w-full cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            class="mt-2 w-full cursor-pointer rounded-md bg-[#2D507E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/50"
         >
             Masuk
         </button>
