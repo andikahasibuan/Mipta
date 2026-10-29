@@ -1,14 +1,14 @@
 @php
     // Definisi menu sidebar admin.
     $menus = [
-        ['label' => 'Dashboard Monitoring', 'route' => 'admin.dashboard'],
-        ['label' => 'Pengguna & Data Master', 'route' => 'admin.users.index'],
-        ['label' => 'Laporan Penyaluran', 'route' => 'admin.distribution.index'],
-        ['label' => 'Monitoring & Analisis', 'route' => 'admin.monitoring.index'],
-        ['label' => 'Pengawasan & Tindak Lanjut', 'route' => 'admin.supervision.index'],
-        ['label' => 'Rekap & Ekspor Laporan', 'route' => 'admin.reports.index'],
-        ['label' => 'Riwayat Aktivitas Sistem', 'route' => 'admin.activity.index'],
-        ['label' => 'Manajemen Profil', 'route' => 'admin.profile.edit'],
+        ['label' => 'Dashboard Monitoring', 'route' => 'admin.dashboard', 'icon' => 'squares-2x2'],
+        ['label' => 'Pengguna & Data Master', 'route' => 'admin.users.index', 'icon' => 'users'],
+        ['label' => 'Laporan Penyaluran', 'route' => 'admin.distribution.index', 'icon' => 'document-text'],
+        ['label' => 'Monitoring & Analisis', 'route' => 'admin.monitoring.index', 'icon' => 'chart-bar'],
+        ['label' => 'Pengawasan & Tindak Lanjut', 'route' => 'admin.supervision.index', 'icon' => 'shield-check'],
+        ['label' => 'Rekap & Ekspor Laporan', 'route' => 'admin.reports.index', 'icon' => 'arrow-down-tray'],
+        ['label' => 'Riwayat Aktivitas Sistem', 'route' => 'admin.activity.index', 'icon' => 'clock'],
+        ['label' => 'Manajemen Profil', 'route' => 'admin.profile.edit', 'icon' => 'user-circle'],
     ];
 @endphp
 
@@ -44,12 +44,17 @@
                                     href="{{ route($menu['route']) }}"
                                     @if (request()->routeIs($menu['route'])) aria-current="page" @endif
                                     @class([
-                                        'block rounded-md px-3 py-2 text-sm transition',
+                                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition',
                                         'bg-[#FDBA12]/40 font-semibold text-white' => request()->routeIs($menu['route']),
                                         'text-[#A9C0D6] hover:bg-[#FDBA12]/40 hover:font-semibold hover:text-white' => ! request()->routeIs($menu['route']),
                                     ])
                                 >
-                                    {{ $menu['label'] }}
+                                    <x-dynamic-component
+                                        :component="'heroicon-o-'.$menu['icon']"
+                                        class="h-5 w-5 shrink-0"
+                                        data-icon="{{ $menu['icon'] }}"
+                                    />
+                                    <span class="min-w-0 truncate">{{ $menu['label'] }}</span>
                                 </a>
                             </li>
                         @endforeach

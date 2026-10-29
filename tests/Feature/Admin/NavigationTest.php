@@ -27,7 +27,7 @@ it('menampilkan halaman admin dengan menu yang sesuai aktif', function (string $
     $html = $response->getContent();
 
     expect(substr_count($html, 'aria-current="page"'))->toBe(1)
-        ->and($html)->toMatch('/aria-current="page"[^>]*>\s*'.preg_quote(e($label), '/').'/s');
+        ->and($html)->toMatch('/aria-current="page"[^>]*>(?:(?!<\/a>).)*'.preg_quote(e($label), '/').'/s');
 })->with('admin pages');
 
 it('mengarahkan tamu ke halaman login', function (string $routeName) {
@@ -39,3 +39,13 @@ it('menolak pengguna dengan peran selain admin', function (string $routeName) {
         ->get(route($routeName))
         ->assertForbidden();
 })->with('admin pages');
+
+it('menampilkan ikon pada setiap menu sidebar', function () {
+    $response = $this->actingAs(User::factory()->create())->get(route('admin.dashboard'));
+
+    $response->assertOk();
+
+    foreach (['squares-2x2', 'users', 'document-text', 'chart-bar', 'shield-check', 'arrow-down-tray', 'clock', 'user-circle'] as $icon) {
+        $response->assertSee('data-icon="'.$icon.'"', false);
+    }
+});
