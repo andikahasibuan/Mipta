@@ -34,6 +34,16 @@
                             class="block h-auto w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
                         >
                     </div>
+                    <div class="mt-4 flex items-center gap-3 rounded-lg bg-[#0B2559]/40 px-3 py-2 ring-1 ring-white/10">
+                        <img src="{{ asset('images/logo.svg') }}" 
+                            alt=" Logo Kota Padang"
+                            class="h-9 w-9 shrink-0 object-contain">
+                        <div class="min-w-0 leading-tight">
+                            <p class="truncate text-[10px] uppercase tracking-wide text-[#A9C0D6]">Dinas Perdagangan</p>
+                            <p class="truncate text-sm font-semibold text-white">Kota Padang</p>
+                        </div>
+
+                    </div>
                 </div>
 
                 <nav class="flex-1 px-3 pb-6" aria-label="Menu utama">
