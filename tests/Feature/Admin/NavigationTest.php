@@ -21,7 +21,8 @@ it('menampilkan halaman admin dengan menu yang sesuai aktif', function (string $
     $response = $this->actingAs(User::factory()->create())->get(route($routeName));
 
     $response->assertOk()
-        ->assertSee('<title>'.e($title).'</title>', false);
+        ->assertSee('<title>'.e($title).'</title>', false)
+        ->assertSeeInOrder(['Sistem Monitoring Distribusi', $label]);
 
     $html = $response->getContent();
 
