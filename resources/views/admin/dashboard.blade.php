@@ -95,42 +95,62 @@
     </form>
 
     <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
-            <p class="mt-2 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['reports']) }}</p>
-            <p class="mt-1 text-xs font-medium {{ $changeColor }}">{{ $changeLabel }}</p>
+        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
+            <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
+                <x-heroicon-o-document-text class="h-6 w-6" />
+            </div>
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['reports']) }}</p>
+                <p class="mt-1 text-xs font-medium {{ $changeColor }}">{{ $changeLabel }}</p>
+            </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Penyaluran</p>
-            <p class="mt-2 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['cartons']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">karton pada {{ $summary['month_label'] }}</p>
+        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
+            <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
+                <x-heroicon-o-truck class="h-6 w-6" />
+            </div>
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Penyaluran</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['cartons']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">karton pada {{ $summary['month_label'] }}</p>
+            </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Distributor Aktif</p>
-            <p class="mt-2 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['active_distributors']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">
-                @if ($summary['total_distributors'] === 0)
-                    Belum ada data distributor
-                @elseif ($summary['active_distributors'] === $summary['total_distributors'])
-                    Seluruhnya aktif
-                @else
-                    {{ $summary['active_distributors'] }} dari {{ $summary['total_distributors'] }} distributor aktif
-                @endif
-            </p>
+        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
+            <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
+                <x-heroicon-o-building-office-2 class="h-6 w-6" />
+            </div>
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Distributor Aktif</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['active_distributors']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">
+                    @if ($summary['total_distributors'] === 0)
+                        Belum ada data distributor
+                    @elseif ($summary['active_distributors'] === $summary['total_distributors'])
+                        Seluruhnya aktif
+                    @else
+                        {{ $summary['active_distributors'] }} dari {{ $summary['total_distributors'] }} distributor aktif
+                    @endif
+                </p>
+            </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Terpantau</p>
-            <p class="mt-2 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['monitored_markets']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">
-                @if ($summary['total_markets'] === 0)
-                    Belum ada data pasar
-                @else
-                    {{ $summary['coverage_percent'] }}% wilayah terpantau
-                @endif
-            </p>
+        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
+            <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
+                <x-heroicon-o-map-pin class="h-6 w-6" />
+            </div>
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Terpantau</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['monitored_markets']) }}</p>
+                <p class="mt-1 text-xs text-slate-500">
+                    @if ($summary['total_markets'] === 0)
+                        Belum ada data pasar
+                    @else
+                        {{ $summary['coverage_percent'] }}% wilayah terpantau
+                    @endif
+                </p>
+            </div>
         </div>
     </div>
 

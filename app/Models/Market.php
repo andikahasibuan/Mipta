@@ -23,6 +23,14 @@ class Market extends Model
     }
 
     /**
+     * Laporan penyaluran yang menyasar pasar ini.
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(DistributionReport::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

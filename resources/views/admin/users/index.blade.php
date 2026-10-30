@@ -5,6 +5,8 @@
 @section('page-title', 'Pengguna & Data Master')
 
 @section('content')
+    <x-admin.master-tabs active="summary" />
+
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
     @endphp

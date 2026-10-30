@@ -2,7 +2,7 @@
     // Definisi menu sidebar admin.
     $menus = [
         ['label' => 'Dashboard Monitoring', 'route' => 'admin.dashboard', 'icon' => 'squares-2x2'],
-        ['label' => 'Pengguna & Data Master', 'route' => 'admin.users.index', 'icon' => 'users'],
+        ['label' => 'Pengguna & Data Master', 'route' => 'admin.users.index', 'icon' => 'users', 'active' => ['admin.users.*', 'admin.distributors.*']],
         ['label' => 'Laporan Penyaluran', 'route' => 'admin.distribution.index', 'icon' => 'document-text'],
         ['label' => 'Monitoring & Analisis', 'route' => 'admin.monitoring.index', 'icon' => 'chart-bar'],
         ['label' => 'Pengawasan & Tindak Lanjut', 'route' => 'admin.supervision.index', 'icon' => 'shield-check'],
@@ -54,11 +54,11 @@
                             <li>
                                 <a
                                     href="{{ route($menu['route']) }}"
-                                    @if (request()->routeIs($menu['route'])) aria-current="page" @endif
+                                    @if (request()->routeIs(...($menu['active'] ?? [$menu['route']]))) aria-current="page" @endif
                                     @class([
                                         'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition',
-                                        'bg-[#FDBA12]/40 font-semibold text-white' => request()->routeIs($menu['route']),
-                                        'text-[#A9C0D6] hover:bg-[#FDBA12]/40 hover:font-semibold hover:text-white' => ! request()->routeIs($menu['route']),
+                                        'bg-[#FDBA12]/40 font-semibold text-white' => request()->routeIs(...($menu['active'] ?? [$menu['route']])),
+                                        'text-[#A9C0D6] hover:bg-[#FDBA12]/40 hover:font-semibold hover:text-white' => ! request()->routeIs(...($menu['active'] ?? [$menu['route']])),
                                     ])
                                 >
                                     <x-dynamic-component

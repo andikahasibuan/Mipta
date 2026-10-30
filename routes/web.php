@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DistributionController;
+use App\Http\Controllers\Admin\DistributorController;
 use App\Http\Controllers\Admin\MonitoringController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReportController;
@@ -29,6 +30,7 @@ Route::post('logout', [LoginController::class, 'destroy'])
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::get('distributors', [DistributorController::class, 'index'])->name('distributors.index');
     Route::get('distribution', [DistributionController::class, 'index'])->name('distribution.index');
     Route::get('monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('supervision', [SupervisionController::class, 'index'])->name('supervision.index');
