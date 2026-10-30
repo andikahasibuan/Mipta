@@ -26,8 +26,11 @@ it('menampilkan halaman admin dengan menu yang sesuai aktif', function (string $
 
     $html = $response->getContent();
 
-    expect(substr_count($html, 'aria-current="page"'))->toBe(1)
-        ->and($html)->toMatch('/aria-current="page"[^>]*>(?:(?!<\/a>).)*'.preg_quote(e($label), '/').'/s');
+    preg_match('/<nav[^>]*aria-label="Menu utama".*?<\/nav>/s', $html, $matches);
+    $sidebar = $matches[0] ?? '';
+
+    expect(substr_count($sidebar, 'aria-current="page"'))->toBe(1)
+        ->and($sidebar)->toMatch('/aria-current="page"[^>]*>(?:(?!<\/a>).)*'.preg_quote(e($label), '/').'/s');
 })->with('admin pages');
 
 it('mengarahkan tamu ke halaman login', function (string $routeName) {

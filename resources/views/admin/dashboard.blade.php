@@ -10,7 +10,7 @@
 
         $change = $summary['reports_change'];
         $changeLabel = $change === null
-            ? 'Belum ada data bulan lalu'
+            ? 'Belum ada data laporan'
             : ($change > 0 ? '+' : '').number_format($change, 1, ',', '.').'% dari bulan lalu';
         $changeColor = match ($summary['reports_change_direction']) {
             'up' => 'text-emerald-600',
@@ -65,8 +65,8 @@
                     class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     <option value="">Semua Pasar</option>
-                    @foreach ($markets as $value => $label)
-                        <option value="{{ $value }}" @selected($filters['market'] === $value)>{{ $label }}</option>
+                    @foreach ($markets as $market)
+                        <option value="{{ $market->id }}" @selected($filters['market'] === $market->id)>{{ $market->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -79,8 +79,8 @@
                     class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     <option value="">Semua Distributor</option>
-                    @foreach ($distributors as $value => $label)
-                        <option value="{{ $value }}" @selected($filters['distributor'] === $value)>{{ $label }}</option>
+                    @foreach ($distributors as $distributor)
+                        <option value="{{ $distributor->id }}" @selected($filters['distributor'] === $distributor->id)>{{ $distributor->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -111,10 +111,12 @@
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Distributor Aktif</p>
             <p class="mt-2 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['active_distributors']) }}</p>
             <p class="mt-1 text-xs text-slate-500">
-                @if ($summary['active_distributors'] === $summary['total_distributors'])
-                    Seluruhnya aktif melapor
+                @if ($summary['total_distributors'] === 0)
+                    Belum ada data distributor
+                @elseif ($summary['active_distributors'] === $summary['total_distributors'])
+                    Seluruhnya aktif
                 @else
-                    {{ $summary['active_distributors'] }} dari {{ $summary['total_distributors'] }} distributor melapor
+                    {{ $summary['active_distributors'] }} dari {{ $summary['total_distributors'] }} distributor aktif
                 @endif
             </p>
         </div>
@@ -122,7 +124,13 @@
         <div class="rounded-xl border border-slate-200 bg-white p-5">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Terpantau</p>
             <p class="mt-2 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['monitored_markets']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">{{ $summary['coverage_percent'] }}% wilayah terpantau</p>
+            <p class="mt-1 text-xs text-slate-500">
+                @if ($summary['total_markets'] === 0)
+                    Belum ada data pasar
+                @else
+                    {{ $summary['coverage_percent'] }}% wilayah terpantau
+                @endif
+            </p>
         </div>
     </div>
 
@@ -148,7 +156,7 @@
             <h3 class="mt-1 text-base font-semibold text-slate-900">Penyaluran per Distributor</h3>
 
             <div class="mt-4 flex flex-1 flex-col gap-4">
-                @foreach ($breakdown as $row)
+                @forelse ($breakdown as $row)
                     @php
                         $width = $maxCartons > 0
                             ? max(2, (int) round($row['cartons'] / $maxCartons * 100))
@@ -167,7 +175,9 @@
                             <div class="h-full rounded-full bg-[#5191E4]" style="width: {{ $width }}%"></div>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <p class="text-sm text-slate-500">Belum ada data distributor</p>
+                @endforelse
             </div>
 
             <div class="mt-5 flex items-baseline justify-between gap-3 border-t border-slate-200 pt-4">

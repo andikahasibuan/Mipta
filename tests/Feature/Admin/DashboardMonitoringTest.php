@@ -1,7 +1,8 @@
 <?php
 
+use App\Models\Distributor;
+use App\Models\Market;
 use App\Models\User;
-use App\Services\DashboardSampleData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -19,32 +20,44 @@ it('menampilkan sapaan dan tombol unduh pada dashboard monitoring', function () 
         ->assertSee('title="Akan tersedia setelah modul laporan selesai"', false);
 });
 
-it('menampilkan empat kartu statistik dari data contoh', function () {
-    $summary = app(DashboardSampleData::class)->summary(now()->format('Y-m'));
-    $change = $summary['reports_change'];
-    $changeText = $change === null
-        ? 'Belum ada data bulan lalu'
-        : ($change > 0 ? '+' : '').number_format($change, 1, ',', '.').'% dari bulan lalu';
+it('menampilkan kartu statistik dari database', function () {
+    Distributor::factory()->create(['is_active' => true]);
+    Distributor::factory()->create(['is_active' => false]);
+    Market::factory()->count(2)->create();
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
         ->assertSeeInOrder([
-            'Total Laporan',
-            'Total Penyaluran',
-            'Distributor Aktif',
-            'Pasar Terpantau',
-        ])
-        ->assertSee(number_format($summary['cartons'], 0, ',', '.'))
-        ->assertSee('karton pada '.$summary['month_label'])
-        ->assertSee($summary['coverage_percent'].'% wilayah terpantau')
-        ->assertSee($changeText);
+            'Total Laporan', '0', 'Belum ada data laporan',
+            'Total Penyaluran', '0',
+            'Distributor Aktif', '1', '1 dari 2 distributor aktif',
+            'Pasar Terpantau', '2', '100% wilayah terpantau',
+        ]);
 });
 
-it('menghasilkan data contoh yang stabil untuk bulan yang sama', function () {
-    $data = app(DashboardSampleData::class);
+it('menampilkan keadaan kosong saat master belum berisi data', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('Belum ada data laporan')
+        ->assertSee('Belum ada data distributor')
+        ->assertSee('Belum ada data pasar');
+});
 
-    expect($data->summary('2026-10'))->toBe($data->summary('2026-10'));
+it('mengambil pilihan filter pasar dan distributor dari database', function () {
+    $distributor = Distributor::factory()->create(['name' => 'PT Contoh Distributor']);
+    $market = Market::factory()->create(['name' => 'Pasar Contoh']);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('PT Contoh Distributor')
+        ->assertSee('Pasar Contoh')
+        ->assertDontSee('PT Perusahaan Perdagangan Indonesia (PPI)')
+        ->assertDontSee('Pasar Raya')
+        ->assertSee('value="'.$distributor->id.'"', false)
+        ->assertSee('value="'.$market->id.'"', false);
 });
 
 it('menampilkan filter dengan pilihan default bulan berjalan', function () {
@@ -57,109 +70,61 @@ it('menampilkan filter dengan pilihan default bulan berjalan', function () {
         ->assertSee('value="'.now()->format('Y-m').'" selected', false);
 });
 
-it('menerapkan filter bulan pada kartu statistik', function () {
-    $data = app(DashboardSampleData::class);
-    $previousMonth = now()->subMonthNoOverflow()->format('Y-m');
-    $summary = $data->summary($previousMonth);
-
-    expect($summary['cartons'])->not->toBe($data->summary(now()->format('Y-m'))['cartons']);
+it('menerapkan filter distributor pada kartu statistik', function () {
+    $distributor = Distributor::factory()->create(['name' => 'PT Filter Distributor']);
+    Distributor::factory()->create();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('admin.dashboard', ['month' => $previousMonth]))
+        ->get(route('admin.dashboard', ['distributor' => $distributor->id]))
         ->assertOk()
-        ->assertSee(number_format($summary['cartons'], 0, ',', '.'))
-        ->assertSee('karton pada '.$summary['month_label'])
-        ->assertSee('value="'.$previousMonth.'" selected', false);
+        ->assertSee('PT Filter Distributor')
+        ->assertSee('value="'.$distributor->id.'" selected', false)
+        ->assertSeeInOrder(['Distributor Aktif', '1', 'Seluruhnya aktif']);
 });
 
 it('menerapkan filter pasar pada kartu statistik', function () {
-    $data = app(DashboardSampleData::class);
-    $month = now()->format('Y-m');
-    $summary = $data->summary($month, 'pasar-raya');
-
-    expect($summary['cartons'])->not->toBe($data->summary($month)['cartons']);
+    $market = Market::factory()->create();
+    Market::factory()->create();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('admin.dashboard', ['market' => 'pasar-raya']))
+        ->get(route('admin.dashboard', ['market' => $market->id]))
         ->assertOk()
-        ->assertSee(number_format($summary['cartons'], 0, ',', '.'))
-        ->assertSee('value="pasar-raya" selected', false);
-});
-
-it('menerapkan filter distributor pada kartu statistik', function () {
-    $data = app(DashboardSampleData::class);
-    $month = now()->format('Y-m');
-    $summary = $data->summary($month, null, 'bulog');
-
-    expect($summary['cartons'])->not->toBe($data->summary($month)['cartons']);
-
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.dashboard', ['distributor' => 'bulog']))
-        ->assertOk()
-        ->assertSee(number_format($summary['cartons'], 0, ',', '.'))
-        ->assertSee('value="bulog" selected', false);
+        ->assertSee('value="'.$market->id.'" selected', false)
+        ->assertSeeInOrder(['Pasar Terpantau', '1', '100% wilayah terpantau']);
 });
 
 it('kembali ke filter default saat nilai filter tidak valid', function () {
-    $summary = app(DashboardSampleData::class)->summary(now()->format('Y-m'));
-
     $this->actingAs(User::factory()->create())
-        ->get(route('admin.dashboard', ['month' => 'bukan-bulan', 'market' => 'pasar-tidak-ada', 'distributor' => 'tidak-ada']))
+        ->get(route('admin.dashboard', ['month' => 'bukan-bulan', 'market' => '999999', 'distributor' => 'abc']))
         ->assertOk()
-        ->assertSee('karton pada '.$summary['month_label'])
+        ->assertSee('Semua Pasar')
+        ->assertSee('Semua Distributor')
         ->assertSee('value="'.now()->format('Y-m').'" selected', false);
 });
 
-it('menampilkan panel grafik perkembangan bulanan', function () {
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.dashboard'))
-        ->assertOk()
+it('menampilkan panel grafik perkembangan bulanan dengan nilai nol', function () {
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.dashboard'));
+
+    $response->assertOk()
         ->assertSee('Perkembangan Bulanan')
         ->assertSee('id="monthly-chart"', false)
         ->assertSee("type: 'line'", false);
+
+    preg_match('/const chartData = (\{.*?\});/s', $response->getContent(), $matches);
+
+    $chartData = json_decode($matches[1], true);
+
+    expect($chartData['values'])->toHaveCount(now()->daysInMonth)
+        ->and(array_sum($chartData['values']))->toBe(0);
 });
 
-it('membangun seri harian yang konsisten dengan total penyaluran', function () {
-    $data = app(DashboardSampleData::class);
-    $month = now()->format('Y-m');
-
-    $series = $data->dailySeries($month);
-    $summary = $data->summary($month);
-
-    expect($series)->toHaveCount(now()->daysInMonth)
-        ->and(array_sum($series))->toBe($summary['cartons'])
-        ->and($data->dailySeries($month, null, 'bulog'))->not->toBe($series);
-});
-
-it('menampilkan panel penyaluran per distributor', function () {
-    $data = app(DashboardSampleData::class);
-    $month = now()->format('Y-m');
-    $top = $data->distributorBreakdown($month)[0];
+it('menampilkan distributor pada panel perbandingan dengan nilai nol', function () {
+    Distributor::factory()->create(['name' => 'PT Panel Distributor']);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('Perbandingan')
         ->assertSee('Penyaluran per Distributor')
-        ->assertSee($top['name'])
-        ->assertSee(number_format($top['cartons'], 0, ',', '.'))
-        ->assertSee('Total Penyaluran '.$data->summary($month)['month_label']);
-});
-
-it('menyusun breakdown distributor menurun dan konsisten dengan total', function () {
-    $data = app(DashboardSampleData::class);
-    $month = now()->format('Y-m');
-    $breakdown = $data->distributorBreakdown($month);
-    $cartons = array_column($breakdown, 'cartons');
-
-    expect(array_sum($cartons))->toBe($data->summary($month)['cartons'])
-        ->and($cartons)->toBe(collect($cartons)->sortDesc()->values()->all());
-});
-
-it('membatasi panel distributor sesuai filter yang dipilih', function () {
-    $data = app(DashboardSampleData::class);
-    $month = now()->format('Y-m');
-
-    expect($data->distributorBreakdown($month, null, 'bulog'))->toHaveCount(1)
-        ->and($data->distributorBreakdown($month, 'pasar-raya'))->not->toBe($data->distributorBreakdown($month));
+        ->assertSeeInOrder(['PT Panel Distributor', '0']);
 });
