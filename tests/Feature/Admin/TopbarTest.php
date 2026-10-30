@@ -34,3 +34,12 @@ it('memakai label peran yang sesuai', function (Role $role, string $label) {
     [Role::KepalaDinas, 'Kepala Dinas'],
     [Role::UptdPasar, 'UPTD Pasar'],
 ]);
+
+it('menampilkan ikon notifikasi', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('aria-label="Notifikasi"', false)
+        ->assertSee('Notifikasi')
+        ->assertSee('Belum ada notifikasi');
+});

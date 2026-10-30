@@ -102,7 +102,22 @@
                     </div>
 
                     @auth
-                        <details class="relative shrink-0" data-profile-menu>
+                        <div class="flex shrink-0 items-center gap-3">
+                            <details class="relative" data-notification-menu>
+                                <summary
+                                    aria-label="Notifikasi"
+                                    class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-[#2D507E] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50 [&::-webkit-details-marker]:hidden"
+                                >
+                                    <x-heroicon-o-bell class="h-5 w-5" />
+                                </summary>
+
+                                <div class="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
+                                    <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Notifikasi</p>
+                                    <p class="mt-2 text-sm text-slate-500">Belum ada notifikasi</p>
+                                </div>
+                            </details>
+
+                            <details class="relative" data-profile-menu>
                             <summary
                                 aria-label="Menu profil"
                                 class="flex cursor-pointer list-none items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50 [&::-webkit-details-marker]:hidden"
@@ -134,6 +149,7 @@
                                 </form>
                             </div>
                         </details>
+                        </div>
                     @endauth
                 </header>
 
