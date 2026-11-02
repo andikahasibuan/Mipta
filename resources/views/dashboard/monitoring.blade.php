@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Admin')
+@section('title', $dashboardTitle)
 
-@section('page-title', 'Dashboard Monitoring')
+@section('page-title', $dashboardPageTitle)
 
 @section('content')
     @php
@@ -40,7 +40,7 @@
         </button>
     </div>
 
-    <form method="GET" action="{{ route('admin.dashboard') }}" class="mt-6 rounded-xl border border-slate-200 bg-white p-3">
+    <form method="GET" action="{{ route($dashboardRoute) }}" class="mt-6 rounded-xl border border-slate-200 bg-white p-3">
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div>
                 <label for="filter-month" class="sr-only">Bulan</label>

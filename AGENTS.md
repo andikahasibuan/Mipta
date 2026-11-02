@@ -1,41 +1,97 @@
 # AGENTS.md
 
-## Project state
+## Project purpose
 
-- Laravel 13.39 application: PHP 8.5 runtime (`composer.json` requires `^8.3`), Pest 5, Tailwind CSS 4, Vite 8.
-- This is still a fresh skeleton: the only route is `GET /` → `resources/views/welcome.blade.php`, the only model is `App\Models\User`, and there are no API routes, auth scaffolding, or domain features. Don't assume application code exists; search before building.
-- `.env` points at SQLite (`database/database.sqlite`, migrations already run). Tests use in-memory SQLite.
-- No `.git` directory and no CI workflows in this workspace; run verification locally instead of relying on a pipeline.
+MIPTA (Sistem Monitoring Distribusi Minyakita) is an internal admin web app for Dinas Perdagangan Kota Padang. It monitors Minyakita distribution from distributors to markets (pasar) and recipient stores (toko penerima). All user-facing copy is Indonesian.
+
+Goals reflected by the current UI and routes:
+
+- Centralize distribution reports and monthly carton totals.
+- Monitor active distributors and covered markets.
+- Support supervision and follow-up.
+- Produce monthly recaps and exports.
+- Provide role-based access for admin, distributor, kepala dinas, and UPTD pasar (only admin is implemented today).
+
+Design references live in `doc/designs/` (dashboard, users/master data, login). Match the existing UI and palette instead of inventing a new style.
+
+## Current state (snapshot 2026-11-02)
+
+Laravel 13.39 on PHP 8.5, Pest 5, Tailwind CSS 4, Vite 8, Chart.js 4. Local database is MySQL `mipta`; tests use in-memory SQLite.
+
+### Implemented
+
+- Login/logout with email or username, remember me, and a 5-attempt rate limit. Only `App\Enums\Role::Admin` may sign in.
+- Admin layout with an 8-item sidebar, notification dropdown, and profile menu.
+- `/admin` dashboard: distributor/market statistics from the database, month/market/distributor filters, Chart.js line chart, and a per-distributor panel. Report and carton values are intentionally `0`.
+- `/admin/users`: database-backed summary cards (users, distributors, stores). Export button is disabled.
+- `/admin/distributors`: paginated, read-only table (no create/edit/delete yet).
+- Models and factories: `User`, `Distributor`, `Market`, `RecipientStore`.
+- 77 Pest tests pass (240 assertions at the time of writing).
+
+### Placeholder or missing
+
+- Title-only views: `admin/distribution`, `admin/monitoring`, `admin/supervision`, `admin/reports`, `admin/activity`, `admin/profile`.
+- No CRUD for master data, no exports, no API, no user management, no password reset, no non-admin dashboards.
+- No distribution-report domain. Commit `af04f63` removed `DistributionReport`, `ReportStatus`, its migration, factory, and tests, so dashboard report metrics are hard-coded zero.
+- `resources/views/welcome.blade.php` is the unused Laravel default page; `/` always redirects.
+- Do not "fix" the zero metrics or fill placeholder pages without confirming domain requirements with the user.
+
+## Domain model
+
+- `User`: name, unique username, email, password, role (`App\Enums\Role`, default admin). `initials()` powers the avatar.
+- `Distributor`: unique code, name, `is_active`.
+- `Market` (pasar): unique code, name, `is_active`; `hasMany` recipient stores.
+- `RecipientStore` (toko penerima): `market_id` (`restrictOnDelete`), unique code, name, `is_active`; `belongsTo` market.
+- Missing: distribution reports. The removed schema was `code`, `distributor_id`, `market_id`, `report_date`, `cartons`, `status` (`ReportStatus::Menunggu`). Confirm before restoring.
+
+## Routes and access
+
+- 13 web routes, no API routes.
+- `/` redirects guests to `login` and authenticated users to `admin.dashboard`.
+- `GET/POST login` is guest-only; `POST logout` requires auth.
+- Every `/admin/*` route uses `auth` + `role:admin` (middleware alias registered in `bootstrap/app.php`).
+- Only `Role::Admin` can authenticate; the other roles exist in the enum but have no UI.
 
 ## Commands
 
-- First-time setup: `composer run setup` (installs PHP/JS deps, creates `.env`, generates key, migrates, builds assets).
-- Development: `composer run dev` → `php artisan dev`, which concurrently runs `artisan serve`, `queue:listen`, and `npm run dev`. `php artisan dev:list` shows the managed processes.
+- First-time setup: `composer run setup`. It requires the MySQL database `mipta` to exist and valid `.env` credentials; it installs dependencies, migrates, and builds assets.
+- Development: `composer run dev` → `php artisan dev`, which concurrently runs `artisan serve`, `queue:listen`, and `npm run dev`. `php artisan dev:list` shows managed processes.
 - Assets: `npm run build`. An "Unable to locate file in Vite manifest" error means assets are stale — build or start the dev server.
-- Tests: `php artisan test --compact`. Narrow with a path (`php artisan test --compact tests/Feature/ExampleTest.php`) or `--filter=testName`. `vendor/bin/pest` accepts the same arguments. `composer test` additionally clears config first.
+- Tests: `php artisan test --compact`. Narrow with a path (`php artisan test --compact tests/Feature/ExampleTest.php`) or `--filter=testName`. `vendor/bin/pest` accepts the same arguments. `composer test` also clears config first.
 - Formatting: `vendor/bin/pint --dirty --format agent` after editing PHP. Do not use `--test`.
 - Routes: `php artisan route:list --except-vendor`.
 
 ## Testing gotchas
 
-- `tests/Pest.php` binds every Feature test to `Tests\TestCase`, but `RefreshDatabase` is commented out. Any test that touches the database must opt in to the trait itself, or its tables won't exist in the in-memory SQLite database.
-- Use model factories (e.g. `UserFactory`) rather than creating records by hand.
-- Create tests with `php artisan make:test --pest SomeFeatureTest` (omit the `Feature/` prefix). Don't delete existing tests without approval.
+- `tests/Pest.php` binds Feature tests to `Tests\TestCase`, but `RefreshDatabase` is commented out. Any test touching the database must opt in with `uses(RefreshDatabase::class)`, or tables will not exist.
+- Use model factories rather than creating records by hand.
+- Test descriptions are written in Indonesian (`it('menampilkan ...')`); follow that convention.
+- Create tests with `php artisan make:test --pest SomeFeatureTest` (omit the `Feature/` prefix). Do not delete existing tests without approval.
 
 ## Frontend
 
-- Tailwind 4 is CSS-first: configuration lives in `resources/css/app.css` (`@import 'tailwindcss'`, `@theme`); there is no `tailwind.config.js`. Add `@source` entries there if styles in a new directory are not picked up.
-- Vite entrypoints are fixed in `vite.config.js` (`resources/css/app.css`, `resources/js/app.js`). Fonts (Instrument Sans) are fetched through `laravel-vite-plugin/fonts`.
+- Tailwind 4 is CSS-first: configuration lives in `resources/css/app.css` (`@import 'tailwindcss'`, `@theme`); there is no `tailwind.config.js`. Add `@source` entries if styles in a new directory are not picked up.
+- Vite entrypoints are fixed in `vite.config.js` (`resources/css/app.css`, `resources/js/app.js`). Instrument Sans is fetched through `laravel-vite-plugin/fonts`.
+- `resources/js/app.js` exposes Chart.js as `window.Chart` and closes the profile/notification dropdowns on outside click or Escape.
+- Reuse the existing palette (`#2D507E`, `#5191E4`, `#FDBA12`) and Blade patterns in `resources/views/layouts/admin.blade.php`.
 - `.npmrc` sets `ignore-scripts=true`; keep `npm install --ignore-scripts` behavior in mind for native/postinstall-dependent packages.
 
 ## Conventions and tooling
 
-- Laravel 13 model configuration uses PHP attributes: `#[Fillable([...])]` and `#[Hidden([...])]` in `app/Models/User.php`, not `$fillable`/`$hidden` properties. Follow that style.
-- Use `php artisan make:* --no-interaction` for new framework files and named routes via `route()`.
-- Skills are installed under `.agents/skills/` (not `**/skills/**`). Activate the matching skill before Laravel, testing, Tailwind, or deployment work. There is no `.ai/rules` directory in this repo.
+- Laravel 13 model configuration uses PHP attributes: `#[Fillable([...])]` and `#[Hidden([...])]` (see `app/Models/User.php`), not `$fillable`/`$hidden` properties.
+- Admin controllers live in `app/Http/Controllers/Admin`, views in `resources/views/admin`, and route names use the `admin.*` prefix. Use named routes via `route()`.
+- Use `php artisan make:* --no-interaction` for new framework files.
+- Skills are installed under `.agents/skills/`. Activate the matching skill before Laravel, testing, Tailwind, or deployment work. There is no `.ai/rules` directory.
 - Laravel Boost MCP is configured in `opencode.json` via `php artisan boost:mcp`. Prefer Boost tools (`search-docs`, `database-query`, `browser-logs`, `last-error`) over shell/file guesses.
-- `composer update` runs `php artisan boost:update`, which refreshes Boost guidelines and skills and can overwrite this file. Re-check AGENTS.md and `.agents/skills` after dependency updates.
+- `composer update` runs `php artisan boost:update`, which refreshes Boost guidelines and skills and can overwrite this file. Re-check AGENTS.md after dependency updates.
 - Ask before changing dependencies or creating new top-level directories. Do not create documentation files unless requested.
+
+## Repository snapshot (2026-11-02)
+
+- Git repository exists; remote is `github.com/andikahasibuan/Mipta`. Current branch is `pimpinan`; `origin/main` is one commit ahead (`7390ba8`) and removes the Activity and Profile pages. Check the branch before working on those pages.
+- The local MySQL database currently has one seeded admin and no distributor/market/store rows.
+- The seed admin account is defined in `database/seeders/AdminSeeder.php` (local development only).
+- No CI workflows; run verification locally.
 
 ===
 
