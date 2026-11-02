@@ -19,8 +19,6 @@ it('menampilkan dashboard admin dengan sidebar MIPTA', function () {
             'Monitoring & Analisis',
             'Pengawasan & Tindak Lanjut',
             'Rekap & Ekspor Laporan',
-            'Riwayat Aktivitas Sistem',
-            'Manajemen Profil',
             'Keluar dari Sistem',
         ]);
 });

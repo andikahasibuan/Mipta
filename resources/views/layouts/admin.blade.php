@@ -7,8 +7,6 @@
         ['label' => 'Monitoring & Analisis', 'route' => 'admin.monitoring.index', 'icon' => 'chart-bar'],
         ['label' => 'Pengawasan & Tindak Lanjut', 'route' => 'admin.supervision.index', 'icon' => 'shield-check'],
         ['label' => 'Rekap & Ekspor Laporan', 'route' => 'admin.reports.index', 'icon' => 'arrow-down-tray'],
-        ['label' => 'Riwayat Aktivitas Sistem', 'route' => 'admin.activity.index', 'icon' => 'clock'],
-        ['label' => 'Manajemen Profil', 'route' => 'admin.profile.edit', 'icon' => 'user-circle'],
     ];
 @endphp
 
