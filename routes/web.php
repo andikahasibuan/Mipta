@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SupervisionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\KepalaDinas\DashboardController as KepalaDinasDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,4 +38,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+});
+
+Route::prefix('kepala-dinas')->name('kepala-dinas.')->middleware(['auth', 'role:kepala_dinas'])->group(function () {
+    Route::get('/', [KepalaDinasDashboardController::class, 'index'])->name('dashboard');
 });
