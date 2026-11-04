@@ -35,25 +35,76 @@ it('menampilkan keadaan kosong saat belum ada distributor', function () {
         ->assertSee('Belum ada data distributor');
 });
 
-it('menampilkan navigasi tab ringkasan dan distributor', function () {
+it('menampilkan lima tab pengguna dan data master tanpa tab ringkasan', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.index'))
         ->assertOk()
+        ->assertSeeInOrder(['Pengguna', 'Distributor', 'Pasar', 'Toko Penerima', 'Kontributor UPTD'])
+        ->assertDontSee('Ringkasan')
         ->assertSee('href="'.route('admin.users.index').'"', false)
-        ->assertSee('href="'.route('admin.distributors.index').'"', false);
+        ->assertSee('href="'.route('admin.markets.index').'"', false)
+        ->assertSee('href="'.route('admin.recipient-stores.index').'"', false)
+        ->assertSee('href="'.route('admin.uptd-contributors.index').'"', false);
 });
 
-it('menyorot menu pengguna dan data master saat membuka daftar distributor', function () {
+it('menyorot tab aktif pada navigasi pengguna dan data master', function () {
     $response = $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.index'));
 
-    $html = $response->getContent();
+    preg_match('/<nav[^>]*aria-label="Navigasi Pengguna dan Data Master".*?<\/nav>/s', $response->getContent(), $matches);
+    $tabs = $matches[0] ?? '';
 
-    preg_match('/<nav[^>]*aria-label="Menu utama".*?<\/nav>/s', $html, $matches);
-    $sidebar = $matches[0] ?? '';
+    expect(substr_count($tabs, 'aria-current="page"'))->toBe(1)
+        ->and($tabs)->toContain('aria-current="page"');
+});
 
-    expect(substr_count($sidebar, 'aria-current="page"'))->toBe(1)
-        ->and($sidebar)->toContain('Pengguna &amp; Data Master');
+it('mencari distributor berdasarkan kode atau nama', function () {
+    $admin = User::factory()->create();
+
+    Distributor::factory()->create(['code' => 'DIST-AAA', 'name' => 'PT Sumber Makmur']);
+    Distributor::factory()->create(['code' => 'DIST-BBB', 'name' => 'PT Lain Sekali']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.distributors.index', ['q' => 'Sumber']))
+        ->assertOk()
+        ->assertSee('PT Sumber Makmur')
+        ->assertDontSee('PT Lain Sekali');
+
+    $this->actingAs($admin)
+        ->get(route('admin.distributors.index', ['q' => 'DIST-BBB']))
+        ->assertOk()
+        ->assertSee('PT Lain Sekali')
+        ->assertDontSee('PT Sumber Makmur');
+});
+
+it('memfilter distributor berdasarkan status', function () {
+    $admin = User::factory()->create();
+
+    Distributor::factory()->create(['name' => 'PT Distributor Aktif']);
+    Distributor::factory()->create(['name' => 'PT Distributor Mati', 'is_active' => false]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.distributors.index', ['status' => 'nonaktif']))
+        ->assertOk()
+        ->assertSee('PT Distributor Mati')
+        ->assertDontSee('PT Distributor Aktif');
+});
+
+it('menampilkan pesan kosong saat filter distributor tidak menemukan data', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distributors.index', ['q' => 'tidak-ada']))
+        ->assertOk()
+        ->assertSee('Tidak ada distributor yang sesuai filter')
+        ->assertDontSee('Belum ada data distributor');
+});
+
+it('mempertahankan filter status pada tautan pagination', function () {
+    Distributor::factory()->count(11)->create();
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distributors.index', ['status' => 'aktif']))
+        ->assertOk()
+        ->assertSee('status=aktif', false);
 });
 
 it('membatasi halaman distributor hanya untuk admin', function () {
