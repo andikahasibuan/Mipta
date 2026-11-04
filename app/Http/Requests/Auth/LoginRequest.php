@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -55,10 +57,19 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         $identifier = (string) $this->string('identifier');
+        $password = (string) $this->string('password');
         $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        if (! Auth::attempt([$field => $identifier, 'password' => (string) $this->string('password')], $this->boolean('remember'))) {
+        if (! Auth::attempt([$field => $identifier, 'password' => $password, 'is_active' => true], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+
+            $user = User::where($field, $identifier)->first();
+
+            if ($user && ! $user->is_active && Hash::check($password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'identifier' => 'Akun ini dinonaktifkan. Hubungi administrator.',
+                ]);
+            }
 
             throw ValidationException::withMessages([
                 'identifier' => 'Email/username atau password salah.',

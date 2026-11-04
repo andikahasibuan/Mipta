@@ -96,6 +96,26 @@ it('menolak akun yang bukan admin', function () {
     $this->assertGuest();
 });
 
+it('menolak akun yang dinonaktifkan', function () {
+    User::factory()->inactive()->create([
+        'email' => 'nonaktif@mipta.test',
+        'password' => 'admin123',
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => 'nonaktif@mipta.test',
+        'password' => 'admin123',
+        'remember' => '1',
+    ])
+        ->assertSessionHasErrors('identifier')
+        ->assertCookieMissing(auth()->guard('web')->getRecallerName());
+
+    expect(session('errors')->first('identifier'))
+        ->toContain('Akun ini dinonaktifkan. Hubungi administrator.');
+
+    $this->assertGuest();
+});
+
 it('membatasi percobaan login yang gagal', function () {
     User::factory()->create([
         'email' => 'admin@mipta.test',
