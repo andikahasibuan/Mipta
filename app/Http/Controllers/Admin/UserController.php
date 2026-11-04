@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -41,5 +43,27 @@ class UserController extends Controller
                 'status' => $status,
             ],
         ]);
+    }
+
+    /**
+     * Tampilkan form tambah pengguna.
+     */
+    public function create(): View
+    {
+        return view('admin.users.create', [
+            'roles' => Role::cases(),
+        ]);
+    }
+
+    /**
+     * Simpan pengguna baru.
+     */
+    public function store(StoreUserRequest $request): RedirectResponse
+    {
+        $user = User::create($request->validated());
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('status', 'Pengguna '.$user->name.' berhasil ditambahkan.');
     }
 }

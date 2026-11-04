@@ -12,17 +12,20 @@
     @endphp
 
     <div class="flex justify-end">
-        <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            title="Form tambah pengguna belum tersedia"
-            class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
+        <a
+            href="{{ route('admin.users.create') }}"
+            class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
         >
             <x-heroicon-o-plus class="h-5 w-5" />
             Tambah data
-        </button>
+        </a>
     </div>
+
+    @if (session('status'))
+        <div role="status" class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {{ session('status') }}
+        </div>
+    @endif
 
     <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="px-5 pt-5">

@@ -6,13 +6,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menampilkan tombol tambah data dalam keadaan nonaktif tanpa tombol ekspor', function () {
+it('menampilkan tautan tambah data ke form pengguna', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.users.index'))
         ->assertOk()
         ->assertSee('Tambah data')
-        ->assertSee('aria-disabled="true"', false)
-        ->assertSee('title="Form tambah pengguna belum tersedia"', false)
+        ->assertSee('href="'.route('admin.users.create').'"', false)
         ->assertDontSee('Ekspor Data');
 });
 
