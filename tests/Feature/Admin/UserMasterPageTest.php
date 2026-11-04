@@ -1,20 +1,19 @@
 <?php
 
-use App\Models\Distributor;
-use App\Models\Market;
-use App\Models\RecipientStore;
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menampilkan tombol ekspor data dalam keadaan nonaktif', function () {
+it('menampilkan tombol tambah data dalam keadaan nonaktif tanpa tombol ekspor', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.users.index'))
         ->assertOk()
-        ->assertSee('Ekspor Data')
+        ->assertSee('Tambah data')
         ->assertSee('aria-disabled="true"', false)
-        ->assertSee('title="Akan tersedia setelah format ekspor disepakati"', false);
+        ->assertSee('title="Form tambah pengguna belum tersedia"', false)
+        ->assertDontSee('Ekspor Data');
 });
 
 it('tidak menampilkan breadcrumb, judul, dan deskripsi di area konten', function () {
@@ -25,38 +24,166 @@ it('tidak menampilkan breadcrumb, judul, dan deskripsi di area konten', function
         ->assertDontSee('aria-label="Breadcrumb"', false);
 });
 
-it('menampilkan kartu statistik dari database walaupun data master masih kosong', function () {
-    $admin = User::factory()->create();
+it('menampilkan tabel data pengguna dari database', function () {
+    $admin = User::factory()->create([
+        'name' => 'Admin MIPTA',
+        'username' => 'admin.mipta',
+    ]);
+
+    User::factory()->create([
+        'name' => 'Kepala Dinas',
+        'username' => 'kepala.dinas',
+        'role' => Role::KepalaDinas,
+    ]);
+
+    User::factory()->inactive()->create([
+        'name' => 'Kontributor UPTD 01',
+        'username' => 'kontributor.01',
+        'role' => Role::UptdPasar,
+    ]);
 
     $this->actingAs($admin)
         ->get(route('admin.users.index'))
         ->assertOk()
-        ->assertSeeInOrder([
-            'Total Pengguna', '1', 'Akun terdaftar',
-            'Distributor', '0', '0 aktif',
-            'Toko Penerima', '0', 'Tersebar di 0 pasar',
-        ]);
+        ->assertSeeInOrder(['Nama / Identitas', 'Nama Akun', 'Peran', 'Status Akun'])
+        ->assertSee('Data pengguna')
+        ->assertSee('Admin MIPTA')
+        ->assertSee('admin.mipta')
+        ->assertSee('kepala.dinas')
+        ->assertSee('UPTD Pasar')
+        ->assertSee('Nonaktif')
+        ->assertSee('Menampilkan 3 dari 3 pengguna')
+        ->assertDontSee('Total Pengguna');
 });
 
-it('menghitung distributor, toko, dan pasar dari database', function () {
-    $user = User::factory()->create();
+it('mencari pengguna berdasarkan nama, username, atau email', function () {
+    $admin = User::factory()->create(['name' => 'Admin MIPTA', 'username' => 'admin.mipta']);
 
-    Distributor::factory()->count(2)->create();
-    Distributor::factory()->create(['is_active' => false]);
+    User::factory()->create([
+        'name' => 'Budi Santoso',
+        'username' => 'budi.santoso',
+        'email' => 'budi@mipta.test',
+    ]);
 
-    $firstMarket = Market::factory()->create();
-    $secondMarket = Market::factory()->create();
-    Market::factory()->create();
+    User::factory()->create([
+        'name' => 'Siti Aminah',
+        'username' => 'siti.aminah',
+        'email' => 'siti@mipta.test',
+    ]);
 
-    RecipientStore::factory()->count(2)->create(['market_id' => $firstMarket->id]);
-    RecipientStore::factory()->create(['market_id' => $secondMarket->id]);
+    $this->actingAs($admin)
+        ->get(route('admin.users.index', ['q' => 'Budi']))
+        ->assertOk()
+        ->assertSee('Budi Santoso')
+        ->assertDontSee('Siti Aminah')
+        ->assertSee('Menampilkan 1 dari 1 pengguna');
 
-    $this->actingAs($user)
+    $this->actingAs($admin)
+        ->get(route('admin.users.index', ['q' => 'siti@mipta.test']))
+        ->assertOk()
+        ->assertSee('Siti Aminah')
+        ->assertDontSee('Budi Santoso');
+});
+
+it('menampilkan pesan kosong saat filter tidak menemukan pengguna', function () {
+    $this->actingAs(User::factory()->create(['name' => 'Admin MIPTA']))
+        ->get(route('admin.users.index', ['q' => 'tidak-ada-yang-cocok']))
+        ->assertOk()
+        ->assertSee('Tidak ada pengguna yang sesuai filter')
+        ->assertDontSee('Belum ada data pengguna');
+});
+
+it('memfilter pengguna berdasarkan peran dan status', function () {
+    $admin = User::factory()->create(['name' => 'Admin MIPTA']);
+
+    User::factory()->create([
+        'name' => 'Kepala Terverifikasi',
+        'username' => 'kepala.satu',
+        'role' => Role::KepalaDinas,
+    ]);
+
+    User::factory()->inactive()->create([
+        'name' => 'Distributor Nonaktif',
+        'username' => 'distributor.satu',
+        'role' => Role::Distributor,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index', ['role' => 'kepala_dinas']))
+        ->assertOk()
+        ->assertSee('Kepala Terverifikasi')
+        ->assertDontSee('Distributor Nonaktif');
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index', ['status' => 'nonaktif']))
+        ->assertOk()
+        ->assertSee('Distributor Nonaktif')
+        ->assertDontSee('Kepala Terverifikasi')
+        ->assertSee('Menampilkan 1 dari 1 pengguna');
+});
+
+it('mengabaikan filter peran dan status yang tidak dikenal', function () {
+    $admin = User::factory()->create(['name' => 'Admin MIPTA']);
+    User::factory()->create(['name' => 'Pengguna Lain', 'username' => 'pengguna.lain']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index', ['role' => 'superadmin', 'status' => 'entah']))
+        ->assertOk()
+        ->assertSee('Admin MIPTA')
+        ->assertSee('Pengguna Lain')
+        ->assertSee('Menampilkan 2 dari 2 pengguna');
+});
+
+it('mempertahankan filter pada tautan pagination', function () {
+    $admin = User::factory()->create(['name' => 'Admin MIPTA']);
+
+    collect(range(1, 6))->each(fn (int $number): User => User::factory()->create([
+        'name' => 'Kepala '.$number,
+        'username' => 'kepala.'.$number,
+        'role' => Role::KepalaDinas,
+    ]));
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index', ['role' => 'kepala_dinas']))
+        ->assertOk()
+        ->assertSee('role=kepala_dinas', false)
+        ->assertSee('Menampilkan 5 dari 6 pengguna');
+});
+
+it('membatasi lima pengguna per halaman', function () {
+    $admin = User::factory()->create([
+        'name' => 'Admin MIPTA',
+        'username' => 'admin.mipta',
+    ]);
+
+    collect(range(1, 6))->each(fn (int $number): User => User::factory()->create([
+        'name' => 'Pengguna 0'.$number,
+        'username' => 'pengguna.0'.$number,
+    ]));
+
+    $this->actingAs($admin)
         ->get(route('admin.users.index'))
         ->assertOk()
-        ->assertSeeInOrder([
-            'Total Pengguna', '1',
-            'Distributor', '3', '2 aktif',
-            'Toko Penerima', '3', 'Tersebar di 2 pasar',
-        ]);
+        ->assertSeeInOrder(['Admin MIPTA', 'Pengguna 01', 'Pengguna 02', 'Pengguna 03', 'Pengguna 04'])
+        ->assertDontSee('Pengguna 05')
+        ->assertSee('Menampilkan 5 dari 7 pengguna');
+});
+
+it('menampilkan pengguna berikutnya pada halaman kedua', function () {
+    $admin = User::factory()->create([
+        'name' => 'Admin MIPTA',
+        'username' => 'admin.mipta',
+    ]);
+
+    collect(range(1, 6))->each(fn (int $number): User => User::factory()->create([
+        'name' => 'Pengguna 0'.$number,
+        'username' => 'pengguna.0'.$number,
+    ]));
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index', ['page' => 2]))
+        ->assertOk()
+        ->assertSeeInOrder(['Pengguna 05', 'Pengguna 06'])
+        ->assertDontSee('Pengguna 01')
+        ->assertSee('Menampilkan 2 dari 7 pengguna');
 });
