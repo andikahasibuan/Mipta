@@ -15,6 +15,10 @@
         </a>
     </x-admin.master-tabs>
 
+    @php
+        $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
+    @endphp
+
     @if (session('status'))
         <div role="status" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {{ session('status') }}
@@ -105,9 +109,15 @@
             </table>
         </div>
 
-        @if ($distributors->hasPages())
-            <div class="border-t border-slate-200 px-5 py-3">
-                {{ $distributors->links() }}
+        @if ($distributors->isNotEmpty())
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-5 py-3">
+                <p class="text-xs text-slate-500">
+                    Menampilkan {{ $formatNumber($distributors->count()) }} dari {{ $formatNumber($distributors->total()) }} distributor
+                </p>
+
+                @if ($distributors->hasPages())
+                    {{ $distributors->links() }}
+                @endif
             </div>
         @endif
     </div>

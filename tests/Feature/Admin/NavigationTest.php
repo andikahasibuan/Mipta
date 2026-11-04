@@ -41,6 +41,14 @@ it('menolak pengguna dengan peran selain admin', function (string $routeName) {
         ->assertForbidden();
 })->with('admin pages');
 
+dataset('master tabs', [
+    'users' => ['admin.users.index', 'Pengguna', 'Data pengguna'],
+    'distributors' => ['admin.distributors.index', 'Distributor', 'Data distributor'],
+    'markets' => ['admin.markets.index', 'Pasar', 'Data pasar'],
+    'stores' => ['admin.recipient-stores.index', 'Toko Penerima', 'Data toko penerima'],
+    'uptd' => ['admin.uptd-contributors.index', 'Kontributor UPTD', 'Data kontributor UPTD'],
+]);
+
 it('menampilkan ikon pada setiap menu sidebar', function () {
     $response = $this->actingAs(User::factory()->create())->get(route('admin.dashboard'));
 
@@ -50,3 +58,25 @@ it('menampilkan ikon pada setiap menu sidebar', function () {
         $response->assertSee('data-icon="'.$icon.'"', false);
     }
 });
+
+it('menjaga konsistensi tab aktif dan sorotan sidebar pada seluruh tab pengguna dan data master', function (string $routeName, string $tabLabel, string $panelHeading) {
+    $response = $this->actingAs(User::factory()->create())->get(route($routeName));
+
+    $response->assertOk()
+        ->assertSee($panelHeading)
+        ->assertSeeInOrder(['Pengguna', 'Distributor', 'Pasar', 'Toko Penerima', 'Kontributor UPTD']);
+
+    $html = $response->getContent();
+
+    preg_match('/<nav[^>]*aria-label="Navigasi Pengguna dan Data Master".*?<\/nav>/s', $html, $tabMatches);
+    $tabsNav = $tabMatches[0] ?? '';
+
+    expect(substr_count($tabsNav, 'aria-current="page"'))->toBe(1)
+        ->and($tabsNav)->toMatch('/aria-current="page"[^>]*>\s*'.preg_quote($tabLabel, '/').'\s*<\/a>/s');
+
+    preg_match('/<nav[^>]*aria-label="Menu utama".*?<\/nav>/s', $html, $sidebarMatches);
+    $sidebar = $sidebarMatches[0] ?? '';
+
+    expect(substr_count($sidebar, 'aria-current="page"'))->toBe(1)
+        ->and($sidebar)->toContain('Pengguna &amp; Data Master');
+})->with('master tabs');

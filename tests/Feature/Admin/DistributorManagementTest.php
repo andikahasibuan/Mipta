@@ -25,7 +25,8 @@ it('menampilkan daftar distributor dari database', function () {
         ->assertSee('DIST-001')
         ->assertSee('PT Contoh Distributor')
         ->assertSee('DIST-002')
-        ->assertSee('Nonaktif');
+        ->assertSee('Nonaktif')
+        ->assertSee('Menampilkan 2 dari 2 distributor');
 });
 
 it('menampilkan keadaan kosong saat belum ada distributor', function () {
@@ -87,7 +88,8 @@ it('memfilter distributor berdasarkan status', function () {
         ->get(route('admin.distributors.index', ['status' => 'nonaktif']))
         ->assertOk()
         ->assertSee('PT Distributor Mati')
-        ->assertDontSee('PT Distributor Aktif');
+        ->assertDontSee('PT Distributor Aktif')
+        ->assertSee('Menampilkan 1 dari 1 distributor');
 });
 
 it('menampilkan pesan kosong saat filter distributor tidak menemukan data', function () {
