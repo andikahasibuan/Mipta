@@ -3,12 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\StoreRecipientStoreRequest;
-use App\Http\Requests\Admin\UpdateRecipientStoreRequest;
 use App\Models\Market;
 use App\Models\RecipientStore;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class RecipientStoreController extends Controller
@@ -45,51 +42,5 @@ class RecipientStoreController extends Controller
                 'status' => $status,
             ],
         ]);
-    }
-
-    /**
-     * Tampilkan form tambah toko penerima.
-     */
-    public function create(): View
-    {
-        return view('admin.recipient-stores.form', [
-            'store' => null,
-            'markets' => Market::orderBy('name')->get(['id', 'name']),
-        ]);
-    }
-
-    /**
-     * Simpan toko penerima baru.
-     */
-    public function store(StoreRecipientStoreRequest $request): RedirectResponse
-    {
-        $store = RecipientStore::create($request->validated());
-
-        return redirect()
-            ->route('admin.recipient-stores.index')
-            ->with('status', 'Toko '.$store->name.' berhasil ditambahkan.');
-    }
-
-    /**
-     * Tampilkan form ubah toko penerima.
-     */
-    public function edit(RecipientStore $recipientStore): View
-    {
-        return view('admin.recipient-stores.form', [
-            'store' => $recipientStore,
-            'markets' => Market::orderBy('name')->get(['id', 'name']),
-        ]);
-    }
-
-    /**
-     * Perbarui data toko penerima.
-     */
-    public function update(UpdateRecipientStoreRequest $request, RecipientStore $recipientStore): RedirectResponse
-    {
-        $recipientStore->update($request->validated());
-
-        return redirect()
-            ->route('admin.recipient-stores.index')
-            ->with('status', 'Toko '.$recipientStore->name.' berhasil diperbarui.');
     }
 }

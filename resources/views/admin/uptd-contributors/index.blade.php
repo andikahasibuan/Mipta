@@ -32,15 +32,18 @@
                 >
             </div>
 
-            <select
-                name="status"
-                onchange="this.form.submit()"
-                class="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
-            >
-                <option value="">Semua Status</option>
-                <option value="aktif" @selected($filters['status'] === 'aktif')>Aktif</option>
-                <option value="nonaktif" @selected($filters['status'] === 'nonaktif')>Nonaktif</option>
-            </select>
+            <div class="relative shrink-0">
+                <select
+                    name="status"
+                    onchange="this.form.submit()"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                >
+                    <option value="">Semua Status</option>
+                    <option value="aktif" @selected($filters['status'] === 'aktif')>Aktif</option>
+                    <option value="nonaktif" @selected($filters['status'] === 'nonaktif')>Nonaktif</option>
+                </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
         </form>
 
         <div class="mt-4 overflow-x-auto">
@@ -58,7 +61,7 @@
                         <tr>
                             <td class="px-5 py-4 align-middle text-slate-900">{{ $contributor->name }}</td>
                             <td class="px-5 py-4 align-middle">
-                                <span class="font-mono text-xs text-slate-600">{{ $contributor->username ?? '—' }}</span>
+                                <span class="text-sm text-slate-600">{{ $contributor->username ?? '—' }}</span>
                             </td>
                             <td class="px-5 py-4 align-middle">
                                 <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">

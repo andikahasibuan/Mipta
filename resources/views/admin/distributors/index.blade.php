@@ -6,24 +6,21 @@
 
 @section('content')
     <x-admin.master-tabs active="distributors">
-        <a
-            href="{{ route('admin.distributors.create') }}"
-            class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+        <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            title="Fitur tambah data dinonaktifkan"
+            class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
         >
             <x-heroicon-o-plus class="h-4 w-4" />
             Tambah data
-        </a>
+        </button>
     </x-admin.master-tabs>
 
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
     @endphp
-
-    @if (session('status'))
-        <div role="status" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {{ session('status') }}
-        </div>
-    @endif
 
     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="px-5 pt-5">
@@ -46,15 +43,18 @@
                 >
             </div>
 
-            <select
-                name="status"
-                onchange="this.form.submit()"
-                class="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
-            >
-                <option value="">Semua Status</option>
-                <option value="aktif" @selected($filters['status'] === 'aktif')>Aktif</option>
-                <option value="nonaktif" @selected($filters['status'] === 'nonaktif')>Nonaktif</option>
-            </select>
+            <div class="relative shrink-0">
+                <select
+                    name="status"
+                    onchange="this.form.submit()"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                >
+                    <option value="">Semua Status</option>
+                    <option value="aktif" @selected($filters['status'] === 'aktif')>Aktif</option>
+                    <option value="nonaktif" @selected($filters['status'] === 'nonaktif')>Nonaktif</option>
+                </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
         </form>
 
         <div class="mt-4 overflow-x-auto">
@@ -64,7 +64,6 @@
                         <th scope="col" class="px-5 py-3 font-semibold">Kode</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Nama</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Status</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -85,18 +84,10 @@
                                     {{ $distributor->is_active ? 'Aktif' : 'Nonaktif' }}
                                 </span>
                             </td>
-                            <td class="whitespace-nowrap px-5 py-3">
-                                <a
-                                    href="{{ route('admin.distributors.edit', $distributor) }}"
-                                    class="text-xs font-semibold text-[#2D507E] transition hover:underline"
-                                >
-                                    Edit
-                                </a>
-                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="3" class="px-5 py-8 text-center text-sm text-slate-500">
                                 @if ($filters['q'] !== '' || $filters['status'])
                                     Tidak ada distributor yang sesuai filter
                                 @else

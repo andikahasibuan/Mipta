@@ -42,12 +42,12 @@
 
     <form method="GET" action="{{ route('admin.dashboard') }}" class="mt-6 rounded-xl border border-slate-200 bg-white p-3">
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div>
+            <div class="relative">
                 <label for="filter-month" class="sr-only">Bulan</label>
                 <select
                     id="filter-month"
                     name="month"
-                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     @foreach ($months as $option)
                         <option value="{{ $option['value'] }}" @selected($filters['month'] === $option['value'])>
@@ -55,34 +55,37 @@
                         </option>
                     @endforeach
                 </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
 
-            <div>
+            <div class="relative">
                 <label for="filter-market" class="sr-only">Pasar</label>
                 <select
                     id="filter-market"
                     name="market"
-                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     <option value="">Semua Pasar</option>
                     @foreach ($markets as $market)
                         <option value="{{ $market->id }}" @selected($filters['market'] === $market->id)>{{ $market->name }}</option>
                     @endforeach
                 </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
 
-            <div>
+            <div class="relative">
                 <label for="filter-distributor" class="sr-only">Distributor</label>
                 <select
                     id="filter-distributor"
                     name="distributor"
-                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     <option value="">Semua Distributor</option>
                     @foreach ($distributors as $distributor)
                         <option value="{{ $distributor->id }}" @selected($filters['distributor'] === $distributor->id)>{{ $distributor->name }}</option>
                     @endforeach
                 </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
 
             <button

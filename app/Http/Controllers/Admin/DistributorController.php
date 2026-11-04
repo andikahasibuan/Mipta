@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\StoreDistributorRequest;
-use App\Http\Requests\Admin\UpdateDistributorRequest;
 use App\Models\Distributor;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class DistributorController extends Controller
@@ -38,49 +35,5 @@ class DistributorController extends Controller
                 'status' => $status,
             ],
         ]);
-    }
-
-    /**
-     * Tampilkan form tambah distributor.
-     */
-    public function create(): View
-    {
-        return view('admin.distributors.form', [
-            'distributor' => null,
-        ]);
-    }
-
-    /**
-     * Simpan distributor baru.
-     */
-    public function store(StoreDistributorRequest $request): RedirectResponse
-    {
-        $distributor = Distributor::create($request->validated());
-
-        return redirect()
-            ->route('admin.distributors.index')
-            ->with('status', 'Distributor '.$distributor->name.' berhasil ditambahkan.');
-    }
-
-    /**
-     * Tampilkan form ubah distributor.
-     */
-    public function edit(Distributor $distributor): View
-    {
-        return view('admin.distributors.form', [
-            'distributor' => $distributor,
-        ]);
-    }
-
-    /**
-     * Perbarui data distributor.
-     */
-    public function update(UpdateDistributorRequest $request, Distributor $distributor): RedirectResponse
-    {
-        $distributor->update($request->validated());
-
-        return redirect()
-            ->route('admin.distributors.index')
-            ->with('status', 'Distributor '.$distributor->name.' berhasil diperbarui.');
     }
 }

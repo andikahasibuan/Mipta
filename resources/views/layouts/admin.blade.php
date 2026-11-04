@@ -23,7 +23,7 @@
     </head>
     <body class="h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased">
         <div class="flex h-screen overflow-hidden">
-            <aside class="flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-blue-200 bg-[linear-gradient(to_bottom,#5191E4_3%,#2D507E_13%)]">
+            <aside class="flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-blue-200 bg-[#2D507E]">
                 <div class="px-6 py-6">
                     <div class="mx-auto w-30">
                         <img
