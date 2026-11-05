@@ -18,8 +18,8 @@ class DistributorFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => strtoupper(fake()->unique()->bothify('DST-###??')),
             'name' => 'PT '.fake()->company(),
+            'wilayah' => 'Padang',
             'is_active' => true,
         ];
     }

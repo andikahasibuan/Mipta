@@ -22,6 +22,7 @@ class RecipientStoreFactory extends Factory
             'market_id' => Market::factory(),
             'code' => strtoupper(fake()->unique()->bothify('TKS-###??')),
             'name' => 'Toko '.fake()->unique()->words(2, true),
+            'nib' => fake()->numerify('#############'),
             'is_active' => true,
         ];
     }

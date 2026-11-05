@@ -8,6 +8,7 @@ use App\Models\Distributor;
 use App\Models\Market;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -30,7 +31,7 @@ class DistributionController extends Controller
         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
 
         $distributions = Distribution::query()
-            ->with(['distributor:id,name', 'market:id,name', 'uptdUser:id,name'])
+            ->with(['distributor:id,name', 'market:id,name', 'store:id,name,market_id'])
             ->whereBetween('distribution_date', [
                 $start->toDateString(),
                 $start->copy()->endOfMonth()->toDateString(),
@@ -52,6 +53,16 @@ class DistributionController extends Controller
             'distributors' => Distributor::orderBy('name')->get(['id', 'name']),
             'markets' => Market::orderBy('name')->get(['id', 'name']),
         ]);
+    }
+
+    /**
+     * Hapus data penyaluran.
+     */
+    public function destroy(Distribution $distribution): RedirectResponse
+    {
+        $distribution->delete();
+
+        return redirect()->route('admin.distribution.index')->with('success', 'Data penyaluran berhasil dihapus.');
     }
 
     /**

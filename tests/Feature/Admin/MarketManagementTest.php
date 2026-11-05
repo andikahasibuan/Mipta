@@ -9,22 +9,22 @@ uses(RefreshDatabase::class);
 
 it('menampilkan daftar pasar dari database', function () {
     Market::factory()->create([
-        'code' => 'PSR-001',
         'name' => 'Pasar Raya Padang',
+        'lokasi' => 'Jln. Merdeka',
     ]);
     Market::factory()->create([
-        'code' => 'PSR-002',
         'name' => 'Pasar Nonaktif',
+        'lokasi' => 'Jln. Pattimura',
         'is_active' => false,
     ]);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.markets.index'))
         ->assertOk()
-        ->assertSeeInOrder(['Kode', 'Nama', 'Status'])
-        ->assertSee('PSR-001')
+        ->assertSeeInOrder(['ID Data', 'Nama Pasar', 'Lokasi', 'Status'])
         ->assertSee('Pasar Raya Padang')
-        ->assertSee('PSR-002')
+        ->assertSee('Jln. Merdeka')
+        ->assertSee('Pasar Nonaktif')
         ->assertSee('Nonaktif');
 });
 
@@ -53,11 +53,11 @@ it('menampilkan pagination saat pasar lebih dari sepuluh', function () {
         ->assertSee('?page=2', false);
 });
 
-it('mencari pasar berdasarkan kode atau nama', function () {
+it('mencari pasar berdasarkan nama atau lokasi', function () {
     $admin = User::factory()->create();
 
-    Market::factory()->create(['code' => 'PSR-AAA', 'name' => 'Pasar Raya']);
-    Market::factory()->create(['code' => 'PSR-BBB', 'name' => 'Pasar Lubuk Buaya']);
+    Market::factory()->create(['name' => 'Pasar Raya', 'lokasi' => 'Jln. Merdeka']);
+    Market::factory()->create(['name' => 'Pasar Lubuk Buaya', 'lokasi' => 'Jln. Adinegoro']);
 
     $this->actingAs($admin)
         ->get(route('admin.markets.index', ['q' => 'Raya']))
@@ -66,7 +66,7 @@ it('mencari pasar berdasarkan kode atau nama', function () {
         ->assertDontSee('Pasar Lubuk Buaya');
 
     $this->actingAs($admin)
-        ->get(route('admin.markets.index', ['q' => 'PSR-BBB']))
+        ->get(route('admin.markets.index', ['q' => 'Adinegoro']))
         ->assertOk()
         ->assertSee('Pasar Lubuk Buaya')
         ->assertDontSee('Pasar Raya');

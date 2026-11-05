@@ -9,25 +9,14 @@
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
     @endphp
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="min-w-0">
-            <h2 class="text-2xl font-semibold text-slate-900">Laporan Penyaluran</h2>
-            <p class="mt-1 text-sm text-slate-500">
-                Pantau penyaluran Minyakita per distributor dan pasar
-            </p>
-        </div>
-
-        <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            title="Menunggu modul input UPTD Pasar"
-            class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
-        >
-            <x-heroicon-o-plus class="h-4 w-4" />
-            Tambah Data
-        </button>
+    <div class="min-w-0">
+        <h2 class="text-2xl font-semibold text-slate-900">Laporan Penyaluran</h2>
+        <p class="mt-1 text-sm text-slate-500">
+            Pantau penyaluran Minyakita per distributor, pasar, dan toko penerima
+        </p>
     </div>
+
+    <x-admin.flash-messages />
 
     <form
         method="GET"
@@ -89,38 +78,61 @@
 
     <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[54rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="text-left text-[11px] uppercase tracking-widest text-slate-500">
+            <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
+                <thead class="text-center text-[11px] uppercase tracking-widest text-slate-500">
                     <tr>
+                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID Data</th>
                         <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Tanggal</th>
-                        <th scope="col" class="w-[25%] px-5 py-3 align-middle font-semibold">Distributor</th>
-                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[21%] px-5 py-3 align-middle font-semibold">Petugas UPTD</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 text-right align-middle font-semibold">Penyaluran</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Pasar</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Distributor</th>
+                        <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
+                        <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($distributions as $distribution)
                         <tr>
+                            <td class="whitespace-nowrap px-5 py-4 text-center align-middle font-mono text-xs text-slate-500">
+                                {{ $distribution->id }}
+                            </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $distribution->distribution_date->format('d/m/Y') }}
-                            </td>
-                            <td class="px-5 py-4 align-middle text-slate-900">
-                                {{ $distribution->distributor->name }}
                             </td>
                             <td class="px-5 py-4 align-middle text-slate-700">
                                 {{ $distribution->market->name }}
                             </td>
                             <td class="px-5 py-4 align-middle text-slate-700">
-                                {{ $distribution->uptdUser?->name ?? '—' }}
+                                {{ $distribution->store?->name ?? '—' }}
                             </td>
-                            <td class="whitespace-nowrap px-5 py-4 text-right align-middle font-semibold text-slate-900">
+                            <td class="px-5 py-4 align-middle text-slate-900">
+                                {{ $distribution->distributor->name }}
+                            </td>
+                            <td class="whitespace-nowrap px-5 py-4 text-center align-middle font-semibold text-slate-900">
                                 {{ $formatNumber($distribution->cartons) }} karton
+                            </td>
+                            <td class="whitespace-nowrap px-5 py-4 text-center align-middle">
+                                <form
+                                    method="POST"
+                                    action="{{ route('admin.distribution.destroy', $distribution) }}"
+                                    onsubmit="return confirm('Yakin ingin menghapus data penyaluran ini?')"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+                                    <button
+                                        type="submit"
+                                        aria-label="Hapus"
+                                        title="Hapus"
+                                        class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-red-500 transition hover:border-red-300 hover:bg-red-50"
+                                    >
+                                        <x-heroicon-o-trash class="h-4 w-4" />
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-500">
                                 Belum ada laporan penyaluran pada periode ini
                             </td>
                         </tr>

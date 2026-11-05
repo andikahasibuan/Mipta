@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
+use App\Models\RecipientStore;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -33,11 +34,9 @@ it('menampilkan laporan penyaluran dari database', function () {
         ->get(route('admin.distribution.index'))
         ->assertOk()
         ->assertSee('Laporan Penyaluran')
-        ->assertSee('Tambah Data')
-        ->assertSee('Menunggu modul input UPTD Pasar')
+        ->assertDontSee('Tambah Data')
         ->assertSee('PT Sinar Pangan Nusantara')
         ->assertSee('Pasar Raya Padang')
-        ->assertSee('Andi Pratama')
         ->assertSee('250 karton')
         ->assertSee(now()->format('d/m/Y'));
 });
@@ -102,4 +101,30 @@ it('menampilkan keadaan kosong saat belum ada laporan penyaluran', function () {
         ->get(route('admin.distribution.index'))
         ->assertOk()
         ->assertSee('Belum ada laporan penyaluran pada periode ini');
+});
+
+it('menampilkan nama toko penerima pada laporan penyaluran', function () {
+    $store = RecipientStore::factory()->create(['name' => 'Toko Atong']);
+
+    Distribution::factory()->create([
+        'market_id' => $store->market_id,
+        'recipient_store_id' => $store->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 150,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSee('Toko Atong');
+});
+
+it('menghapus laporan penyaluran dari database', function () {
+    $this->actingAs(User::factory()->create());
+    $distribution = Distribution::factory()->create();
+
+    $this->delete(route('admin.distribution.destroy', $distribution))
+        ->assertRedirect(route('admin.distribution.index'));
+
+    $this->assertDatabaseMissing('distributions', ['id' => $distribution->id]);
 });

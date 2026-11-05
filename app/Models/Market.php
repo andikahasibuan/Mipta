@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['code', 'name', 'is_active'])]
+#[Fillable(['name', 'lokasi', 'is_active'])]
 class Market extends Model
 {
     /** @use HasFactory<MarketFactory> */

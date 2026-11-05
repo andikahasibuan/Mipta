@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Market;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -30,13 +31,28 @@ it('hanya menampilkan akun berperan UPTD Pasar', function () {
     $this->actingAs($admin)
         ->get(route('admin.uptd-contributors.index'))
         ->assertOk()
-        ->assertSeeInOrder(['Nama / Identitas', 'Nama Akun', 'Peran', 'Status Akun'])
+        ->assertSeeInOrder(['Nama Kontributor', 'Pasar Terkait', 'Peran', 'Status Akun'])
         ->assertSee('Kontributor Satu')
-        ->assertSee('kontributor.01')
         ->assertSee('Kontributor Dua')
         ->assertSee('Nonaktif')
         ->assertDontSee('Kepala Dinas Lain')
         ->assertSee('Menampilkan 2 dari 2 kontributor');
+});
+
+it('menampilkan pasar terkait pada kolom kontributor', function () {
+    $admin = User::factory()->create();
+    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
+
+    User::factory()->create([
+        'name' => 'Kontributor Satu',
+        'role' => Role::UptdPasar,
+        'market_id' => $market->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.uptd-contributors.index'))
+        ->assertOk()
+        ->assertSee('Pasar Raya Padang');
 });
 
 it('menampilkan keadaan kosong saat belum ada kontributor UPTD', function () {
@@ -116,11 +132,12 @@ it('menampilkan pesan kosong saat filter kontributor tidak menemukan data', func
         ->assertDontSee('Belum ada data kontributor UPTD');
 });
 
-it('tidak menampilkan tombol tambah data pada tab kontributor', function () {
+it('menampilkan tombol tambah data pada tab kontributor', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.uptd-contributors.index'))
         ->assertOk()
-        ->assertDontSee('Tambah data');
+        ->assertSee('Tambah data')
+        ->assertSee(route('admin.uptd-contributors.create'), false);
 });
 
 it('membatasi lima kontributor per halaman', function () {

@@ -18,8 +18,8 @@ class MarketFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => strtoupper(fake()->unique()->bothify('PAS-###??')),
             'name' => 'Pasar '.fake()->unique()->words(2, true),
+            'lokasi' => 'Jln. '.fake()->streetName(),
             'is_active' => true,
         ];
     }

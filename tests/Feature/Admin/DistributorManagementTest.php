@@ -9,22 +9,22 @@ uses(RefreshDatabase::class);
 
 it('menampilkan daftar distributor dari database', function () {
     Distributor::factory()->create([
-        'code' => 'DIST-001',
         'name' => 'PT Contoh Distributor',
+        'wilayah' => 'Padang',
     ]);
     Distributor::factory()->create([
-        'code' => 'DIST-002',
         'name' => 'PT Distributor Nonaktif',
+        'wilayah' => 'Padang',
         'is_active' => false,
     ]);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.index'))
         ->assertOk()
-        ->assertSeeInOrder(['Kode', 'Nama', 'Status'])
-        ->assertSee('DIST-001')
+        ->assertSeeInOrder(['ID Data', 'Nama Distributor', 'Wilayah', 'Status'])
         ->assertSee('PT Contoh Distributor')
-        ->assertSee('DIST-002')
+        ->assertSee('Padang')
+        ->assertSee('PT Distributor Nonaktif')
         ->assertSee('Nonaktif')
         ->assertSee('Menampilkan 2 dari 2 distributor');
 });
@@ -59,11 +59,11 @@ it('menyorot tab aktif pada navigasi pengguna dan data master', function () {
         ->and($tabs)->toContain('aria-current="page"');
 });
 
-it('mencari distributor berdasarkan kode atau nama', function () {
+it('mencari distributor berdasarkan nama atau wilayah', function () {
     $admin = User::factory()->create();
 
-    Distributor::factory()->create(['code' => 'DIST-AAA', 'name' => 'PT Sumber Makmur']);
-    Distributor::factory()->create(['code' => 'DIST-BBB', 'name' => 'PT Lain Sekali']);
+    Distributor::factory()->create(['name' => 'PT Sumber Makmur', 'wilayah' => 'Padang']);
+    Distributor::factory()->create(['name' => 'PT Lain Sekali', 'wilayah' => 'Padang Pariaman']);
 
     $this->actingAs($admin)
         ->get(route('admin.distributors.index', ['q' => 'Sumber']))
@@ -72,7 +72,7 @@ it('mencari distributor berdasarkan kode atau nama', function () {
         ->assertDontSee('PT Lain Sekali');
 
     $this->actingAs($admin)
-        ->get(route('admin.distributors.index', ['q' => 'DIST-BBB']))
+        ->get(route('admin.distributors.index', ['q' => 'Pariaman']))
         ->assertOk()
         ->assertSee('PT Lain Sekali')
         ->assertDontSee('PT Sumber Makmur');

@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Models\Market;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class UptdContributorController extends Controller
 {
@@ -20,6 +23,7 @@ class UptdContributorController extends Controller
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
         $contributors = User::where('role', Role::UptdPasar->value)
+            ->with('market:id,name')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('username', 'like', "%{$search}%")
@@ -37,5 +41,96 @@ class UptdContributorController extends Controller
                 'status' => $status,
             ],
         ]);
+    }
+
+    /**
+     * Tampilkan formulir tambah kontributor UPTD Pasar.
+     */
+    public function create(): View
+    {
+        return view('admin.uptd-contributors.create', [
+            'markets' => Market::orderBy('name')->get(['id', 'name']),
+        ]);
+    }
+
+    /**
+     * Simpan kontributor UPTD Pasar baru.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'password' => ['required', 'string', 'min:8'],
+            'market_id' => ['nullable', 'integer', 'exists:markets,id'],
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => Role::UptdPasar->value,
+            'market_id' => $validated['market_id'] ?? null,
+            'is_active' => $request->boolean('is_active'),
+        ]);
+
+        return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil ditambahkan.');
+    }
+
+    /**
+     * Tampilkan formulir edit kontributor UPTD Pasar.
+     */
+    public function edit(User $contributor): View
+    {
+        return view('admin.uptd-contributors.edit', [
+            'contributor' => $contributor,
+            'markets' => Market::orderBy('name')->get(['id', 'name']),
+        ]);
+    }
+
+    /**
+     * Perbarui data kontributor UPTD Pasar.
+     */
+    public function update(Request $request, User $contributor): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($contributor->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($contributor->id)],
+            'password' => ['nullable', 'string', 'min:8'],
+            'market_id' => ['nullable', 'integer', 'exists:markets,id'],
+        ]);
+
+        $data = [
+            'name' => $validated['name'],
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+            'market_id' => $validated['market_id'] ?? null,
+            'is_active' => $request->boolean('is_active'),
+        ];
+
+        if (! empty($validated['password'])) {
+            $data['password'] = $validated['password'];
+        }
+
+        $contributor->update($data);
+
+        return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus kontributor UPTD Pasar.
+     */
+    public function destroy(User $contributor): RedirectResponse
+    {
+        if ($contributor->is(auth()->user())) {
+            return back()->withErrors(['delete' => 'Anda tidak dapat menghapus akun yang sedang digunakan untuk login.']);
+        }
+
+        $contributor->delete();
+
+        return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil dihapus.');
     }
 }

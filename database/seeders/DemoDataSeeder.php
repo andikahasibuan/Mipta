@@ -7,6 +7,7 @@ use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
+use App\Models\RecipientStore;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -18,32 +19,53 @@ class DemoDataSeeder extends Seeder
     public function run(): void
     {
         $distributors = [
-            ['code' => 'DST-001', 'name' => 'PT Amanah Niaga Mandiri'],
-            ['code' => 'DST-002', 'name' => 'PT Sinar Pangan Nusantara'],
-            ['code' => 'DST-003', 'name' => 'PT Berkah Distribusi Padang'],
+            ['name' => 'PT Amanah Niaga Mandiri', 'wilayah' => 'Padang'],
+            ['name' => 'PT Sinar Pangan Nusantara', 'wilayah' => 'Padang'],
+            ['name' => 'PT Berkah Distribusi Padang', 'wilayah' => 'Padang'],
         ];
 
         foreach ($distributors as $distributor) {
             Distributor::updateOrCreate(
-                ['code' => $distributor['code']],
+                ['name' => $distributor['name']],
                 [
-                    'name' => $distributor['name'],
+                    'wilayah' => $distributor['wilayah'],
                     'is_active' => true,
                 ],
             );
         }
 
         $markets = [
-            ['code' => 'PAS-001', 'name' => 'Pasar Raya Padang'],
-            ['code' => 'PAS-002', 'name' => 'Pasar Bandar Buat'],
-            ['code' => 'PAS-003', 'name' => 'Pasar Lubuk Buaya'],
+            ['name' => 'Pasar Raya Padang', 'lokasi' => 'Jln. Merdeka'],
+            ['name' => 'Pasar Bandar Buat', 'lokasi' => 'Jln. Pattimura'],
+            ['name' => 'Pasar Lubuk Buaya', 'lokasi' => 'Jln. Adinegoro'],
         ];
 
         foreach ($markets as $market) {
             Market::updateOrCreate(
-                ['code' => $market['code']],
+                ['name' => $market['name']],
                 [
-                    'name' => $market['name'],
+                    'lokasi' => $market['lokasi'],
+                    'is_active' => true,
+                ],
+            );
+        }
+
+        $stores = [
+            ['code' => 'TKS-001', 'name' => 'Toko Atong', 'market' => 'Pasar Raya Padang'],
+            ['code' => 'TKS-002', 'name' => 'Toko Mak Itam', 'market' => 'Pasar Raya Padang'],
+            ['code' => 'TKS-003', 'name' => 'Toko Mail', 'market' => 'Pasar Bandar Buat'],
+            ['code' => 'TKS-004', 'name' => 'Toko Hisyam', 'market' => 'Pasar Lubuk Buaya'],
+        ];
+
+        foreach ($stores as $store) {
+            $market = Market::where('name', $store['market'])->firstOrFail();
+
+            RecipientStore::updateOrCreate(
+                ['code' => $store['code']],
+                [
+                    'market_id' => $market->id,
+                    'name' => $store['name'],
+                    'nib' => fake()->numerify('#############'),
                     'is_active' => true,
                 ],
             );
@@ -84,11 +106,12 @@ class DemoDataSeeder extends Seeder
         }
 
         $uptdUser = User::where('email', 'uptd@mipta.test')->firstOrFail();
+        $uptdUser->update(['market_id' => Market::where('name', 'Pasar Raya Padang')->value('id')]);
         $currentMonthStart = now()->startOfMonth();
         $previousMonthStart = now()->subMonthNoOverflow()->startOfMonth();
 
         foreach ([$currentMonthStart, $previousMonthStart] as $monthStart) {
-            foreach (Market::whereIn('code', ['PAS-001', 'PAS-002'])->get() as $market) {
+            foreach (Market::whereIn('name', ['Pasar Raya Padang', 'Pasar Bandar Buat'])->get() as $market) {
                 MarketMonitoring::updateOrCreate(
                     [
                         'market_id' => $market->id,
@@ -100,16 +123,17 @@ class DemoDataSeeder extends Seeder
         }
 
         $distributionSamples = [
-            [$currentMonthStart, 'DST-001', 'PAS-001', 250, 1],
-            [$currentMonthStart, 'DST-002', 'PAS-002', 180, 2],
-            [$currentMonthStart, 'DST-003', 'PAS-001', 120, 3],
-            [$previousMonthStart, 'DST-001', 'PAS-001', 200, 5],
-            [$previousMonthStart, 'DST-002', 'PAS-002', 150, 12],
+            [$currentMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'TKS-001', 250, 1],
+            [$currentMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'TKS-003', 180, 2],
+            [$currentMonthStart, 'PT Berkah Distribusi Padang', 'Pasar Raya Padang', 'TKS-002', 120, 3],
+            [$previousMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'TKS-001', 200, 5],
+            [$previousMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'TKS-003', 150, 12],
         ];
 
-        foreach ($distributionSamples as [$monthStart, $distributorCode, $marketCode, $cartons, $day]) {
-            $distributor = Distributor::where('code', $distributorCode)->firstOrFail();
-            $market = Market::where('code', $marketCode)->firstOrFail();
+        foreach ($distributionSamples as [$monthStart, $distributorName, $marketName, $storeCode, $cartons, $day]) {
+            $distributor = Distributor::where('name', $distributorName)->firstOrFail();
+            $market = Market::where('name', $marketName)->firstOrFail();
+            $store = RecipientStore::where('code', $storeCode)->firstOrFail();
 
             Distribution::updateOrCreate(
                 [
@@ -119,6 +143,7 @@ class DemoDataSeeder extends Seeder
                 ],
                 [
                     'uptd_user_id' => $uptdUser->id,
+                    'recipient_store_id' => $store->id,
                     'cartons' => $cartons,
                 ],
             );

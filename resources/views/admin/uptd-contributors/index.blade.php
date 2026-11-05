@@ -5,7 +5,17 @@
 @section('page-title', 'Kontributor UPTD')
 
 @section('content')
-    <x-admin.master-tabs active="uptd" />
+    <x-admin.master-tabs active="uptd">
+        <a
+            href="{{ route('admin.uptd-contributors.create') }}"
+            class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+        >
+            <x-heroicon-o-plus class="h-4 w-4" />
+            Tambah data
+        </a>
+    </x-admin.master-tabs>
+
+    <x-admin.flash-messages />
 
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
@@ -48,20 +58,21 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[44rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="text-left text-[11px] uppercase tracking-widest text-slate-500">
+                <thead class="text-center text-[11px] uppercase tracking-widest text-slate-500">
                     <tr>
-                        <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Nama / Identitas</th>
-                        <th scope="col" class="w-[25%] px-5 py-3 align-middle font-semibold">Nama Akun</th>
-                        <th scope="col" class="w-[25%] px-5 py-3 align-middle font-semibold">Peran</th>
-                        <th scope="col" class="w-[20%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status Akun</th>
+                        <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Nama Kontributor</th>
+                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Pasar Terkait</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Peran</th>
+                        <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status Akun</th>
+                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($contributors as $contributor)
                         <tr>
                             <td class="px-5 py-4 align-middle text-slate-900">{{ $contributor->name }}</td>
                             <td class="px-5 py-4 align-middle">
-                                <span class="text-sm text-slate-600">{{ $contributor->username ?? '—' }}</span>
+                                <span class="text-sm text-slate-600">{{ $contributor->market?->name ?? '—' }}</span>
                             </td>
                             <td class="px-5 py-4 align-middle">
                                 <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
@@ -77,10 +88,16 @@
                                     {{ $contributor->is_active ? 'Aktif' : 'Nonaktif' }}
                                 </span>
                             </td>
+                            <td class="whitespace-nowrap px-5 py-4 align-middle">
+                                <x-admin.row-actions
+                                    :edit="route('admin.uptd-contributors.edit', $contributor)"
+                                    :delete="route('admin.uptd-contributors.destroy', $contributor)"
+                                />
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
                                 @if ($filters['q'] !== '' || $filters['status'])
                                     Tidak ada kontributor UPTD yang sesuai filter
                                 @else

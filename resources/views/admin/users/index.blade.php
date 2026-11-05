@@ -6,17 +6,16 @@
 
 @section('content')
     <x-admin.master-tabs active="users">
-        <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            title="Fitur tambah data dinonaktifkan"
-            class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
+        <a
+            href="{{ route('admin.users.create') }}"
+            class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
         >
             <x-heroicon-o-plus class="h-4 w-4" />
             Tambah data
-        </button>
+        </a>
     </x-admin.master-tabs>
+
+    <x-admin.flash-messages />
 
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
@@ -73,15 +72,16 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[50rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="text-left text-[11px] uppercase tracking-widest text-slate-500">
+                <thead class="text-center text-[11px] uppercase tracking-widest text-slate-500">
                     <tr>
-                        <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Nama / Identitas</th>
-                        <th scope="col" class="w-[25%] px-5 py-3 align-middle font-semibold">Nama Akun</th>
-                        <th scope="col" class="w-[25%] px-5 py-3 align-middle font-semibold">Peran</th>
-                        <th scope="col" class="w-[20%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status Akun</th>
+                        <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Nama / Identitas</th>
+                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Nama Akun</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Peran</th>
+                        <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status Akun</th>
+                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($users as $user)
                         <tr>
                             <td class="px-5 py-4 align-middle text-slate-900">{{ $user->name }}</td>
@@ -102,10 +102,16 @@
                                     {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
                                 </span>
                             </td>
+                            <td class="whitespace-nowrap px-5 py-4 align-middle">
+                                <x-admin.row-actions
+                                    :edit="route('admin.users.edit', $user)"
+                                    :delete="route('admin.users.destroy', $user)"
+                                />
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
                                 @if ($filters['q'] !== '' || $filters['role'] || $filters['status'])
                                     Tidak ada pengguna yang sesuai filter
                                 @else

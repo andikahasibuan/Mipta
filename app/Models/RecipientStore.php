@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['market_id', 'code', 'name', 'is_active'])]
+#[Fillable(['market_id', 'code', 'name', 'nib', 'is_active'])]
 class RecipientStore extends Model
 {
     /** @use HasFactory<RecipientStoreFactory> */

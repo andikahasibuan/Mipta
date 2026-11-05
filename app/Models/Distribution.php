@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['distributor_id', 'market_id', 'uptd_user_id', 'distribution_date', 'cartons'])]
+#[Fillable(['distributor_id', 'market_id', 'uptd_user_id', 'recipient_store_id', 'distribution_date', 'cartons'])]
 class Distribution extends Model
 {
     /** @use HasFactory<DistributionFactory> */
@@ -36,6 +36,14 @@ class Distribution extends Model
     public function uptdUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uptd_user_id');
+    }
+
+    /**
+     * Toko penerima yang menerima penyaluran.
+     */
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(RecipientStore::class, 'recipient_store_id');
     }
 
     /**

@@ -5,6 +5,7 @@ use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
+use App\Models\RecipientStore;
 use App\Models\User;
 use Database\Seeders\DemoDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +17,7 @@ it('membuat data contoh untuk master, pemantauan, penyaluran, dan pengguna', fun
 
     expect(Distributor::count())->toBe(3)
         ->and(Market::count())->toBe(3)
+        ->and(RecipientStore::count())->toBe(4)
         ->and(MarketMonitoring::count())->toBe(4)
         ->and(Distribution::count())->toBe(5)
         ->and(Distribution::sum('cartons'))->toBe(900)
@@ -53,4 +55,11 @@ it('menampilkan data contoh pada dashboard dan menu pengguna dan data master', f
         ->assertSee('Rina Marlina')
         ->assertSee('Andi Pratama')
         ->assertSee('Dewi Anggraini');
+
+    $this->get(route('admin.recipient-stores.index'))
+        ->assertOk()
+        ->assertSee('Toko Atong')
+        ->assertSee('Toko Mak Itam')
+        ->assertSee('Toko Mail')
+        ->assertSee('Toko Hisyam');
 });

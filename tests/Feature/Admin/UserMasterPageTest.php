@@ -6,14 +6,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menampilkan tombol tambah data dalam keadaan nonaktif', function () {
+it('menampilkan tombol tambah data yang mengarah ke halaman tambah', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.users.index'))
         ->assertOk()
         ->assertSee('Tambah data')
-        ->assertSee('aria-disabled="true"', false)
-        ->assertSee('title="Fitur tambah data dinonaktifkan"', false)
-        ->assertDontSee('admin/users/create', false)
+        ->assertSee(route('admin.users.create'), false)
+        ->assertDontSee('aria-disabled="true"', false)
         ->assertDontSee('Ekspor Data');
 });
 
