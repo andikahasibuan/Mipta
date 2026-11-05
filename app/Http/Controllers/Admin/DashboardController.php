@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
 use Illuminate\Contracts\View\View;
@@ -46,6 +47,8 @@ class DashboardController extends Controller
 
         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $days = $start->daysInMonth;
+        $periodStart = $start->toDateString();
+        $periodEnd = $start->copy()->endOfMonth()->toDateString();
 
         $totalDistributors = Distributor::query()
             ->when($distributorId, fn ($query, int $id) => $query->whereKey($id))
@@ -56,14 +59,49 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->count();
 
-        $totalMarkets = Market::query()
-            ->when($marketId, fn ($query, int $id) => $query->whereKey($id))
-            ->count();
+        $totalMarkets = Market::count();
 
         $monitoredMarkets = Market::query()
-            ->when($marketId, fn ($query, int $id) => $query->whereKey($id))
-            ->where('is_active', true)
+            ->whereHas('monitorings', fn ($query) => $query->whereBetween('monitored_at', [$periodStart, $periodEnd]))
             ->count();
+
+        $distributions = Distribution::query()
+            ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
+            ->whereBetween('distribution_date', [$periodStart, $periodEnd])
+            ->get(['distributor_id', 'distribution_date', 'cartons']);
+
+        $dailyCartons = array_fill(0, $days, 0);
+
+        foreach ($distributions as $distribution) {
+            $dailyCartons[$distribution->distribution_date->day - 1] += $distribution->cartons;
+        }
+
+        $cartonsByDistributor = $distributions->groupBy('distributor_id')->map->sum('cartons');
+        $totalReports = $distributions->count();
+        $totalCartons = $distributions->sum('cartons');
+
+        $previousStart = $start->copy()->subMonthNoOverflow()->startOfMonth();
+        $previousReports = Distribution::query()
+            ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
+            ->whereBetween('distribution_date', [
+                $previousStart->toDateString(),
+                $previousStart->copy()->endOfMonth()->toDateString(),
+            ])
+            ->count();
+
+        $reportsChange = null;
+        $reportsChangeDirection = 'none';
+
+        if ($previousReports > 0) {
+            $reportsChange = round((($totalReports - $previousReports) / $previousReports) * 100, 1);
+            $reportsChangeDirection = match (true) {
+                $reportsChange > 0 => 'up',
+                $reportsChange < 0 => 'down',
+                default => 'none',
+            };
+        } elseif ($totalReports > 0) {
+            $reportsChangeDirection = 'up';
+        }
 
         $breakdown = Distributor::query()
             ->when($distributorId, fn ($query, int $id) => $query->whereKey($id))
@@ -71,7 +109,7 @@ class DashboardController extends Controller
             ->get(['id', 'name'])
             ->map(fn (Distributor $distributor): array => [
                 'name' => $distributor->name,
-                'cartons' => 0,
+                'cartons' => (int) ($cartonsByDistributor[$distributor->id] ?? 0),
             ])
             ->all();
 
@@ -79,10 +117,10 @@ class DashboardController extends Controller
             'summary' => [
                 'month' => $month,
                 'month_label' => $this->monthLabel($month),
-                'cartons' => 0,
-                'reports' => 0,
-                'reports_change' => null,
-                'reports_change_direction' => 'none',
+                'cartons' => $totalCartons,
+                'reports' => $totalReports,
+                'reports_change' => $reportsChange,
+                'reports_change_direction' => $reportsChangeDirection,
                 'active_distributors' => $activeDistributors,
                 'total_distributors' => $totalDistributors,
                 'monitored_markets' => $monitoredMarkets,
@@ -93,7 +131,7 @@ class DashboardController extends Controller
             ],
             'chart' => [
                 'labels' => $this->dayLabels($month),
-                'values' => array_fill(0, $days, 0),
+                'values' => $dailyCartons,
             ],
             'breakdown' => $breakdown,
             'filters' => [

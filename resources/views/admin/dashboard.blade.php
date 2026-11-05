@@ -9,9 +9,11 @@
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
 
         $change = $summary['reports_change'];
-        $changeLabel = $change === null
+        $changeLabel = $summary['reports'] === 0
             ? 'Belum ada data laporan'
-            : ($change > 0 ? '+' : '').number_format($change, 1, ',', '.').'% dari bulan lalu';
+            : ($change === null
+                ? 'Belum ada data pembanding'
+                : ($change > 0 ? '+' : '').number_format($change, 1, ',', '.').'% dari bulan lalu');
         $changeColor = match ($summary['reports_change_direction']) {
             'up' => 'text-emerald-600',
             'down' => 'text-red-600',

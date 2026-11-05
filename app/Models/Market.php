@@ -23,6 +23,22 @@ class Market extends Model
     }
 
     /**
+     * Riwayat pemantauan pasar oleh petugas UPTD.
+     */
+    public function monitorings(): HasMany
+    {
+        return $this->hasMany(MarketMonitoring::class);
+    }
+
+    /**
+     * Riwayat penyaluran Minyakita di pasar ini.
+     */
+    public function distributions(): HasMany
+    {
+        return $this->hasMany(Distribution::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
