@@ -21,25 +21,38 @@ class LoginController extends Controller
     }
 
     /**
-     * Autentikasi pengguna dan arahkan ke dashboard admin.
+     * Autentikasi pengguna dan arahkan ke dashboard sesuai peran.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
 
-        if (Auth::user()?->role !== Role::Admin) {
+        $role = Auth::user()?->role;
+
+        if (! in_array($role, [Role::Admin, Role::KepalaDinas], true)) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'identifier' => 'Akun ini tidak memiliki akses ke dashboard admin.',
+                'identifier' => 'Akun ini tidak memiliki akses ke aplikasi ini.',
             ])->onlyInput('identifier');
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard'));
+        return redirect()->intended($this->dashboardRoute($role));
+    }
+
+    /**
+     * Nama rute dashboard tujuan untuk sebuah peran.
+     */
+    private function dashboardRoute(Role $role): string
+    {
+        return match ($role) {
+            Role::KepalaDinas => route('kepala-dinas.dashboard'),
+            default => route('admin.dashboard'),
+        };
     }
 
     /**

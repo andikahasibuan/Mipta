@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -40,4 +41,10 @@ it('mengarahkan halaman utama ke dashboard admin untuk pengguna yang sudah login
     $this->actingAs(User::factory()->create())
         ->get('/')
         ->assertRedirect(route('admin.dashboard'));
+});
+
+it('mengarahkan halaman utama ke dashboard kepala dinas untuk kepala dinas yang sudah login', function () {
+    $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
+        ->get('/')
+        ->assertRedirect(route('kepala-dinas.dashboard'));
 });

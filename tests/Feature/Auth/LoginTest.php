@@ -50,6 +50,21 @@ it('mengautentikasi admin memakai username', function () {
     $this->assertAuthenticatedAs($admin);
 });
 
+it('mengautentikasi kepala dinas dan mengarahkan ke dashboard kepala dinas', function () {
+    $kepalaDinas = User::factory()->create([
+        'email' => 'kepaladinas@mipta.test',
+        'password' => 'admin123',
+        'role' => Role::KepalaDinas,
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => 'kepaladinas@mipta.test',
+        'password' => 'admin123',
+    ])->assertRedirect(route('kepala-dinas.dashboard'));
+
+    $this->assertAuthenticatedAs($kepalaDinas);
+});
+
 it('mengingat sesi login saat opsi ingat saya dipilih', function () {
     User::factory()->create([
         'email' => 'admin@mipta.test',
@@ -81,20 +96,23 @@ it('menolak password yang salah', function () {
     $this->assertGuest();
 });
 
-it('menolak akun yang bukan admin', function () {
+it('menolak akun yang tidak memiliki akses ke aplikasi', function (Role $role) {
     User::factory()->create([
-        'email' => 'distributor@mipta.test',
+        'email' => 'tanpa-akses@mipta.test',
         'password' => 'admin123',
-        'role' => Role::Distributor,
+        'role' => $role,
     ]);
 
     $this->post(route('login'), [
-        'identifier' => 'distributor@mipta.test',
+        'identifier' => 'tanpa-akses@mipta.test',
         'password' => 'admin123',
     ])->assertSessionHasErrors('identifier');
 
     $this->assertGuest();
-});
+})->with([
+    Role::Distributor,
+    Role::UptdPasar,
+]);
 
 it('membatasi percobaan login yang gagal', function () {
     User::factory()->create([

@@ -22,5 +22,15 @@ class AdminSeeder extends Seeder
                 'role' => Role::Admin,
             ],
         );
+
+        User::updateOrCreate(
+            ['email' => 'kepaladinas@mipta.test'],
+            [
+                'name' => 'Kepala Dinas',
+                'username' => 'kepaladinas',
+                'password' => 'admin123',
+                'role' => Role::KepalaDinas,
+            ],
+        );
     }
 }
