@@ -14,6 +14,7 @@ class DashboardController extends MonitoringDashboardController
     public function index(Request $request): View
     {
         return view('dashboard.monitoring', array_merge($this->dashboardData($request), [
+            'layout' => 'layouts.admin',
             'dashboardTitle' => 'Dashboard Admin',
             'dashboardPageTitle' => 'Dashboard Monitoring',
             'dashboardRoute' => 'admin.dashboard',

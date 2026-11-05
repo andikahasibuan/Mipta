@@ -90,7 +90,7 @@ Laravel 13.39 on PHP 8.5, Pest 5, Tailwind CSS 4, Vite 8, Chart.js 4. Local data
 
 - Git repository exists; remote is `github.com/andikahasibuan/Mipta`. Current branch is `pimpinan`; `origin/main` is one commit ahead (`7390ba8`) and removes the Activity and Profile pages. Check the branch before working on those pages.
 - The local MySQL database currently has one seeded admin and no distributor/market/store rows.
-- The seed admin account is defined in `database/seeders/AdminSeeder.php` (local development only).
+- The seed admin account is defined in `database/seeders/UserSeeder.php` (local development only).
 - No CI workflows; run verification locally.
 
 ===

@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends($layout)
 
 @section('title', $dashboardTitle)
 

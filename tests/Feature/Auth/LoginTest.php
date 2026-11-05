@@ -52,13 +52,13 @@ it('mengautentikasi admin memakai username', function () {
 
 it('mengautentikasi kepala dinas dan mengarahkan ke dashboard kepala dinas', function () {
     $kepalaDinas = User::factory()->create([
-        'email' => 'kepaladinas@mipta.test',
+        'email' => 'kepala.dinas@mipta.test',
         'password' => 'admin123',
         'role' => Role::KepalaDinas,
     ]);
 
     $this->post(route('login'), [
-        'identifier' => 'kepaladinas@mipta.test',
+        'identifier' => 'kepala.dinas@mipta.test',
         'password' => 'admin123',
     ])->assertRedirect(route('kepala-dinas.dashboard'));
 

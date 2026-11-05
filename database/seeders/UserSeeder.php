@@ -6,10 +6,10 @@ use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class AdminSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     /**
-     * Seed akun admin awal.
+     * Seed akun pengguna awal untuk pengembangan lokal.
      */
     public function run(): void
     {
@@ -24,11 +24,11 @@ class AdminSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'kepaladinas@mipta.test'],
+            ['email' => 'kepala.dinas@mipta.test'],
             [
                 'name' => 'Kepala Dinas',
-                'username' => 'kepaladinas',
-                'password' => 'admin123',
+                'username' => 'kepala.dinas',
+                'password' => 'kepaladinas123',
                 'role' => Role::KepalaDinas,
             ],
         );
