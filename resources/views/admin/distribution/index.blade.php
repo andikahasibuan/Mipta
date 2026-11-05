@@ -9,13 +9,6 @@
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
     @endphp
 
-    <div class="min-w-0">
-        <h2 class="text-2xl font-semibold text-slate-900">Laporan Penyaluran</h2>
-        <p class="mt-1 text-sm text-slate-500">
-            Pantau penyaluran Minyakita per distributor, pasar, dan toko penerima
-        </p>
-    </div>
-
     <x-admin.flash-messages />
 
     <form

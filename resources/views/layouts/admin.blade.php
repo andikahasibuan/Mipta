@@ -8,6 +8,9 @@
         ['label' => 'Pengawasan & Tindak Lanjut', 'route' => 'admin.supervision.index', 'icon' => 'shield-check'],
         ['label' => 'Rekap & Ekspor Laporan', 'route' => 'admin.reports.index', 'icon' => 'arrow-down-tray'],
     ];
+
+    $activeMenu = collect($menus)->first(fn (array $menu) => request()->routeIs(...($menu['active'] ?? [$menu['route']])));
+    $activeMenuLabel = data_get($activeMenu, 'label', 'Dashboard Monitoring');
 @endphp
 
 <!DOCTYPE html>
@@ -91,11 +94,7 @@
                             Sistem Monitoring Distribusi
                         </p>
                         <h1 class="mt-1 truncate text-2xl font-semibold text-slate-900">
-                            @hasSection('page-title')
-                                @yield('page-title')
-                            @else
-                                @yield('title', 'Dashboard Monitoring')
-                            @endif
+                            {{ $activeMenuLabel }}
                         </h1>
                     </div>
 
