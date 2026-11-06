@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\FieldCondition;
 use App\Enums\Role;
 use App\Models\Distribution;
 use App\Models\Distributor;
+use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
 use App\Models\RecipientStore;
@@ -120,6 +122,27 @@ class DemoDataSeeder extends Seeder
                     ['uptd_user_id' => $uptdUser->id],
                 );
             }
+        }
+
+        $fieldReportSamples = [
+            ['Pasar Raya Padang', 'Stok Minyakita tersedia, harga sesuai HET', FieldCondition::Normal],
+            ['Pasar Bandar Buat', 'Stok Minyakita menipis di beberapa kios', FieldCondition::PerluPerhatian],
+        ];
+
+        foreach ($fieldReportSamples as [$marketName, $description, $condition]) {
+            $market = Market::where('name', $marketName)->firstOrFail();
+
+            FieldDistributionReport::updateOrCreate(
+                [
+                    'market_id' => $market->id,
+                    'report_date' => now()->toDateString(),
+                ],
+                [
+                    'uptd_user_id' => $uptdUser->id,
+                    'description' => $description,
+                    'condition' => $condition->value,
+                ],
+            );
         }
 
         $distributionSamples = [

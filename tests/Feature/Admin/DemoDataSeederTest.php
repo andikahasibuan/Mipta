@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Models\Distribution;
 use App\Models\Distributor;
+use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
 use App\Models\RecipientStore;
@@ -20,6 +21,7 @@ it('membuat data contoh untuk master, pemantauan, penyaluran, dan pengguna', fun
         ->and(RecipientStore::count())->toBe(4)
         ->and(MarketMonitoring::count())->toBe(4)
         ->and(Distribution::count())->toBe(5)
+        ->and(FieldDistributionReport::count())->toBe(2)
         ->and(Distribution::sum('cartons'))->toBe(900)
         ->and(User::count())->toBe(3)
         ->and(User::where('role', Role::Distributor)->count())->toBe(1)
