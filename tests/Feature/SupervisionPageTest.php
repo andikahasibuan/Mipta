@@ -82,7 +82,7 @@ it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () 
         ->assertSee('Stok menipis')
         ->assertDontSee('Stok aman');
 
-    $this->get(route('admin.supervision.index', ['market' => $secondMarket->id]))
+    $this->get(route('admin.supervision.index', ['q' => 'Pasar Beta']))
         ->assertOk()
         ->assertSee('Stok menipis')
         ->assertDontSee('Stok aman');

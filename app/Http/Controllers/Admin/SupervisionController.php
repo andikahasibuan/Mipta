@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\FieldCondition;
 use App\Http\Controllers\Controller;
 use App\Models\FieldDistributionReport;
-use App\Models\Market;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -25,7 +23,6 @@ class SupervisionController extends Controller
             $month = now()->format('Y-m');
         }
 
-        $marketId = $this->validId($request->string('market')->toString(), Market::class);
         $condition = FieldCondition::tryFrom($request->string('condition')->toString());
 
         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
@@ -36,7 +33,6 @@ class SupervisionController extends Controller
                 ->whereHas('contributor', fn ($query) => $query->where('name', 'like', "%{$search}%"))
                 ->orWhereHas('market', fn ($query) => $query->where('name', 'like', "%{$search}%"))))
             ->when($condition, fn ($query, FieldCondition $condition) => $query->where('condition', $condition->value))
-            ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
             ->whereBetween('report_date', [
                 $start->toDateString(),
                 $start->copy()->endOfMonth()->toDateString(),
@@ -52,24 +48,8 @@ class SupervisionController extends Controller
                 'q' => $search,
                 'month' => $month,
                 'condition' => $condition?->value,
-                'market' => $marketId,
             ],
-            'markets' => Market::orderBy('name')->get(['id', 'name']),
             'conditions' => FieldCondition::cases(),
         ]);
-    }
-
-    /**
-     * @param  class-string<Model>  $model
-     */
-    private function validId(string $value, string $model): ?int
-    {
-        if ($value === '' || ! ctype_digit($value)) {
-            return null;
-        }
-
-        $id = (int) $value;
-
-        return $model::whereKey($id)->exists() ? $id : null;
     }
 }
