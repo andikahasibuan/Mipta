@@ -2,8 +2,6 @@
 
 @section('title', 'Edit Toko Penerima')
 
-@section('page-title', 'Edit Toko Penerima')
-
 @section('content')
     <div class="mx-auto max-w-2xl">
         <form method="POST" action="{{ route('admin.recipient-stores.update', $store) }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">

@@ -112,6 +112,20 @@ class UserController extends Controller
             'is_active' => $request->boolean('is_active'),
         ];
 
+        if ($user->is($request->user())) {
+            if (Role::from($validated['role']) !== $user->role) {
+                return back()->withErrors([
+                    'role' => 'Anda tidak dapat mengubah peran akun yang sedang digunakan untuk login.',
+                ])->withInput();
+            }
+
+            if (! $data['is_active']) {
+                return back()->withErrors([
+                    'is_active' => 'Anda tidak dapat menonaktifkan akun yang sedang digunakan untuk login.',
+                ])->withInput();
+            }
+        }
+
         if (! empty($validated['password'])) {
             $data['password'] = $validated['password'];
         }

@@ -2,10 +2,8 @@
 
 @section('title', 'Pengguna & Data Master')
 
-@section('page-title', 'Pengguna & Data Master')
-
 @section('content')
-    <x-admin.master-tabs active="users">
+    <x-ui.master-tabs active="users">
         <a
             href="{{ route('admin.users.create') }}"
             class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
@@ -13,9 +11,9 @@
             <x-heroicon-o-plus class="h-4 w-4" />
             Tambah data
         </a>
-    </x-admin.master-tabs>
+    </x-ui.master-tabs>
 
-    <x-admin.flash-messages />
+    <x-ui.flash-messages />
 
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
@@ -103,7 +101,7 @@
                                 </span>
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
-                                <x-admin.row-actions
+                                <x-ui.row-actions
                                     :edit="route('admin.users.edit', $user)"
                                     :delete="route('admin.users.destroy', $user)"
                                 />

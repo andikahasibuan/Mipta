@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -110,4 +111,21 @@ it('membatasi halaman pasar hanya untuk admin', function () {
     $this->actingAs(User::factory()->create(['role' => Role::Distributor]))
         ->get(route('admin.markets.index'))
         ->assertForbidden();
+});
+
+it('menolak menghapus pasar yang masih memiliki laporan kondisi lapangan', function () {
+    $market = Market::factory()->create();
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $market->id,
+        'uptd_user_id' => $uptd->id,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->delete(route('admin.markets.destroy', $market))
+        ->assertSessionHasErrors('delete');
+
+    $this->assertDatabaseHas('markets', ['id' => $market->id]);
+    $this->assertDatabaseCount('field_distribution_reports', 1);
 });

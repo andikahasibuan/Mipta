@@ -2,10 +2,8 @@
 
 @section('title', 'Monitoring & Analisis')
 
-@section('page-title', 'Monitoring & Analisis')
-
 @section('content')
-    <x-admin.page-heading
+    <x-ui.page-heading
         title="Monitoring & Analisis"
         subtitle="Cari, filter, dan kelola data sistem secara terpusat"
     />

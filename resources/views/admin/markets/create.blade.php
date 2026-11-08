@@ -2,8 +2,6 @@
 
 @section('title', 'Tambah Pasar')
 
-@section('page-title', 'Tambah Pasar')
-
 @section('content')
     <div class="mx-auto max-w-2xl">
         <form method="POST" action="{{ route('admin.markets.store') }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">

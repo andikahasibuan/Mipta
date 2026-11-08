@@ -21,4 +21,36 @@ enum Role: string
             self::UptdPasar => 'UPTD Pasar',
         };
     }
+
+    /**
+     * Periksa apakah peran ini kepala dinas.
+     */
+    public function isKepalaDinas(): bool
+    {
+        return $this === self::KepalaDinas;
+    }
+
+    /**
+     * Nama route dashboard utama untuk peran ini, atau null bila peran tidak memiliki area.
+     */
+    public function homeRoute(): ?string
+    {
+        return match ($this) {
+            self::Admin => 'admin.dashboard',
+            self::KepalaDinas => 'kepala-dinas.dashboard',
+            default => null,
+        };
+    }
+
+    /**
+     * Prefix URL area untuk peran ini, atau null bila peran tidak memiliki area.
+     */
+    public function routePrefix(): ?string
+    {
+        return match ($this) {
+            self::Admin => 'admin',
+            self::KepalaDinas => 'kepala-dinas',
+            default => null,
+        };
+    }
 }

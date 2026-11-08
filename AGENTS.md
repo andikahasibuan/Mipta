@@ -37,6 +37,14 @@
 - `composer update` runs `php artisan boost:update`, which refreshes Boost guidelines and skills and can overwrite this file. Re-check AGENTS.md and `.agents/skills` after dependency updates.
 - Ask before changing dependencies or creating new top-level directories. Do not create documentation files unless requested.
 
+## Response style
+
+- Every final reply must end with a single relevant emote/emoji on its own line.
+  - `✅` after finishing work or a successful verification.
+  - `🙏` when waiting for the user's confirmation or an answer.
+  - `💡` when giving a suggestion or an option to choose.
+- Keep it at the very end of the message; do not add extra text after the emote.
+
 ===
 
 <laravel-boost-guidelines>

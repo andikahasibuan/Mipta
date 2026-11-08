@@ -119,3 +119,28 @@ it('menghapus kontributor UPTD dari database', function () {
 
     $this->assertDatabaseMissing('users', ['id' => $contributor->id]);
 });
+
+it('mencegah admin mengubah peran atau menonaktifkan akunnya sendiri', function () {
+    $admin = User::factory()->create(['role' => Role::Admin]);
+
+    $this->actingAs($admin)
+        ->put(route('admin.users.update', $admin), [
+            'name' => $admin->name,
+            'username' => $admin->username,
+            'email' => $admin->email,
+            'role' => Role::Distributor->value,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('role');
+
+    $this->put(route('admin.users.update', $admin), [
+        'name' => $admin->name,
+        'username' => $admin->username,
+        'email' => $admin->email,
+        'role' => Role::Admin->value,
+        'is_active' => '0',
+    ])->assertSessionHasErrors('is_active');
+
+    expect($admin->fresh()->role)->toBe(Role::Admin)
+        ->and($admin->fresh()->is_active)->toBeTrue();
+});

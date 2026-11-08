@@ -2,8 +2,6 @@
 
 @section('title', 'Edit Distributor')
 
-@section('page-title', 'Edit Distributor')
-
 @section('content')
     <div class="mx-auto max-w-2xl">
         <form method="POST" action="{{ route('admin.distributors.update', $distributor) }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">

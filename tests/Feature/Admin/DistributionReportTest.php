@@ -42,6 +42,18 @@ it('menampilkan laporan penyaluran dari database', function () {
         ->assertSee(now()->format('d/m/Y'));
 });
 
+it('menampilkan tombol hapus pada laporan penyaluran admin', function () {
+    Distribution::factory()->create([
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 120,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSee('aria-label="Hapus"', false);
+});
+
 it('memfilter laporan penyaluran berdasarkan distributor, pasar, dan bulan', function () {
     $firstDistributor = Distributor::factory()->create(['name' => 'PT Alpha Niaga']);
     $secondDistributor = Distributor::factory()->create(['name' => 'PT Beta Pangan']);

@@ -48,6 +48,14 @@ class Market extends Model
     }
 
     /**
+     * Laporan kondisi lapangan yang tercatat untuk pasar ini.
+     */
+    public function fieldReports(): HasMany
+    {
+        return $this->hasMany(FieldDistributionReport::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

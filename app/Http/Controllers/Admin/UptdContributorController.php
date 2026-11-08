@@ -84,6 +84,8 @@ class UptdContributorController extends Controller
      */
     public function edit(User $contributor): View
     {
+        $this->ensureUptdContributor($contributor);
+
         return view('admin.uptd-contributors.edit', [
             'contributor' => $contributor,
             'markets' => Market::orderBy('name')->get(['id', 'name']),
@@ -95,6 +97,8 @@ class UptdContributorController extends Controller
      */
     public function update(Request $request, User $contributor): RedirectResponse
     {
+        $this->ensureUptdContributor($contributor);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($contributor->id)],
@@ -125,6 +129,8 @@ class UptdContributorController extends Controller
      */
     public function destroy(User $contributor): RedirectResponse
     {
+        $this->ensureUptdContributor($contributor);
+
         if ($contributor->is(auth()->user())) {
             return back()->withErrors(['delete' => 'Anda tidak dapat menghapus akun yang sedang digunakan untuk login.']);
         }
@@ -132,5 +138,13 @@ class UptdContributorController extends Controller
         $contributor->delete();
 
         return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil dihapus.');
+    }
+
+    /**
+     * Pastikan pengguna yang diakses benar-benar berkontribusi sebagai UPTD Pasar.
+     */
+    private function ensureUptdContributor(User $contributor): void
+    {
+        abort_unless($contributor->role === Role::UptdPasar, 404);
     }
 }

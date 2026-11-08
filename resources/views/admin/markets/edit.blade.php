@@ -2,8 +2,6 @@
 
 @section('title', 'Edit Pasar')
 
-@section('page-title', 'Edit Pasar')
-
 @section('content')
     <div class="mx-auto max-w-2xl">
         <form method="POST" action="{{ route('admin.markets.update', $market) }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">

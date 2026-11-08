@@ -50,6 +50,36 @@ it('mengautentikasi admin memakai username', function () {
     $this->assertAuthenticatedAs($admin);
 });
 
+it('mengautentikasi kepala dinas dan mengarahkan ke dashboard kepala dinas', function () {
+    $kepalaDinas = User::factory()->create([
+        'email' => 'kepala.dinas@mipta.test',
+        'password' => 'admin123',
+        'role' => Role::KepalaDinas,
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => 'kepala.dinas@mipta.test',
+        'password' => 'admin123',
+    ])->assertRedirect(route('kepala-dinas.dashboard'));
+
+    $this->assertAuthenticatedAs($kepalaDinas);
+});
+
+it('mengabaikan tujuan awal di luar area peran setelah login', function () {
+    User::factory()->create([
+        'email' => 'kepala.dinas@mipta.test',
+        'password' => 'admin123',
+        'role' => Role::KepalaDinas,
+    ]);
+
+    $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
+
+    $this->post(route('login'), [
+        'identifier' => 'kepala.dinas@mipta.test',
+        'password' => 'admin123',
+    ])->assertRedirect(route('kepala-dinas.dashboard'));
+});
+
 it('mengingat sesi login saat opsi ingat saya dipilih', function () {
     User::factory()->create([
         'email' => 'admin@mipta.test',

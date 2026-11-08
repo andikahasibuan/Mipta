@@ -11,12 +11,31 @@ use App\Http\Controllers\Admin\SupervisionController;
 use App\Http\Controllers\Admin\UptdContributorController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\KepalaDinas\DashboardController as KepalaDinasDashboardController;
+use App\Http\Controllers\KepalaDinas\DistributionController as KepalaDinasDistributionController;
+use App\Http\Controllers\KepalaDinas\ReportController as KepalaDinasReportController;
+use App\Http\Controllers\KepalaDinas\SupervisionController as KepalaDinasSupervisionController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('admin.dashboard')
-        : redirect()->route('login');
+    $user = auth()->user();
+
+    if (! $user) {
+        return redirect()->route('login');
+    }
+
+    $home = $user->role->homeRoute();
+
+    if ($home === null) {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    return redirect()->route($home);
 });
 
 Route::middleware('guest')->group(function () {
@@ -69,4 +88,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('supervision', [SupervisionController::class, 'index'])->name('supervision.index');
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+});
+
+Route::prefix('kepala-dinas')->name('kepala-dinas.')->middleware(['auth', 'role:kepala_dinas'])->group(function () {
+    Route::get('/', [KepalaDinasDashboardController::class, 'index'])->name('dashboard');
+    Route::get('distribution', [KepalaDinasDistributionController::class, 'index'])->name('distribution.index');
+    Route::get('supervision', [KepalaDinasSupervisionController::class, 'index'])->name('supervision.index');
+    Route::get('reports', [KepalaDinasReportController::class, 'index'])->name('reports.index');
 });

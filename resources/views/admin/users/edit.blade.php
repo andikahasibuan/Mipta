@@ -2,8 +2,6 @@
 
 @section('title', 'Edit Pengguna')
 
-@section('page-title', 'Edit Pengguna')
-
 @section('content')
     <div class="mx-auto max-w-2xl">
         <form method="POST" action="{{ route('admin.users.update', $user) }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -101,6 +99,9 @@
                     >
                     <span class="text-sm text-slate-700">Status aktif</span>
                 </label>
+                @error('is_active')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="flex items-center justify-end gap-3 border-t border-slate-200 px-5 py-4">

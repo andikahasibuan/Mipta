@@ -85,6 +85,40 @@ it('menghitung total laporan dan penyaluran dari data penyaluran', function () {
         ->assertSeeInOrder(['PT Beta Pangan', '180']);
 });
 
+it('memfilter total penyaluran berdasarkan pasar yang dipilih', function () {
+    $firstMarket = Market::factory()->create();
+    $secondMarket = Market::factory()->create();
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+
+    Distribution::factory()->create([
+        'market_id' => $firstMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 250,
+    ]);
+
+    Distribution::factory()->create([
+        'market_id' => $secondMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 180,
+    ]);
+
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.dashboard', ['market' => $firstMarket->id]));
+
+    $response->assertOk()
+        ->assertSee('value="'.$firstMarket->id.'" selected', false)
+        ->assertSeeInOrder(['Total Laporan', '1'])
+        ->assertSeeInOrder(['Total Penyaluran', '250']);
+
+    preg_match('/const chartData = (\{.*?\});/s', $response->getContent(), $matches);
+
+    $chartData = json_decode($matches[1], true);
+
+    expect(array_sum($chartData['values']))->toBe(250);
+});
+
 it('mengisi grafik bulanan dari total karton per tanggal', function () {
     $distributor = Distributor::factory()->create();
     $market = Market::factory()->create();

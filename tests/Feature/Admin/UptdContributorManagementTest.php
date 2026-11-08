@@ -163,3 +163,17 @@ it('membatasi halaman kontributor hanya untuk admin', function () {
         ->get(route('admin.uptd-contributors.index'))
         ->assertForbidden();
 });
+
+it('menolak mengelola akun yang bukan kontributor UPTD lewat halaman kontributor', function () {
+    $admin = User::factory()->create();
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.uptd-contributors.edit', $kepalaDinas))
+        ->assertNotFound();
+
+    $this->delete(route('admin.uptd-contributors.destroy', $kepalaDinas))
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('users', ['id' => $kepalaDinas->id]);
+});

@@ -2,8 +2,6 @@
 
 @section('title', 'Edit Kontributor UPTD')
 
-@section('page-title', 'Edit Kontributor UPTD')
-
 @section('content')
     <div class="mx-auto max-w-2xl">
         <form method="POST" action="{{ route('admin.uptd-contributors.update', $contributor) }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
