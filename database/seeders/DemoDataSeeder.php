@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use App\Enums\FieldCondition;
 use App\Enums\Role;
-use App\Models\Distribution;
-use App\Models\Distributor;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
@@ -17,25 +15,13 @@ class DemoDataSeeder extends Seeder
 {
     /**
      * Seed data contoh untuk dashboard dan menu pengguna & data master.
+     *
+     * Akun dan data distributor sengaja tidak di-seed. Distributor dibuat
+     * melalui menu Distributor agar akun perusahaan dan data PT terbentuk
+     * bersamaan.
      */
     public function run(): void
     {
-        $distributors = [
-            ['name' => 'PT Amanah Niaga Mandiri', 'wilayah' => 'Padang'],
-            ['name' => 'PT Sinar Pangan Nusantara', 'wilayah' => 'Padang'],
-            ['name' => 'PT Berkah Distribusi Padang', 'wilayah' => 'Padang'],
-        ];
-
-        foreach ($distributors as $distributor) {
-            Distributor::updateOrCreate(
-                ['name' => $distributor['name']],
-                [
-                    'wilayah' => $distributor['wilayah'],
-                    'is_active' => true,
-                ],
-            );
-        }
-
         $markets = [
             ['name' => 'Pasar Raya Padang', 'lokasi' => 'Jln. Merdeka'],
             ['name' => 'Pasar Bandar Buat', 'lokasi' => 'Jln. Pattimura'],
@@ -73,12 +59,6 @@ class DemoDataSeeder extends Seeder
         }
 
         $users = [
-            [
-                'name' => 'Rina Marlina',
-                'username' => 'distributor',
-                'email' => 'distributor@mipta.test',
-                'role' => Role::Distributor,
-            ],
             [
                 'name' => 'Andi Pratama',
                 'username' => 'uptd',
@@ -140,33 +120,6 @@ class DemoDataSeeder extends Seeder
                     'uptd_user_id' => $uptdUser->id,
                     'description' => $description,
                     'condition' => $condition->value,
-                ],
-            );
-        }
-
-        $distributionSamples = [
-            [$currentMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'Toko Atong', 250, 1],
-            [$currentMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'Toko Mail', 180, 2],
-            [$currentMonthStart, 'PT Berkah Distribusi Padang', 'Pasar Raya Padang', 'Toko Mak Itam', 120, 3],
-            [$previousMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'Toko Atong', 200, 5],
-            [$previousMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'Toko Mail', 150, 12],
-        ];
-
-        foreach ($distributionSamples as [$monthStart, $distributorName, $marketName, $storeName, $cartons, $day]) {
-            $distributor = Distributor::where('name', $distributorName)->firstOrFail();
-            $market = Market::where('name', $marketName)->firstOrFail();
-            $store = RecipientStore::where('name', $storeName)->firstOrFail();
-
-            Distribution::updateOrCreate(
-                [
-                    'distributor_id' => $distributor->id,
-                    'market_id' => $market->id,
-                    'distribution_date' => $monthStart->copy()->addDays($day - 1)->toDateString(),
-                ],
-                [
-                    'uptd_user_id' => $uptdUser->id,
-                    'recipient_store_id' => $store->id,
-                    'cartons' => $cartons,
                 ],
             );
         }

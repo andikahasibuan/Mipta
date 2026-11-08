@@ -104,6 +104,23 @@ it('menampilkan pesan kosong saat filter tidak menemukan pengguna', function () 
         ->assertDontSee('Belum ada data pengguna');
 });
 
+it('menyembunyikan semua akun distributor dari daftar pengguna', function () {
+    $admin = User::factory()->create();
+
+    User::factory()->distributor()->create(['name' => 'PT Akun Distributor']);
+    User::factory()->create([
+        'name' => 'Distributor Tanpa PT',
+        'role' => Role::Distributor,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index'))
+        ->assertOk()
+        ->assertDontSee('PT Akun Distributor')
+        ->assertDontSee('Distributor Tanpa PT')
+        ->assertDontSee('value="'.Role::Distributor->value.'"', false);
+});
+
 it('memfilter pengguna berdasarkan peran dan status', function () {
     $admin = User::factory()->create(['name' => 'Admin MIPTA']);
 
@@ -114,21 +131,21 @@ it('memfilter pengguna berdasarkan peran dan status', function () {
     ]);
 
     User::factory()->inactive()->create([
-        'name' => 'Distributor Nonaktif',
-        'username' => 'distributor.satu',
-        'role' => Role::Distributor,
+        'name' => 'UPTD Nonaktif',
+        'username' => 'uptd.nonaktif',
+        'role' => Role::UptdPasar,
     ]);
 
     $this->actingAs($admin)
         ->get(route('admin.users.index', ['role' => 'kepala_dinas']))
         ->assertOk()
         ->assertSee('Kepala Terverifikasi')
-        ->assertDontSee('Distributor Nonaktif');
+        ->assertDontSee('UPTD Nonaktif');
 
     $this->actingAs($admin)
         ->get(route('admin.users.index', ['status' => 'nonaktif']))
         ->assertOk()
-        ->assertSee('Distributor Nonaktif')
+        ->assertSee('UPTD Nonaktif')
         ->assertDontSee('Kepala Terverifikasi')
         ->assertSee('Menampilkan 1 dari 1 pengguna');
 });

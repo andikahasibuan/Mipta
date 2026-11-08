@@ -22,7 +22,12 @@ class UserController extends Controller
         $status = $request->string('status')->toString();
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
+        if ($role === Role::Distributor) {
+            $role = null;
+        }
+
         $users = User::query()
+            ->where('role', '!=', Role::Distributor->value)
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('username', 'like', "%{$search}%")
@@ -36,7 +41,7 @@ class UserController extends Controller
 
         return view('admin.users.index', [
             'users' => $users,
-            'roles' => Role::cases(),
+            'roles' => $this->assignableRoles(),
             'filters' => [
                 'q' => $search,
                 'role' => $role?->value,
@@ -51,7 +56,7 @@ class UserController extends Controller
     public function create(): View
     {
         return view('admin.users.create', [
-            'roles' => Role::cases(),
+            'roles' => $this->assignableRoles(),
         ]);
     }
 
@@ -65,7 +70,9 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', Rule::enum(Role::class)],
+            'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
+        ], [
+            'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
 
         User::create([
@@ -85,9 +92,11 @@ class UserController extends Controller
      */
     public function edit(User $user): View
     {
+        $this->ensureNotDistributorAccount($user);
+
         return view('admin.users.edit', [
             'user' => $user,
-            'roles' => Role::cases(),
+            'roles' => $this->assignableRoles(),
         ]);
     }
 
@@ -96,12 +105,16 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
+        $this->ensureNotDistributorAccount($user);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
-            'role' => ['required', Rule::enum(Role::class)],
+            'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
+        ], [
+            'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
 
         $data = [
@@ -140,6 +153,8 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
+        $this->ensureNotDistributorAccount($user);
+
         if ($user->is(auth()->user())) {
             return back()->withErrors(['delete' => 'Anda tidak dapat menghapus akun yang sedang digunakan untuk login.']);
         }
@@ -147,5 +162,26 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    /**
+     * Peran yang dapat dikelola dari halaman pengguna.
+     *
+     * @return array<int, Role>
+     */
+    private function assignableRoles(): array
+    {
+        return array_values(array_filter(
+            Role::cases(),
+            fn (Role $role): bool => $role !== Role::Distributor,
+        ));
+    }
+
+    /**
+     * Pastikan akun distributor tidak dikelola melalui halaman pengguna.
+     */
+    private function ensureNotDistributorAccount(User $user): void
+    {
+        abort_if($user->role === Role::Distributor, 404);
     }
 }

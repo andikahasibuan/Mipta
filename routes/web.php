@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DistributionController;
 use App\Http\Controllers\Admin\DistributorController;
@@ -11,6 +12,11 @@ use App\Http\Controllers\Admin\SupervisionController;
 use App\Http\Controllers\Admin\UptdContributorController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Distributor\DashboardController as DistributorDashboardController;
+use App\Http\Controllers\Distributor\DistributionReportController as DistributorDistributionReportController;
+use App\Http\Controllers\Distributor\ProfileController as DistributorProfileController;
+use App\Http\Controllers\Distributor\ReportHistoryController as DistributorReportHistoryController;
+use App\Http\Controllers\Distributor\StoreController as DistributorStoreController;
 use App\Http\Controllers\KepalaDinas\DashboardController as KepalaDinasDashboardController;
 use App\Http\Controllers\KepalaDinas\DistributionController as KepalaDinasDistributionController;
 use App\Http\Controllers\KepalaDinas\ReportController as KepalaDinasReportController;
@@ -23,6 +29,16 @@ Route::get('/', function () {
 
     if (! $user) {
         return redirect()->route('login');
+    }
+
+    if ($user->role === Role::Distributor && $user->distributor_id === null) {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('login')->withErrors([
+            'identifier' => 'Akun distributor belum dikaitkan ke PT. Hubungi administrator.',
+        ]);
     }
 
     $home = $user->role->homeRoute();
@@ -95,4 +111,12 @@ Route::prefix('kepala-dinas')->name('kepala-dinas.')->middleware(['auth', 'role:
     Route::get('distribution', [KepalaDinasDistributionController::class, 'index'])->name('distribution.index');
     Route::get('supervision', [KepalaDinasSupervisionController::class, 'index'])->name('supervision.index');
     Route::get('reports', [KepalaDinasReportController::class, 'index'])->name('reports.index');
+});
+
+Route::prefix('distributor')->name('distributor.')->middleware(['auth', 'role:distributor', 'distributor.linked'])->group(function () {
+    Route::get('/', [DistributorDashboardController::class, 'index'])->name('dashboard');
+    Route::get('stores', [DistributorStoreController::class, 'index'])->name('stores.index');
+    Route::get('distribution-reports/create', [DistributorDistributionReportController::class, 'create'])->name('distribution-reports.create');
+    Route::get('report-history', [DistributorReportHistoryController::class, 'index'])->name('report-history.index');
+    Route::get('profile', [DistributorProfileController::class, 'edit'])->name('profile.edit');
 });

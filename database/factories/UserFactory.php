@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Role;
+use App\Models\Distributor;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -35,6 +36,17 @@ class UserFactory extends Factory
             'is_active' => true,
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Indicate that the account belongs to a distributor.
+     */
+    public function distributor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => Role::Distributor,
+            'distributor_id' => Distributor::factory(),
+        ]);
     }
 
     /**

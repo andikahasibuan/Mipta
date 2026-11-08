@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'username', 'email', 'password', 'role', 'market_id', 'is_active'])]
+#[Fillable(['name', 'username', 'email', 'password', 'role', 'market_id', 'distributor_id', 'is_active'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -41,6 +41,14 @@ class User extends Authenticatable
     public function market(): BelongsTo
     {
         return $this->belongsTo(Market::class);
+    }
+
+    /**
+     * Data distributor yang diwakili akun ini.
+     */
+    public function distributor(): BelongsTo
+    {
+        return $this->belongsTo(Distributor::class);
     }
 
     /**

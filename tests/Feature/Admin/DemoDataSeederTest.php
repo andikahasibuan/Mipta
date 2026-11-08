@@ -13,23 +13,22 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('membuat data contoh untuk master, pemantauan, penyaluran, dan pengguna', function () {
+it('membuat data contoh tanpa akun dan data distributor', function () {
     $this->seed(DemoDataSeeder::class);
 
-    expect(Distributor::count())->toBe(3)
+    expect(Distributor::count())->toBe(0)
         ->and(Market::count())->toBe(3)
         ->and(RecipientStore::count())->toBe(4)
         ->and(MarketMonitoring::count())->toBe(4)
-        ->and(Distribution::count())->toBe(5)
+        ->and(Distribution::count())->toBe(0)
         ->and(FieldDistributionReport::count())->toBe(2)
-        ->and(Distribution::sum('cartons'))->toBe(900)
-        ->and(User::count())->toBe(3)
-        ->and(User::where('role', Role::Distributor)->count())->toBe(1)
+        ->and(User::count())->toBe(2)
+        ->and(User::where('role', Role::Distributor)->count())->toBe(0)
         ->and(User::where('role', Role::UptdPasar)->count())->toBe(1)
         ->and(User::where('role', Role::KepalaDinas)->count())->toBe(1);
 });
 
-it('menampilkan data contoh pada dashboard dan menu pengguna dan data master', function () {
+it('menampilkan data contoh yang tersedia pada dashboard dan menu pengguna dan data master', function () {
     $this->seed(DemoDataSeeder::class);
 
     $admin = User::factory()->create();
@@ -37,16 +36,12 @@ it('menampilkan data contoh pada dashboard dan menu pengguna dan data master', f
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('PT Amanah Niaga Mandiri')
         ->assertSee('Pasar Raya Padang')
-        ->assertSeeInOrder(['Total Laporan', '3', '+50,0% dari bulan lalu'])
-        ->assertSeeInOrder(['Total Penyaluran', '550'])
-        ->assertSeeInOrder(['Distributor Aktif', '3', 'Seluruhnya aktif'])
-        ->assertSeeInOrder(['Pasar Terpantau', '2', '67% wilayah terpantau']);
+        ->assertSee('Belum ada data distributor');
 
     $this->get(route('admin.distributors.index'))
         ->assertOk()
-        ->assertSee('PT Amanah Niaga Mandiri');
+        ->assertSee('Belum ada data distributor');
 
     $this->get(route('admin.markets.index'))
         ->assertOk()
@@ -54,9 +49,9 @@ it('menampilkan data contoh pada dashboard dan menu pengguna dan data master', f
 
     $this->get(route('admin.users.index'))
         ->assertOk()
-        ->assertSee('Rina Marlina')
         ->assertSee('Andi Pratama')
-        ->assertSee('Dewi Anggraini');
+        ->assertSee('Dewi Anggraini')
+        ->assertDontSee('Rina Marlina');
 
     $this->get(route('admin.recipient-stores.index'))
         ->assertOk()

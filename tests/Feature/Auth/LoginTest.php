@@ -65,6 +65,24 @@ it('mengautentikasi kepala dinas dan mengarahkan ke dashboard kepala dinas', fun
     $this->assertAuthenticatedAs($kepalaDinas);
 });
 
+it('menolak distributor yang belum dikaitkan ke PT', function () {
+    User::factory()->create([
+        'email' => 'distributor.lepas@mipta.test',
+        'password' => 'admin123',
+        'role' => Role::Distributor,
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => 'distributor.lepas@mipta.test',
+        'password' => 'admin123',
+    ])->assertSessionHasErrors('identifier');
+
+    expect(session('errors')->first('identifier'))
+        ->toContain('Akun distributor belum dikaitkan ke PT. Hubungi administrator.');
+
+    $this->assertGuest();
+});
+
 it('mengabaikan tujuan awal di luar area peran setelah login', function () {
     User::factory()->create([
         'email' => 'kepala.dinas@mipta.test',
@@ -111,19 +129,18 @@ it('menolak password yang salah', function () {
     $this->assertGuest();
 });
 
-it('menolak akun yang bukan admin', function () {
-    User::factory()->create([
+it('mengautentikasi distributor dan mengarahkan ke dashboard distributor', function () {
+    $distributor = User::factory()->distributor()->create([
         'email' => 'distributor@mipta.test',
         'password' => 'admin123',
-        'role' => Role::Distributor,
     ]);
 
     $this->post(route('login'), [
         'identifier' => 'distributor@mipta.test',
         'password' => 'admin123',
-    ])->assertSessionHasErrors('identifier');
+    ])->assertRedirect(route('distributor.dashboard'));
 
-    $this->assertGuest();
+    $this->assertAuthenticatedAs($distributor);
 });
 
 it('menolak akun yang dinonaktifkan', function () {

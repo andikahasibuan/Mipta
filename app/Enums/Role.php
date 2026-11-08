@@ -37,6 +37,7 @@ enum Role: string
     {
         return match ($this) {
             self::Admin => 'admin.dashboard',
+            self::Distributor => 'distributor.dashboard',
             self::KepalaDinas => 'kepala-dinas.dashboard',
             default => null,
         };
@@ -49,6 +50,7 @@ enum Role: string
     {
         return match ($this) {
             self::Admin => 'admin',
+            self::Distributor => 'distributor',
             self::KepalaDinas => 'kepala-dinas',
             default => null,
         };

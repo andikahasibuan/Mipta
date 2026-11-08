@@ -43,6 +43,61 @@
                     @enderror
                 </div>
 
+                <div class="border-t border-slate-200 pt-4">
+                    <p class="text-sm font-semibold text-slate-900">Akun Login Perusahaan</p>
+                    <p class="mt-1 text-xs text-slate-500">
+                        @if ($account)
+                            Nama akun otomatis mengikuti nama distributor. Kosongkan password jika tidak ingin mengubahnya.
+                        @else
+                            Distributor ini belum memiliki akun. Lengkapi email, username, dan password untuk membuat akun perusahaan.
+                        @endif
+                    </p>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email Perusahaan</label>
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value="{{ old('email', $account?->email) }}"
+                        placeholder="Contoh: admin@amanahniaga.co.id"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    >
+                    @error('email')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="username" class="block text-sm font-medium text-slate-700">Username</label>
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        value="{{ old('username', $account?->username) }}"
+                        placeholder="Contoh: amanahniaga"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    >
+                    @error('username')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="{{ $account ? 'Kosongkan jika tidak ingin mengubah' : 'Minimal 8 karakter' }}"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    >
+                    @error('password')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <label class="flex items-center gap-2.5">
                     <input
                         name="is_active"

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Contracts\View\View;
@@ -40,6 +41,16 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
+
+        if ($user->role === Role::Distributor && $user->distributor_id === null) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'identifier' => 'Akun distributor belum dikaitkan ke PT. Hubungi administrator.',
+            ])->onlyInput('identifier');
+        }
 
         return redirect()->to($this->intendedUrl(route($home), $user->role->routePrefix()));
     }

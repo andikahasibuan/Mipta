@@ -61,6 +61,7 @@
                         <th scope="col" class="px-5 py-3 font-semibold">ID Data</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Nama Distributor</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Wilayah</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Email Akun</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Status</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Aksi</th>
                     </tr>
@@ -76,6 +77,9 @@
                             </td>
                             <td class="px-5 py-3 text-slate-700">
                                 {{ $distributor->wilayah }}
+                            </td>
+                            <td class="px-5 py-3 text-slate-600">
+                                {{ $distributor->account?->email ?? 'Belum ada akun' }}
                             </td>
                             <td class="px-5 py-3">
                                 <span @class([
@@ -95,7 +99,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
                                 @if ($filters['q'] !== '' || $filters['status'])
                                     Tidak ada distributor yang sesuai filter
                                 @else

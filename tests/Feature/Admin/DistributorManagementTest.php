@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\Distributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
@@ -36,6 +37,109 @@ it('menampilkan keadaan kosong saat belum ada distributor', function () {
         ->get(route('admin.distributors.index'))
         ->assertOk()
         ->assertSee('Belum ada data distributor');
+});
+
+it('menampilkan formulir tambah distributor beserta akun perusahaan', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distributors.create'))
+        ->assertOk()
+        ->assertSee('Nama Distributor')
+        ->assertSee('Email Perusahaan')
+        ->assertSee('Username')
+        ->assertSee('Password');
+});
+
+it('menampilkan email akun perusahaan pada daftar distributor', function () {
+    $distributor = Distributor::factory()->create(['name' => 'PT Akun']);
+    User::factory()->distributor()->create([
+        'distributor_id' => $distributor->id,
+        'email' => 'akun@pt.test',
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distributors.index'))
+        ->assertOk()
+        ->assertSee('akun@pt.test');
+});
+
+it('membuat akun untuk distributor lama yang belum memiliki akun', function () {
+    $this->actingAs(User::factory()->create());
+    $distributor = Distributor::factory()->create(['name' => 'PT Lama', 'wilayah' => 'Padang']);
+
+    $this->put(route('admin.distributors.update', $distributor), [
+        'name' => 'PT Lama',
+        'wilayah' => 'Padang',
+        'email' => 'pt.lama@example.com',
+        'username' => 'pt.lama',
+        'password' => 'password123',
+    ])->assertRedirect(route('admin.distributors.index'));
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'PT Lama',
+        'email' => 'pt.lama@example.com',
+        'username' => 'pt.lama',
+        'role' => Role::Distributor->value,
+        'distributor_id' => $distributor->id,
+    ]);
+});
+
+it('menolak email atau username yang sudah dipakai akun lain', function () {
+    $this->actingAs(User::factory()->create());
+    User::factory()->create([
+        'email' => 'dipakai@example.com',
+        'username' => 'dipakai',
+    ]);
+
+    $this->post(route('admin.distributors.store'), [
+        'name' => 'PT Duplikat',
+        'wilayah' => 'Padang',
+        'email' => 'dipakai@example.com',
+        'username' => 'dipakai',
+        'password' => 'password123',
+        'is_active' => '1',
+    ])->assertSessionHasErrors(['email', 'username']);
+
+    $this->assertDatabaseMissing('distributors', ['name' => 'PT Duplikat']);
+});
+
+it('menyinkronkan nama dan status akun saat distributor diperbarui', function () {
+    $this->actingAs(User::factory()->create());
+    $distributor = Distributor::factory()->create(['name' => 'PT Awal']);
+    $account = User::factory()->distributor()->create([
+        'distributor_id' => $distributor->id,
+        'name' => 'PT Awal',
+        'email' => 'awal@example.com',
+        'username' => 'awal',
+        'password' => 'password-lama',
+    ]);
+
+    $this->put(route('admin.distributors.update', $distributor), [
+        'name' => 'PT Baru',
+        'wilayah' => 'Padang',
+        'email' => 'baru@example.com',
+        'username' => 'baru',
+        'is_active' => '0',
+    ])->assertRedirect(route('admin.distributors.index'));
+
+    $account->refresh();
+
+    expect($account->name)->toBe('PT Baru')
+        ->and($account->email)->toBe('baru@example.com')
+        ->and($account->username)->toBe('baru')
+        ->and($account->is_active)->toBeFalse()
+        ->and(Hash::check('password-lama', $account->password))->toBeTrue();
+});
+
+it('menghapus akun perusahaan saat distributor dihapus', function () {
+    $this->actingAs(User::factory()->create());
+    $distributor = Distributor::factory()->create();
+    $account = User::factory()->distributor()->create(['distributor_id' => $distributor->id]);
+
+    $this->delete(route('admin.distributors.destroy', $distributor))
+        ->assertRedirect(route('admin.distributors.index'));
+
+    $this->assertDatabaseMissing('users', ['id' => $account->id]);
+    $this->assertDatabaseMissing('distributors', ['id' => $distributor->id]);
 });
 
 it('menampilkan lima tab pengguna dan data master tanpa tab ringkasan', function () {

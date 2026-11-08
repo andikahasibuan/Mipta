@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['name', 'wilayah', 'is_active'])]
 class Distributor extends Model
@@ -29,6 +30,14 @@ class Distributor extends Model
     public function distributions(): HasMany
     {
         return $this->hasMany(Distribution::class);
+    }
+
+    /**
+     * Akun login perusahaan yang mewakili distributor ini.
+     */
+    public function account(): HasOne
+    {
+        return $this->hasOne(User::class);
     }
 
     /**

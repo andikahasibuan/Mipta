@@ -10,18 +10,32 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menyimpan distributor baru ke database', function () {
+it('menyimpan distributor baru beserta akun perusahaannya', function () {
     $this->actingAs(User::factory()->create());
 
     $this->post(route('admin.distributors.store'), [
         'name' => 'PT Contoh Baru',
         'wilayah' => 'Padang',
+        'email' => 'pt.contoh@example.com',
+        'username' => 'pt.contoh',
+        'password' => 'password123',
         'is_active' => '1',
     ])->assertRedirect(route('admin.distributors.index'));
+
+    $distributor = Distributor::where('name', 'PT Contoh Baru')->firstOrFail();
 
     $this->assertDatabaseHas('distributors', [
         'name' => 'PT Contoh Baru',
         'wilayah' => 'Padang',
+        'is_active' => true,
+    ]);
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'PT Contoh Baru',
+        'email' => 'pt.contoh@example.com',
+        'username' => 'pt.contoh',
+        'role' => Role::Distributor->value,
+        'distributor_id' => $distributor->id,
         'is_active' => true,
     ]);
 });
@@ -35,18 +49,29 @@ it('menampilkan halaman edit distributor', function () {
         ->assertSee('PT Sinar Pangan');
 });
 
-it('memperbarui distributor dan menyimpannya ke database', function () {
+it('memperbarui distributor dan akun perusahaannya', function () {
     $this->actingAs(User::factory()->create());
     $distributor = Distributor::factory()->create(['name' => 'Nama Lama']);
 
     $this->put(route('admin.distributors.update', $distributor), [
         'name' => 'Nama Baru',
         'wilayah' => 'Padang',
+        'email' => 'nama.baru@example.com',
+        'username' => 'nama.baru',
+        'password' => 'password123',
     ])->assertRedirect(route('admin.distributors.index'));
 
     $this->assertDatabaseHas('distributors', [
         'id' => $distributor->id,
         'name' => 'Nama Baru',
+    ]);
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'Nama Baru',
+        'email' => 'nama.baru@example.com',
+        'username' => 'nama.baru',
+        'role' => Role::Distributor->value,
+        'distributor_id' => $distributor->id,
     ]);
 });
 

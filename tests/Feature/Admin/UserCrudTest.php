@@ -6,23 +6,27 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menyimpan pengguna baru ke database', function () {
+it('menolak pembuatan akun distributor melalui halaman pengguna', function () {
     $this->actingAs(User::factory()->create());
 
     $this->post(route('admin.users.store'), [
-        'name' => 'Andi Pratama',
-        'username' => 'andi.pratama',
-        'email' => 'andi@example.com',
+        'name' => 'PT Contoh',
+        'username' => 'pt.contoh',
+        'email' => 'pt.contoh@example.com',
         'password' => 'password123',
         'role' => Role::Distributor->value,
         'is_active' => '1',
-    ])->assertRedirect(route('admin.users.index'));
+    ])->assertSessionHasErrors('role');
 
-    $this->assertDatabaseHas('users', [
-        'email' => 'andi@example.com',
-        'role' => Role::Distributor->value,
-        'is_active' => true,
-    ]);
+    $this->assertDatabaseMissing('users', ['email' => 'pt.contoh@example.com']);
+});
+
+it('tidak menampilkan role distributor pada form pengguna', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.users.create'))
+        ->assertOk()
+        ->assertDontSee('value="'.Role::Distributor->value.'"', false);
 });
 
 it('menampilkan halaman edit pengguna', function () {
@@ -128,7 +132,7 @@ it('mencegah admin mengubah peran atau menonaktifkan akunnya sendiri', function 
             'name' => $admin->name,
             'username' => $admin->username,
             'email' => $admin->email,
-            'role' => Role::Distributor->value,
+            'role' => Role::KepalaDinas->value,
             'is_active' => '1',
         ])
         ->assertSessionHasErrors('role');
