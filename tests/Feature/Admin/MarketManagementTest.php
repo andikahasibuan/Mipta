@@ -22,6 +22,8 @@ it('menampilkan daftar pasar dari database', function () {
         ->get(route('admin.markets.index'))
         ->assertOk()
         ->assertSeeInOrder(['ID Data', 'Nama Pasar', 'Lokasi', 'Status'])
+        ->assertSee('PSR-001')
+        ->assertSee('PSR-002')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Jln. Merdeka')
         ->assertSee('Pasar Nonaktif')

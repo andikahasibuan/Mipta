@@ -10,9 +10,10 @@
         $isPenyaluran = $activeTab === 'penyaluran';
     @endphp
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-sm text-slate-500">Cari, filter, dan kelola data sistem secara terpusat</p>
-
+    <x-admin.page-heading
+        title="Rekap & Ekspor Laporan"
+        subtitle="Cari, filter, dan kelola data sistem secara terpusat"
+    >
         <button
             type="button"
             disabled
@@ -23,7 +24,7 @@
             <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
             Ekspor Data
         </button>
-    </div>
+    </x-admin.page-heading>
 
     <form
         method="GET"
@@ -198,7 +199,7 @@
                         @forelse ($conditionReports as $report)
                             <tr>
                                 <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
-                                    {{ $report->id }}
+                                    {{ $report->code }}
                                 </td>
                                 <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                     {{ $report->report_date->format('d/m/Y') }}

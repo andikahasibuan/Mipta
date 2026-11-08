@@ -133,14 +133,12 @@ it('menyimpan toko penerima baru ke database', function () {
 
     $this->post(route('admin.recipient-stores.store'), [
         'market_id' => $market->id,
-        'code' => 'TKS-999',
         'name' => 'Toko Baru',
         'is_active' => '1',
     ])->assertRedirect(route('admin.recipient-stores.index'));
 
     $this->assertDatabaseHas('recipient_stores', [
         'market_id' => $market->id,
-        'code' => 'TKS-999',
         'name' => 'Toko Baru',
         'is_active' => true,
     ]);
@@ -152,7 +150,6 @@ it('memperbarui toko penerima dan menyimpannya ke database', function () {
 
     $this->put(route('admin.recipient-stores.update', $store), [
         'market_id' => $store->market_id,
-        'code' => $store->code,
         'name' => 'Nama Baru',
     ])->assertRedirect(route('admin.recipient-stores.index'));
 

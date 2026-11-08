@@ -13,7 +13,7 @@ it('mengarahkan tamu dari halaman pengawasan ke halaman login', function () {
     $this->get(route('admin.supervision.index'))->assertRedirect(route('login'));
 });
 
-it('menampilkan laporan penyaluran lapangan dari database', function () {
+it('menampilkan laporan kondisi lapangan dari database', function () {
     $contributor = User::factory()->create([
         'name' => 'Andi Pratama',
         'role' => Role::UptdPasar,
@@ -31,7 +31,8 @@ it('menampilkan laporan penyaluran lapangan dari database', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.supervision.index'))
         ->assertOk()
-        ->assertSee('Laporan Penyaluran Lapangan')
+        ->assertSee('Laporan Kondisi Lapangan')
+        ->assertSee('KP-001')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Stok Minyakita tersedia, harga sesuai HET')
@@ -95,9 +96,9 @@ it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () 
         ->assertDontSee('Stok aman');
 });
 
-it('menampilkan keadaan kosong saat belum ada laporan penyaluran lapangan', function () {
+it('menampilkan keadaan kosong saat belum ada laporan kondisi lapangan', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.supervision.index'))
         ->assertOk()
-        ->assertSee('Belum ada laporan penyaluran lapangan');
+        ->assertSee('Belum ada laporan kondisi lapangan');
 });

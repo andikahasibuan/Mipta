@@ -115,6 +115,7 @@ it('menampilkan rekap kondisi pasar pada tab kedua', function () {
         ->assertOk()
         ->assertViewHas('activeTab', 'kondisi')
         ->assertSee('Rekap Kondisi Pasar')
+        ->assertSee('KP-001')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Stok Minyakita menipis di beberapa kios')

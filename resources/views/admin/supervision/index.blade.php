@@ -5,6 +5,11 @@
 @section('page-title', 'Pengawasan & Tindak Lanjut')
 
 @section('content')
+    <x-admin.page-heading
+        title="Pengawasan & Tindak Lanjut"
+        subtitle="Kelola pemeriksaan, dan tindak lanjut secara terstruktur"
+    />
+
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
     @endphp
@@ -67,7 +72,7 @@
 
     <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="px-5 pt-5">
-            <h2 class="text-lg font-semibold text-slate-900">Laporan Penyaluran Lapangan</h2>
+            <h2 class="text-lg font-semibold text-slate-900">Laporan Kondisi Lapangan</h2>
         </div>
 
         <div class="mt-4 overflow-x-auto">
@@ -86,7 +91,7 @@
                     @forelse ($reports as $report)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
-                                {{ $report->id }}
+                                {{ $report->code }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $report->report_date->format('d/m/Y') }}
@@ -116,7 +121,7 @@
                                 @if ($filters['q'] !== '' || $filters['condition'] !== null)
                                     Tidak ada laporan yang sesuai filter
                                 @else
-                                    Belum ada laporan penyaluran lapangan
+                                    Belum ada laporan kondisi lapangan
                                 @endif
                             </td>
                         </tr>

@@ -16,12 +16,23 @@ it('menampilkan tombol tambah data yang mengarah ke halaman tambah', function ()
         ->assertDontSee('Ekspor Data');
 });
 
-it('tidak menampilkan breadcrumb, judul, dan deskripsi di area konten', function () {
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.users.index'))
-        ->assertOk()
-        ->assertDontSee('Cari, filter, dan kelola data sistem secara terpusat')
-        ->assertDontSee('aria-label="Breadcrumb"', false);
+it('menampilkan judul dan deskripsi pengguna dan data master di setiap tab', function () {
+    $admin = User::factory()->create();
+
+    collect([
+        'admin.users.index',
+        'admin.distributors.index',
+        'admin.markets.index',
+        'admin.recipient-stores.index',
+        'admin.uptd-contributors.index',
+    ])->each(function (string $route) use ($admin): void {
+        $this->actingAs($admin)
+            ->get(route($route))
+            ->assertOk()
+            ->assertSee('Pengguna & Data Master')
+            ->assertSee('Cari, filter, dan kelola data sistem secara terpusat')
+            ->assertDontSee('aria-label="Breadcrumb"', false);
+    });
 });
 
 it('menampilkan tabel data pengguna dari database', function () {

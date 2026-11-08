@@ -5,6 +5,11 @@
 @section('page-title', 'Monitoring & Analisis')
 
 @section('content')
+    <x-admin.page-heading
+        title="Monitoring & Analisis"
+        subtitle="Cari, filter, dan kelola data sistem secara terpusat"
+    />
+
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
         $formatAvg = fn (float $value): string => number_format($value, 1, ',', '.');

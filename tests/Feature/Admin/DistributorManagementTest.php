@@ -22,6 +22,8 @@ it('menampilkan daftar distributor dari database', function () {
         ->get(route('admin.distributors.index'))
         ->assertOk()
         ->assertSeeInOrder(['ID Data', 'Nama Distributor', 'Wilayah', 'Status'])
+        ->assertSee('DST-001')
+        ->assertSee('DST-002')
         ->assertSee('PT Contoh Distributor')
         ->assertSee('Padang')
         ->assertSee('PT Distributor Nonaktif')

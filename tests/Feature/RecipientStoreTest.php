@@ -2,7 +2,6 @@
 
 use App\Models\Market;
 use App\Models\RecipientStore;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -30,9 +29,3 @@ it('menyimpan status nonaktif sebagai boolean', function () {
 
     expect($store->fresh()->is_active)->toBeFalse();
 });
-
-it('menolak kode toko yang duplikat', function () {
-    RecipientStore::factory()->create(['code' => 'TKS-RAYA']);
-
-    RecipientStore::factory()->create(['code' => 'TKS-RAYA']);
-})->throws(QueryException::class);

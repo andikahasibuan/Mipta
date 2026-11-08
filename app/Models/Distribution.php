@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\DistributionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,14 @@ class Distribution extends Model
 {
     /** @use HasFactory<DistributionFactory> */
     use HasFactory;
+
+    /**
+     * ID laporan penyaluran yang ditampilkan, mis. LP-001.
+     */
+    protected function code(): Attribute
+    {
+        return Attribute::get(fn (): string => sprintf('LP-%03d', $this->id));
+    }
 
     /**
      * Distributor yang melakukan penyaluran.

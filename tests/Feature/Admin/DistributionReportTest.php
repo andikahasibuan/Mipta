@@ -34,6 +34,7 @@ it('menampilkan laporan penyaluran dari database', function () {
         ->get(route('admin.distribution.index'))
         ->assertOk()
         ->assertSee('Laporan Penyaluran')
+        ->assertSee('LP-001')
         ->assertDontSee('Tambah Data')
         ->assertSee('PT Sinar Pangan Nusantara')
         ->assertSee('Pasar Raya Padang')

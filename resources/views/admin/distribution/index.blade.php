@@ -5,6 +5,11 @@
 @section('page-title', 'Laporan Penyaluran')
 
 @section('content')
+    <x-admin.page-heading
+        title="Laporan Penyaluran"
+        subtitle="Cari, filter, dan kelola data sistem secara terpusat"
+    />
+
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
     @endphp
@@ -14,7 +19,7 @@
     <form
         method="GET"
         action="{{ route('admin.distribution.index') }}"
-        class="mt-6 rounded-xl border border-slate-200 bg-white p-3"
+        class="rounded-xl border border-slate-200 bg-white p-3"
     >
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div>
@@ -87,7 +92,7 @@
                     @forelse ($distributions as $distribution)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-4 text-center align-middle font-mono text-xs text-slate-500">
-                                {{ $distribution->id }}
+                                {{ $distribution->code }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $distribution->distribution_date->format('d/m/Y') }}

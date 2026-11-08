@@ -10,6 +10,11 @@
     ];
 @endphp
 
+<div class="-mt-2 mb-4 min-w-0">
+    <h2 class="text-2xl font-semibold text-[#1F3A5F]">Pengguna &amp; Data Master</h2>
+    <p class="mt-1 text-sm text-[#2D507E]">Cari, filter, dan kelola data sistem secara terpusat</p>
+</div>
+
 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
     <nav class="flex flex-wrap items-center gap-2" aria-label="Navigasi Pengguna dan Data Master">
         @foreach ($tabs as $tab)

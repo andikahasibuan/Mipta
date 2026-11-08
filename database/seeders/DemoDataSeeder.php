@@ -53,20 +53,19 @@ class DemoDataSeeder extends Seeder
         }
 
         $stores = [
-            ['code' => 'TKS-001', 'name' => 'Toko Atong', 'market' => 'Pasar Raya Padang'],
-            ['code' => 'TKS-002', 'name' => 'Toko Mak Itam', 'market' => 'Pasar Raya Padang'],
-            ['code' => 'TKS-003', 'name' => 'Toko Mail', 'market' => 'Pasar Bandar Buat'],
-            ['code' => 'TKS-004', 'name' => 'Toko Hisyam', 'market' => 'Pasar Lubuk Buaya'],
+            ['name' => 'Toko Atong', 'market' => 'Pasar Raya Padang'],
+            ['name' => 'Toko Mak Itam', 'market' => 'Pasar Raya Padang'],
+            ['name' => 'Toko Mail', 'market' => 'Pasar Bandar Buat'],
+            ['name' => 'Toko Hisyam', 'market' => 'Pasar Lubuk Buaya'],
         ];
 
         foreach ($stores as $store) {
             $market = Market::where('name', $store['market'])->firstOrFail();
 
             RecipientStore::updateOrCreate(
-                ['code' => $store['code']],
+                ['name' => $store['name']],
                 [
                     'market_id' => $market->id,
-                    'name' => $store['name'],
                     'nib' => fake()->numerify('#############'),
                     'is_active' => true,
                 ],
@@ -146,17 +145,17 @@ class DemoDataSeeder extends Seeder
         }
 
         $distributionSamples = [
-            [$currentMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'TKS-001', 250, 1],
-            [$currentMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'TKS-003', 180, 2],
-            [$currentMonthStart, 'PT Berkah Distribusi Padang', 'Pasar Raya Padang', 'TKS-002', 120, 3],
-            [$previousMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'TKS-001', 200, 5],
-            [$previousMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'TKS-003', 150, 12],
+            [$currentMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'Toko Atong', 250, 1],
+            [$currentMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'Toko Mail', 180, 2],
+            [$currentMonthStart, 'PT Berkah Distribusi Padang', 'Pasar Raya Padang', 'Toko Mak Itam', 120, 3],
+            [$previousMonthStart, 'PT Amanah Niaga Mandiri', 'Pasar Raya Padang', 'Toko Atong', 200, 5],
+            [$previousMonthStart, 'PT Sinar Pangan Nusantara', 'Pasar Bandar Buat', 'Toko Mail', 150, 12],
         ];
 
-        foreach ($distributionSamples as [$monthStart, $distributorName, $marketName, $storeCode, $cartons, $day]) {
+        foreach ($distributionSamples as [$monthStart, $distributorName, $marketName, $storeName, $cartons, $day]) {
             $distributor = Distributor::where('name', $distributorName)->firstOrFail();
             $market = Market::where('name', $marketName)->firstOrFail();
-            $store = RecipientStore::where('code', $storeCode)->firstOrFail();
+            $store = RecipientStore::where('name', $storeName)->firstOrFail();
 
             Distribution::updateOrCreate(
                 [

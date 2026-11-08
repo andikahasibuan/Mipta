@@ -71,7 +71,7 @@
                     @forelse ($markets as $market)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
-                                {{ $market->id }}
+                                {{ $market->code }}
                             </td>
                             <td class="px-5 py-3 text-slate-900">
                                 {{ $market->name }}

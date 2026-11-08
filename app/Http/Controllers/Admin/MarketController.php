@@ -19,10 +19,13 @@ class MarketController extends Controller
         $status = $request->string('status')->toString();
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
+        $searchId = preg_match('/^PSR-(\d+)$/i', $search, $matches) === 1 ? (int) $matches[1] : null;
+
         $markets = Market::query()
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
-                ->orWhere('lokasi', 'like', "%{$search}%")))
+                ->orWhere('lokasi', 'like', "%{$search}%")
+                ->when($searchId !== null, fn ($query) => $query->orWhereKey($searchId))))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
             ->orderBy('name')

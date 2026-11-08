@@ -8,7 +8,6 @@ use App\Models\RecipientStore;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class RecipientStoreController extends Controller
 {
@@ -24,10 +23,12 @@ class RecipientStoreController extends Controller
         $marketId = $request->integer('market');
         $marketId = $marketId > 0 && Market::whereKey($marketId)->exists() ? $marketId : null;
 
+        $searchId = preg_match('/^TKS-(\d+)$/i', $search, $matches) === 1 ? (int) $matches[1] : null;
+
         $stores = RecipientStore::with('market:id,name')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%")))
+                ->when($searchId !== null, fn ($query) => $query->orWhereKey($searchId))))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
             ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
@@ -63,14 +64,12 @@ class RecipientStoreController extends Controller
     {
         $validated = $request->validate([
             'market_id' => ['required', 'integer', 'exists:markets,id'],
-            'code' => ['required', 'string', 'max:255', Rule::unique('recipient_stores', 'code')],
             'name' => ['required', 'string', 'max:255'],
             'nib' => ['nullable', 'string', 'max:20'],
         ]);
 
         RecipientStore::create([
             'market_id' => $validated['market_id'],
-            'code' => $validated['code'],
             'name' => $validated['name'],
             'nib' => $validated['nib'] ?? null,
             'is_active' => $request->boolean('is_active'),
@@ -97,14 +96,12 @@ class RecipientStoreController extends Controller
     {
         $validated = $request->validate([
             'market_id' => ['required', 'integer', 'exists:markets,id'],
-            'code' => ['required', 'string', 'max:255', Rule::unique('recipient_stores', 'code')->ignore($store->id)],
             'name' => ['required', 'string', 'max:255'],
             'nib' => ['nullable', 'string', 'max:20'],
         ]);
 
         $store->update([
             'market_id' => $validated['market_id'],
-            'code' => $validated['code'],
             'name' => $validated['name'],
             'nib' => $validated['nib'] ?? null,
             'is_active' => $request->boolean('is_active'),
