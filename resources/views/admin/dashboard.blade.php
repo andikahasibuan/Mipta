@@ -21,35 +21,24 @@
         };
     @endphp
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="min-w-0">
-            <h2 class="text-2xl font-semibold text-slate-900">
-                Selamat datang, {{ auth()->user()->name }}
-            </h2>
-            <p class="mt-1 text-sm text-slate-500">
-                Pantau penyaluran Minyakita secara terintegrasi
-            </p>
-        </div>
-
-        <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            title="Akan tersedia setelah modul laporan selesai"
-            class="shrink-0 cursor-not-allowed rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
-        >
-            Unduh Rekap Bulanan
-        </button>
+    <div class="min-w-0">
+        <h2 class="text-2xl font-semibold text-slate-900">
+            Selamat datang, {{ auth()->user()->name }}
+        </h2>
+        <p class="mt-1 text-sm text-slate-500">
+            Pantau penyaluran Minyakita secara terintegrasi
+        </p>
     </div>
 
     <form method="GET" action="{{ route('admin.dashboard') }}" class="mt-6 rounded-xl border border-slate-200 bg-white p-3">
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div class="relative">
                 <label for="filter-month" class="sr-only">Bulan</label>
+                <x-heroicon-o-calendar-days class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#2D507E]" />
                 <select
                     id="filter-month"
                     name="month"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     @foreach ($months as $option)
                         <option value="{{ $option['value'] }}" @selected($filters['month'] === $option['value'])>
@@ -62,10 +51,11 @@
 
             <div class="relative">
                 <label for="filter-market" class="sr-only">Pasar</label>
+                <x-heroicon-o-map-pin class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#2D507E]" />
                 <select
                     id="filter-market"
                     name="market"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     <option value="">Semua Pasar</option>
                     @foreach ($markets as $market)
@@ -77,10 +67,11 @@
 
             <div class="relative">
                 <label for="filter-distributor" class="sr-only">Distributor</label>
+                <x-heroicon-o-user class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#2D507E]" />
                 <select
                     id="filter-distributor"
                     name="distributor"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
                     <option value="">Semua Distributor</option>
                     @foreach ($distributors as $distributor)
@@ -92,8 +83,9 @@
 
             <button
                 type="submit"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
             >
+                <x-heroicon-o-funnel class="h-5 w-5 text-[#2D507E]" />
                 Terapkan Filter
             </button>
         </div>
