@@ -39,6 +39,29 @@ it('hanya menampilkan akun berperan UPTD Pasar', function () {
         ->assertSee('Menampilkan 2 dari 2 kontributor');
 });
 
+it('menyimpan kontributor UPTD dengan nama akun generik dan username bernomor', function () {
+    $admin = User::factory()->create();
+    $market = Market::factory()->create();
+
+    $this->actingAs($admin)
+        ->post(route('admin.uptd-contributors.store'), [
+            'name' => 'Kontributor UPTD 01',
+            'username' => 'kontributor.uptd.01',
+            'email' => 'kontributor.uptd.01@mipta.test',
+            'password' => 'password123',
+            'market_id' => $market->id,
+            'is_active' => '1',
+        ])
+        ->assertRedirect(route('admin.uptd-contributors.index'));
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'Kontributor UPTD 01',
+        'username' => 'kontributor.uptd.01',
+        'role' => Role::UptdPasar->value,
+        'market_id' => $market->id,
+    ]);
+});
+
 it('menampilkan pasar terkait pada kolom kontributor', function () {
     $admin = User::factory()->create();
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);

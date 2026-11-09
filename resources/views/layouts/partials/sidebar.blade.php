@@ -4,7 +4,7 @@
             <img
                 src="{{ asset('images/mipta-logo.png') }}"
                 alt="MIPTA"
-                class="block h-14 w-14 shrink-0 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
+                class="block h-16 w-16 shrink-0 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
             >
             <div class="min-w-0 leading-tight">
                 <p class="truncate text-2xl font-semibold tracking-wide text-white">MIPTA</p>
@@ -12,7 +12,7 @@
             </div>
         </div>
 
-        <div class="mt-4 flex items-center gap-3 rounded-lg bg-[#0B2559]/40 px-3 py-2 ring-1 ring-white/10">
+        <div class="mt-4 flex items-center gap-3 rounded-lg bg-[#3E6BA5]/50 px-3 py-2 ring-1 ring-white/10">
             <img src="{{ asset('images/logo.svg') }}"
                 alt="Logo Kota Padang"
                 width="36"
@@ -26,7 +26,7 @@
     </div>
 
     <nav class="flex-1 px-3 pb-6" aria-label="Menu utama">
-        <p class="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-widest text-[#A9C0D6]">
+        <p class="px-3 pb-2 pt-1 text-sm font-semibold uppercase tracking-widest text-[#A9C0D6]">
             Menu Utama
         </p>
         <ul class="flex flex-col gap-1">
@@ -54,7 +54,7 @@
         </ul>
     </nav>
 
-    <div class="px-3 pb-8">
+    <div class="px-3 pb-6">
         <div class="rounded-lg bg-[#3E6BA5]/50 p-4 ring-1 ring-white/15">
             <div class="flex items-start gap-3">
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FDBA12]/20 text-[#FDBA12]">

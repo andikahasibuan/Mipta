@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Market;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -63,6 +64,40 @@ it('mengautentikasi kepala dinas dan mengarahkan ke dashboard kepala dinas', fun
     ])->assertRedirect(route('kepala-dinas.dashboard'));
 
     $this->assertAuthenticatedAs($kepalaDinas);
+});
+
+it('mengautentikasi kontributor UPTD dan mengarahkan ke dashboard UPTD', function () {
+    $contributor = User::factory()->create([
+        'email' => 'kontributor.uptd.01@mipta.test',
+        'password' => 'admin123',
+        'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => 'kontributor.uptd.01@mipta.test',
+        'password' => 'admin123',
+    ])->assertRedirect(route('uptd.dashboard'));
+
+    $this->assertAuthenticatedAs($contributor);
+});
+
+it('menolak kontributor UPTD yang belum dikaitkan ke pasar', function () {
+    User::factory()->create([
+        'email' => 'uptd.lepas@mipta.test',
+        'password' => 'admin123',
+        'role' => Role::UptdPasar,
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => 'uptd.lepas@mipta.test',
+        'password' => 'admin123',
+    ])->assertSessionHasErrors('identifier');
+
+    expect(session('errors')->first('identifier'))
+        ->toContain('Akun kontributor UPTD belum dikaitkan ke pasar. Hubungi administrator.');
+
+    $this->assertGuest();
 });
 
 it('menolak distributor yang belum dikaitkan ke PT', function () {

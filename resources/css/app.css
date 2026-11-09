@@ -8,6 +8,17 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+@layer base {
+    table thead th {
+        border-inline-end: 1px solid #cbd5e1;
+        text-align: center;
+    }
+
+    table thead th:last-child {
+        border-inline-end: 0;
+    }
+}
+
 @utility no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;

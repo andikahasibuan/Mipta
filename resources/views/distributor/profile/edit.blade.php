@@ -97,7 +97,7 @@
                             <dt class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
                                 {{ $field['label'] }}
                                 @if ($isEmptyAddress)
-                                    <span class="h-2 w-2 rounded-full bg-amber-500" title="Belum diisi"></span>
+                                    <span class="h-2 w-2 rounded-full bg-red-500" title="Belum diisi"></span>
                                 @endif
                             </dt>
                             <dd class="mt-1.5">
@@ -109,7 +109,7 @@
                                     ])
                                 >
                                     @if ($isEmptyAddress)
-                                        <span class="min-w-0 break-words text-sm font-semibold text-amber-600">
+                                        <span class="min-w-0 break-words text-sm font-semibold text-red-600">
                                             Belum diisi
                                         </span>
                                     @else

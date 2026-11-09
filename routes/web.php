@@ -22,6 +22,9 @@ use App\Http\Controllers\KepalaDinas\DistributionController as KepalaDinasDistri
 use App\Http\Controllers\KepalaDinas\ReportController as KepalaDinasReportController;
 use App\Http\Controllers\KepalaDinas\SupervisionController as KepalaDinasSupervisionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Uptd\ContributorController as UptdAreaContributorController;
+use App\Http\Controllers\Uptd\DashboardController as UptdDashboardController;
+use App\Http\Controllers\Uptd\ReportController as UptdReportController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +42,16 @@ Route::get('/', function () {
 
         return redirect()->route('login')->withErrors([
             'identifier' => 'Akun distributor belum dikaitkan ke PT. Hubungi administrator.',
+        ]);
+    }
+
+    if ($user->role === Role::UptdPasar && $user->market_id === null) {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('login')->withErrors([
+            'identifier' => 'Akun kontributor UPTD belum dikaitkan ke pasar. Hubungi administrator.',
         ]);
     }
 
@@ -116,6 +129,17 @@ Route::prefix('kepala-dinas')->name('kepala-dinas.')->middleware(['auth', 'role:
     Route::get('distribution', [KepalaDinasDistributionController::class, 'index'])->name('distribution.index');
     Route::get('supervision', [KepalaDinasSupervisionController::class, 'index'])->name('supervision.index');
     Route::get('reports', [KepalaDinasReportController::class, 'index'])->name('reports.index');
+});
+
+Route::prefix('uptd')->name('uptd.')->middleware(['auth', 'role:uptd_pasar', 'uptd.linked'])->group(function () {
+    Route::get('/', [UptdDashboardController::class, 'index'])->name('dashboard');
+    Route::get('reports/create', [UptdReportController::class, 'create'])->name('reports.create');
+    Route::post('reports', [UptdReportController::class, 'store'])->name('reports.store');
+    Route::get('reports/{report}/edit', [UptdReportController::class, 'edit'])->name('reports.edit');
+    Route::put('reports/{report}', [UptdReportController::class, 'update'])->name('reports.update');
+    Route::delete('reports/{report}', [UptdReportController::class, 'destroy'])->name('reports.destroy');
+    Route::get('reports', [UptdReportController::class, 'index'])->name('reports.index');
+    Route::get('contributors', [UptdAreaContributorController::class, 'index'])->name('contributors.index');
 });
 
 Route::prefix('distributor')->name('distributor.')->middleware(['auth', 'role:distributor', 'distributor.linked'])->group(function () {

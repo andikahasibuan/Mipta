@@ -20,10 +20,10 @@
                         name="name"
                         type="text"
                         value="{{ old('name', $contributor->name) }}"
-                        placeholder="Contoh: Rina Marlina"
+                        placeholder="Contoh: Kontributor UPTD 01"
                         required
-                        pattern="[A-Za-z .'-]+"
-                        title="Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung."
+                        pattern="[A-Za-z0-9 .'-]+"
+                        title="Nama hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
                     @error('name')
@@ -38,7 +38,7 @@
                         name="username"
                         type="text"
                         value="{{ old('username', $contributor->username) }}"
-                        placeholder="Contoh: rina.marlina"
+                        placeholder="Contoh: kontributor.uptd.01"
                         required
                         pattern="[A-Za-z0-9._-]+"
                         title="Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung."

@@ -52,6 +52,16 @@ class LoginController extends Controller
             ])->onlyInput('identifier');
         }
 
+        if ($user->role === Role::UptdPasar && $user->market_id === null) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'identifier' => 'Akun kontributor UPTD belum dikaitkan ke pasar. Hubungi administrator.',
+            ])->onlyInput('identifier');
+        }
+
         return redirect()->to($this->intendedUrl(route($home), $user->role->routePrefix()));
     }
 

@@ -39,6 +39,7 @@ enum Role: string
             self::Admin => 'admin.dashboard',
             self::Distributor => 'distributor.dashboard',
             self::KepalaDinas => 'kepala-dinas.dashboard',
+            self::UptdPasar => 'uptd.dashboard',
             default => null,
         };
     }
@@ -52,6 +53,7 @@ enum Role: string
             self::Admin => 'admin',
             self::Distributor => 'distributor',
             self::KepalaDinas => 'kepala-dinas',
+            self::UptdPasar => 'uptd',
             default => null,
         };
     }

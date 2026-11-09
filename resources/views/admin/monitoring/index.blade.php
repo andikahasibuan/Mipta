@@ -122,7 +122,7 @@
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
                         <tr>
-                            <th scope="col" class="px-5 py-3 text-left font-semibold">Pasar</th>
+                            <th scope="col" class="px-5 py-3 font-semibold">Pasar</th>
                             <th scope="col" class="px-5 py-3 font-semibold">Jumlah Laporan</th>
                             <th scope="col" class="px-5 py-3 font-semibold">Total Karton</th>
                         </tr>
