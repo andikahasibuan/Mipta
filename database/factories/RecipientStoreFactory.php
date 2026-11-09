@@ -21,6 +21,7 @@ class RecipientStoreFactory extends Factory
         return [
             'market_id' => Market::factory(),
             'name' => 'Toko '.fake()->unique()->words(2, true),
+            'alamat' => fake()->streetAddress(),
             'nib' => fake()->numerify('#############'),
             'is_active' => true,
         ];

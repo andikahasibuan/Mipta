@@ -55,6 +55,33 @@ it('memperbarui pengguna dan menyimpannya ke database', function () {
     ]);
 });
 
+it('menolak nama dan username pengguna yang mengandung karakter khusus', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('admin.users.store'), [
+        'name' => 'Andi !@#$%',
+        'username' => 'andi!#$',
+        'email' => 'andi.khusus@example.com',
+        'password' => 'password123',
+        'role' => Role::Admin->value,
+    ])->assertSessionHasErrors(['name', 'username']);
+
+    $this->assertDatabaseMissing('users', ['email' => 'andi.khusus@example.com']);
+});
+
+it('menolak nama dan username kontributor UPTD yang mengandung karakter khusus', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('admin.uptd-contributors.store'), [
+        'name' => 'Rina !@#$%',
+        'username' => 'rina!#$',
+        'email' => 'rina.khusus@example.com',
+        'password' => 'password123',
+    ])->assertSessionHasErrors(['name', 'username']);
+
+    $this->assertDatabaseMissing('users', ['email' => 'rina.khusus@example.com']);
+});
+
 it('menghapus pengguna dari database', function () {
     $this->actingAs(User::factory()->create());
     $user = User::factory()->create();

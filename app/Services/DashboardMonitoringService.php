@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DistributionStatus;
 use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
@@ -75,6 +76,7 @@ class DashboardMonitoringService
             ->count();
 
         $distributions = Distribution::query()
+            ->where('status', DistributionStatus::Submitted->value)
             ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
             ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
             ->whereBetween('distribution_date', [$periodStart, $periodEnd])
@@ -92,6 +94,7 @@ class DashboardMonitoringService
 
         $previousStart = $start->copy()->subMonthNoOverflow()->startOfMonth();
         $previousReports = Distribution::query()
+            ->where('status', DistributionStatus::Submitted->value)
             ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
             ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
             ->whereBetween('distribution_date', [

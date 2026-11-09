@@ -28,7 +28,8 @@ class MarketController extends Controller
                 ->when($searchId !== null, fn ($query) => $query->orWhereKey($searchId))))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('name')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -55,9 +56,9 @@ class MarketController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'lokasi' => ['required', 'string', 'max:255'],
-        ]);
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
+            'lokasi' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+        ], $this->validationMessages());
 
         Market::create([
             'name' => $validated['name'],
@@ -84,9 +85,9 @@ class MarketController extends Controller
     public function update(Request $request, Market $market): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'lokasi' => ['required', 'string', 'max:255'],
-        ]);
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
+            'lokasi' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+        ], $this->validationMessages());
 
         $market->update([
             'name' => $validated['name'],
@@ -95,6 +96,19 @@ class MarketController extends Controller
         ]);
 
         return redirect()->route('admin.markets.index')->with('success', 'Pasar berhasil diperbarui.');
+    }
+
+    /**
+     * Pesan validasi data pasar.
+     *
+     * @return array<string, string>
+     */
+    private function validationMessages(): array
+    {
+        return [
+            'name.regex' => 'Nama pasar hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
+            'lokasi.regex' => 'Lokasi hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
+        ];
     }
 
     /**

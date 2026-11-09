@@ -75,3 +75,28 @@ it('memfilter monitoring berdasarkan distributor', function () {
         ->assertSee('150')
         ->assertDontSee('250');
 });
+
+it('tidak menghitung laporan draft pada monitoring', function () {
+    $distributor = Distributor::factory()->create();
+    $market = Market::factory()->create();
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 120,
+    ]);
+
+    Distribution::factory()->draft()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 4321,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.monitoring.index'))
+        ->assertOk()
+        ->assertSee('120')
+        ->assertDontSee('4.321');
+});

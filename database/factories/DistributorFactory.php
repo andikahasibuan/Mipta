@@ -20,6 +20,9 @@ class DistributorFactory extends Factory
         return [
             'name' => 'PT '.fake()->company(),
             'wilayah' => 'Padang',
+            'penanggung_jawab' => fake()->name(),
+            'telepon' => '0751'.fake()->numerify('######'),
+            'alamat_kantor' => fake()->streetAddress().', Padang',
             'is_active' => true,
         ];
     }

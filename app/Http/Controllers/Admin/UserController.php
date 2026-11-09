@@ -35,7 +35,8 @@ class UserController extends Controller
             ->when($role, fn ($query, Role $role) => $query->where('role', $role->value))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('name')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(5)
             ->withQueryString();
 
@@ -66,12 +67,14 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
         ], [
+            'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
+            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
             'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
 
@@ -108,12 +111,14 @@ class UserController extends Controller
         $this->ensureNotDistributorAccount($user);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id)],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
             'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
         ], [
+            'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
+            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
             'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
 

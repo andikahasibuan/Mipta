@@ -31,13 +31,33 @@
                 </div>
 
                 <div>
-                    <label for="name" class="block text-sm font-medium text-slate-700">Nama</label>
+                    <label for="distributor_id" class="block text-sm font-medium text-slate-700">Distributor</label>
+                    <select
+                        id="distributor_id"
+                        name="distributor_id"
+                        class="mt-1 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    >
+                        <option value="">— Belum ditentukan —</option>
+                        @foreach ($distributors as $distributor)
+                            <option value="{{ $distributor->id }}" @selected(old('distributor_id', $store->distributor_id) == $distributor->id)>{{ $distributor->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('distributor_id')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="name" class="block text-sm font-medium text-slate-700">Nama Toko <span class="text-red-500">*</span></label>
                     <input
                         id="name"
                         name="name"
                         type="text"
                         value="{{ old('name', $store->name) }}"
                         placeholder="Contoh: Toko Berkah"
+                        required
+                        pattern="[A-Za-z0-9 ]+"
+                        title="Nama toko hanya boleh berisi huruf, angka, dan spasi."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
                     @error('name')
@@ -46,13 +66,37 @@
                 </div>
 
                 <div>
-                    <label for="nib" class="block text-sm font-medium text-slate-700">NIB</label>
+                    <label for="alamat" class="block text-sm font-medium text-slate-700">Alamat <span class="text-red-500">*</span></label>
+                    <input
+                        id="alamat"
+                        name="alamat"
+                        type="text"
+                        value="{{ old('alamat', $store->alamat) }}"
+                        placeholder="Contoh: Jln. Pasar Raya No. 12"
+                        required
+                        pattern="[A-Za-z0-9 .,/-]+"
+                        title="Alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-)."
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    >
+                    @error('alamat')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="nib" class="block text-sm font-medium text-slate-700">NIB <span class="text-red-500">*</span></label>
                     <input
                         id="nib"
                         name="nib"
                         type="text"
                         value="{{ old('nib', $store->nib) }}"
                         placeholder="Contoh: 1234567890123"
+                        required
+                        inputmode="numeric"
+                        minlength="13"
+                        maxlength="13"
+                        pattern="[0-9]{13}"
+                        title="NIB harus terdiri dari tepat 13 angka."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
                     @error('nib')

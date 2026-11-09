@@ -21,6 +21,7 @@ use App\Http\Controllers\KepalaDinas\DashboardController as KepalaDinasDashboard
 use App\Http\Controllers\KepalaDinas\DistributionController as KepalaDinasDistributionController;
 use App\Http\Controllers\KepalaDinas\ReportController as KepalaDinasReportController;
 use App\Http\Controllers\KepalaDinas\SupervisionController as KepalaDinasSupervisionController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -62,6 +63,10 @@ Route::middleware('guest')->group(function () {
 Route::post('logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+    ->middleware('auth')
+    ->name('notifications.read-all');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -116,7 +121,17 @@ Route::prefix('kepala-dinas')->name('kepala-dinas.')->middleware(['auth', 'role:
 Route::prefix('distributor')->name('distributor.')->middleware(['auth', 'role:distributor', 'distributor.linked'])->group(function () {
     Route::get('/', [DistributorDashboardController::class, 'index'])->name('dashboard');
     Route::get('stores', [DistributorStoreController::class, 'index'])->name('stores.index');
+    Route::get('stores/create', [DistributorStoreController::class, 'create'])->name('stores.create');
+    Route::post('stores', [DistributorStoreController::class, 'store'])->name('stores.store');
+    Route::get('stores/{store}/edit', [DistributorStoreController::class, 'edit'])->name('stores.edit');
+    Route::put('stores/{store}', [DistributorStoreController::class, 'update'])->name('stores.update');
     Route::get('distribution-reports/create', [DistributorDistributionReportController::class, 'create'])->name('distribution-reports.create');
+    Route::post('distribution-reports', [DistributorDistributionReportController::class, 'store'])->name('distribution-reports.store');
+    Route::get('distribution-reports/{distribution}/edit', [DistributorDistributionReportController::class, 'edit'])->name('distribution-reports.edit');
+    Route::put('distribution-reports/{distribution}', [DistributorDistributionReportController::class, 'update'])->name('distribution-reports.update');
     Route::get('report-history', [DistributorReportHistoryController::class, 'index'])->name('report-history.index');
+    Route::delete('report-history/{distribution}', [DistributorReportHistoryController::class, 'destroy'])->name('report-history.destroy');
     Route::get('profile', [DistributorProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [DistributorProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/password', [DistributorProfileController::class, 'updatePassword'])->name('profile.password.update');
 });

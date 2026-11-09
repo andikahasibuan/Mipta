@@ -244,3 +244,34 @@ it('menampilkan keadaan kosong saat periode belum memiliki data', function () {
         ->assertOk()
         ->assertSee('Belum ada laporan kondisi pasar pada periode ini');
 });
+
+it('tidak menghitung laporan draft pada rekapitulasi', function () {
+    $market = Market::factory()->create();
+    $distributor = Distributor::factory()->create();
+
+    Distribution::factory()->create([
+        'market_id' => $market->id,
+        'distributor_id' => $distributor->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 100,
+    ]);
+
+    Distribution::factory()->draft()->create([
+        'market_id' => $market->id,
+        'distributor_id' => $distributor->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 4321,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.reports.index'))
+        ->assertOk()
+        ->assertViewHas('summary', function (array $summary): bool {
+            return $summary['distribution_reports'] === 1
+                && $summary['distribution_cartons'] === 100;
+        })
+        ->assertViewHas('distributionRecap', function ($recap): bool {
+            return $recap->count() === 1
+                && (int) $recap->first()->cartons_sum === 100;
+        });
+});

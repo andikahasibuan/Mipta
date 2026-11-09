@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
-use App\Models\RecipientStore;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -33,26 +32,6 @@ class DemoDataSeeder extends Seeder
                 ['name' => $market['name']],
                 [
                     'lokasi' => $market['lokasi'],
-                    'is_active' => true,
-                ],
-            );
-        }
-
-        $stores = [
-            ['name' => 'Toko Atong', 'market' => 'Pasar Raya Padang'],
-            ['name' => 'Toko Mak Itam', 'market' => 'Pasar Raya Padang'],
-            ['name' => 'Toko Mail', 'market' => 'Pasar Bandar Buat'],
-            ['name' => 'Toko Hisyam', 'market' => 'Pasar Lubuk Buaya'],
-        ];
-
-        foreach ($stores as $store) {
-            $market = Market::where('name', $store['market'])->firstOrFail();
-
-            RecipientStore::updateOrCreate(
-                ['name' => $store['name']],
-                [
-                    'market_id' => $market->id,
-                    'nib' => fake()->numerify('#############'),
                     'is_active' => true,
                 ],
             );

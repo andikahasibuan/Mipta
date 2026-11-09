@@ -278,3 +278,29 @@ it('menampilkan distributor pada panel perbandingan dengan nilai nol', function 
         ->assertSee('Penyaluran per Distributor')
         ->assertSeeInOrder(['PT Panel Distributor', '0']);
 });
+
+it('tidak menghitung laporan draft pada dashboard admin', function () {
+    $distributor = Distributor::factory()->create();
+    $market = Market::factory()->create();
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 100,
+    ]);
+
+    Distribution::factory()->draft()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 4321,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSeeInOrder(['Total Laporan', '1'])
+        ->assertSeeInOrder(['Total Penyaluran', '100'])
+        ->assertDontSee('4.321');
+});

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['name', 'wilayah', 'is_active'])]
+#[Fillable(['name', 'wilayah', 'penanggung_jawab', 'telepon', 'alamat_kantor', 'is_active'])]
 class Distributor extends Model
 {
     /** @use HasFactory<DistributorFactory> */
@@ -38,6 +38,14 @@ class Distributor extends Model
     public function account(): HasOne
     {
         return $this->hasOne(User::class);
+    }
+
+    /**
+     * Toko penerima milik distributor ini.
+     */
+    public function stores(): HasMany
+    {
+        return $this->hasMany(RecipientStore::class);
     }
 
     /**

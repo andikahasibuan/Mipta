@@ -15,11 +15,10 @@ it('menyimpan distributor baru beserta akun perusahaannya', function () {
 
     $this->post(route('admin.distributors.store'), [
         'name' => 'PT Contoh Baru',
-        'wilayah' => 'Padang',
+        'penanggung_jawab' => 'Budi Santoso',
+        'telepon' => '081234567890',
         'email' => 'pt.contoh@example.com',
-        'username' => 'pt.contoh',
         'password' => 'password123',
-        'is_active' => '1',
     ])->assertRedirect(route('admin.distributors.index'));
 
     $distributor = Distributor::where('name', 'PT Contoh Baru')->firstOrFail();
@@ -33,7 +32,7 @@ it('menyimpan distributor baru beserta akun perusahaannya', function () {
     $this->assertDatabaseHas('users', [
         'name' => 'PT Contoh Baru',
         'email' => 'pt.contoh@example.com',
-        'username' => 'pt.contoh',
+        'username' => 'pt-contoh-baru',
         'role' => Role::Distributor->value,
         'distributor_id' => $distributor->id,
         'is_active' => true,
@@ -55,9 +54,9 @@ it('memperbarui distributor dan akun perusahaannya', function () {
 
     $this->put(route('admin.distributors.update', $distributor), [
         'name' => 'Nama Baru',
-        'wilayah' => 'Padang',
+        'penanggung_jawab' => 'Budi Santoso',
+        'telepon' => '081234567890',
         'email' => 'nama.baru@example.com',
-        'username' => 'nama.baru',
         'password' => 'password123',
     ])->assertRedirect(route('admin.distributors.index'));
 
@@ -69,7 +68,7 @@ it('memperbarui distributor dan akun perusahaannya', function () {
     $this->assertDatabaseHas('users', [
         'name' => 'Nama Baru',
         'email' => 'nama.baru@example.com',
-        'username' => 'nama.baru',
+        'username' => 'nama-baru',
         'role' => Role::Distributor->value,
         'distributor_id' => $distributor->id,
     ]);
@@ -159,12 +158,16 @@ it('menyimpan toko penerima baru ke database', function () {
     $this->post(route('admin.recipient-stores.store'), [
         'market_id' => $market->id,
         'name' => 'Toko Baru',
+        'alamat' => 'Jln. Merdeka No. 1',
+        'nib' => '1234567890123',
         'is_active' => '1',
     ])->assertRedirect(route('admin.recipient-stores.index'));
 
     $this->assertDatabaseHas('recipient_stores', [
         'market_id' => $market->id,
         'name' => 'Toko Baru',
+        'alamat' => 'Jln. Merdeka No. 1',
+        'nib' => '1234567890123',
         'is_active' => true,
     ]);
 });
@@ -176,6 +179,8 @@ it('memperbarui toko penerima dan menyimpannya ke database', function () {
     $this->put(route('admin.recipient-stores.update', $store), [
         'market_id' => $store->market_id,
         'name' => 'Nama Baru',
+        'alamat' => 'Jln. Merdeka No. 2',
+        'nib' => $store->nib,
     ])->assertRedirect(route('admin.recipient-stores.index'));
 
     $this->assertDatabaseHas('recipient_stores', [

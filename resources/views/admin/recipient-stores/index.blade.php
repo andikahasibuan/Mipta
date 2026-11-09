@@ -35,7 +35,7 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari ID data atau nama toko..."
+                    placeholder="Cari ID data, nama, atau alamat toko..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
             </div>
@@ -56,6 +56,20 @@
 
             <div class="relative shrink-0">
                 <select
+                    name="distributor"
+                    onchange="this.form.submit()"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                >
+                    <option value="">Semua Distributor</option>
+                    @foreach ($distributors as $distributor)
+                        <option value="{{ $distributor->id }}" @selected($filters['distributor'] === $distributor->id)>{{ $distributor->name }}</option>
+                    @endforeach
+                </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+
+            <div class="relative shrink-0">
+                <select
                     name="status"
                     onchange="this.form.submit()"
                     class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
@@ -69,13 +83,15 @@
         </form>
 
         <div class="mt-4 overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <table class="min-w-[64rem] divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-50 text-center text-[11px] uppercase tracking-widest text-slate-500">
                     <tr>
                         <th scope="col" class="px-5 py-3 font-semibold">ID Data</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Nama</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Nama Toko</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Alamat</th>
                         <th scope="col" class="px-5 py-3 font-semibold">NIB</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Pasar</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Distributor</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Status</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Aksi</th>
                     </tr>
@@ -89,11 +105,17 @@
                             <td class="px-5 py-3 text-slate-900">
                                 {{ $store->name }}
                             </td>
+                            <td class="px-5 py-3 text-slate-700">
+                                {{ $store->alamat ?? '—' }}
+                            </td>
                             <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
                                 {{ $store->nib ?? '—' }}
                             </td>
                             <td class="px-5 py-3 text-slate-700">
                                 {{ $store->market->name }}
+                            </td>
+                            <td class="px-5 py-3 text-slate-700">
+                                {{ $store->distributor?->name ?? '—' }}
                             </td>
                             <td class="px-5 py-3">
                                 <span @class([
@@ -108,13 +130,14 @@
                                 <x-ui.row-actions
                                     :edit="route('admin.recipient-stores.edit', $store)"
                                     :delete="route('admin.recipient-stores.destroy', $store)"
+                                    :confirm="'Menghapus toko penerima juga akan menghapus seluruh laporan penyaluran yang terkait. Lanjutkan?'"
                                 />
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
-                                @if ($filters['q'] !== '' || $filters['market'] || $filters['status'])
+                            <td colspan="8" class="px-5 py-8 text-center text-sm text-slate-500">
+                                @if ($filters['q'] !== '' || $filters['market'] || $filters['distributor'] || $filters['status'])
                                     Tidak ada toko penerima yang sesuai filter
                                 @else
                                     Belum ada data toko penerima

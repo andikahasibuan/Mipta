@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DistributionStatus;
 use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
@@ -38,6 +39,7 @@ class DistributionReportService
 
         $distributions = Distribution::query()
             ->with(['distributor:id,name', 'market:id,name', 'store:id,name,market_id'])
+            ->where('status', DistributionStatus::Submitted->value)
             ->whereBetween('distribution_date', [
                 $start->toDateString(),
                 $start->copy()->endOfMonth()->toDateString(),

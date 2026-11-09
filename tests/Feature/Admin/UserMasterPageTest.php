@@ -192,8 +192,8 @@ it('membatasi lima pengguna per halaman', function () {
     $this->actingAs($admin)
         ->get(route('admin.users.index'))
         ->assertOk()
-        ->assertSeeInOrder(['Admin MIPTA', 'Pengguna 01', 'Pengguna 02', 'Pengguna 03', 'Pengguna 04'])
-        ->assertDontSee('Pengguna 05')
+        ->assertSeeInOrder(['Pengguna 06', 'Pengguna 05', 'Pengguna 04', 'Pengguna 03', 'Pengguna 02'])
+        ->assertDontSee('Pengguna 01')
         ->assertSee('Menampilkan 5 dari 7 pengguna');
 });
 
@@ -211,7 +211,7 @@ it('menampilkan pengguna berikutnya pada halaman kedua', function () {
     $this->actingAs($admin)
         ->get(route('admin.users.index', ['page' => 2]))
         ->assertOk()
-        ->assertSeeInOrder(['Pengguna 05', 'Pengguna 06'])
-        ->assertDontSee('Pengguna 01')
+        ->assertSeeInOrder(['Pengguna 01', 'Admin MIPTA'])
+        ->assertDontSee('Pengguna 06')
         ->assertSee('Menampilkan 2 dari 7 pengguna');
 });

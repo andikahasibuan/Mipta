@@ -21,6 +21,9 @@
                         type="text"
                         value="{{ old('name', $market->name) }}"
                         placeholder="Contoh: Pasar Raya Padang"
+                        required
+                        pattern="[A-Za-z0-9 .'-]+"
+                        title="Nama pasar hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
                     @error('name')
@@ -36,6 +39,9 @@
                         type="text"
                         value="{{ old('lokasi', $market->lokasi) }}"
                         placeholder="Contoh: Jln. Merdeka"
+                        required
+                        pattern="[A-Za-z0-9 .,/'-]+"
+                        title="Lokasi hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/'-)."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
                     @error('lokasi')

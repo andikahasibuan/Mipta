@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DistributionStatus;
 use App\Enums\FieldCondition;
 use App\Models\Distribution;
 use App\Models\FieldDistributionReport;
@@ -39,9 +40,11 @@ class ReportRecapService
 
         $summary = [
             'distribution_reports' => Distribution::query()
+                ->where('status', DistributionStatus::Submitted->value)
                 ->whereBetween('distribution_date', [$startDate, $endDate])
                 ->count(),
             'distribution_cartons' => (int) Distribution::query()
+                ->where('status', DistributionStatus::Submitted->value)
                 ->whereBetween('distribution_date', [$startDate, $endDate])
                 ->sum('cartons'),
             'condition_reports' => FieldDistributionReport::query()
@@ -59,6 +62,7 @@ class ReportRecapService
         if ($activeTab === 'penyaluran') {
             $distributionRecap = Distribution::query()
                 ->selectRaw('market_id, COUNT(*) as reports_count, SUM(cartons) as cartons_sum, COUNT(DISTINCT distributor_id) as distributors_count')
+                ->where('status', DistributionStatus::Submitted->value)
                 ->whereBetween('distribution_date', [$startDate, $endDate])
                 ->groupBy('market_id')
                 ->with('market:id,name')

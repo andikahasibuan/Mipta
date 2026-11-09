@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Distribution;
+use App\Models\Distributor;
 use App\Models\Market;
 use App\Models\RecipientStore;
 use App\Models\User;
@@ -24,12 +26,144 @@ it('menampilkan daftar toko penerima beserta pasarnya', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.recipient-stores.index'))
         ->assertOk()
-        ->assertSeeInOrder(['ID Data', 'Nama', 'Pasar', 'Status'])
+        ->assertSeeInOrder(['ID Data', 'Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Distributor', 'Status', 'Aksi'])
         ->assertSee('TKS-001')
         ->assertSee('Toko Berkah')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('TKS-002')
         ->assertSee('Nonaktif');
+});
+
+it('menampilkan toko yang dibuat distributor pada halaman toko penerima admin', function () {
+    $distributor = Distributor::factory()->create(['name' => 'PT Amanah Niaga Mandiri']);
+    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
+
+    RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Distributor',
+        'alamat' => 'Jln. Merdeka No. 1',
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.recipient-stores.index'))
+        ->assertOk()
+        ->assertSee('Toko Distributor')
+        ->assertSee('Jln. Merdeka No. 1')
+        ->assertSee('PT Amanah Niaga Mandiri');
+});
+
+it('memfilter toko berdasarkan distributor', function () {
+    $firstDistributor = Distributor::factory()->create(['name' => 'PT Distributor Satu']);
+    $secondDistributor = Distributor::factory()->create(['name' => 'PT Distributor Dua']);
+    $market = Market::factory()->create();
+
+    RecipientStore::factory()->create([
+        'distributor_id' => $firstDistributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Distributor Satu',
+    ]);
+
+    RecipientStore::factory()->create([
+        'distributor_id' => $secondDistributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Distributor Dua',
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.recipient-stores.index', ['distributor' => $firstDistributor->id]))
+        ->assertOk()
+        ->assertSee('Toko Distributor Satu')
+        ->assertDontSee('Toko Distributor Dua');
+});
+
+it('menyimpan alamat dan distributor saat admin menambah toko', function () {
+    $distributor = Distributor::factory()->create();
+    $market = Market::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.recipient-stores.store'), [
+            'market_id' => $market->id,
+            'distributor_id' => $distributor->id,
+            'name' => 'Toko Baru Admin',
+            'alamat' => 'Jln. Baru No. 1',
+            'nib' => '1234567890123',
+            'is_active' => '1',
+        ])
+        ->assertRedirect(route('admin.recipient-stores.index'));
+
+    $this->assertDatabaseHas('recipient_stores', [
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Baru Admin',
+        'alamat' => 'Jln. Baru No. 1',
+    ]);
+});
+
+it('memperbarui alamat dan distributor toko dari admin', function () {
+    $distributor = Distributor::factory()->create();
+    $market = Market::factory()->create();
+    $store = RecipientStore::factory()->create(['market_id' => $market->id]);
+
+    $this->actingAs(User::factory()->create())
+        ->put(route('admin.recipient-stores.update', $store), [
+            'market_id' => $market->id,
+            'distributor_id' => $distributor->id,
+            'name' => $store->name,
+            'alamat' => 'Alamat Baru',
+            'nib' => '9876543210123',
+            'is_active' => '1',
+        ])
+        ->assertRedirect(route('admin.recipient-stores.index'));
+
+    $this->assertDatabaseHas('recipient_stores', [
+        'id' => $store->id,
+        'distributor_id' => $distributor->id,
+        'alamat' => 'Alamat Baru',
+        'nib' => '9876543210123',
+    ]);
+});
+
+it('mewajibkan NIB saat admin menambah toko', function () {
+    $market = Market::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.recipient-stores.store'), [
+            'market_id' => $market->id,
+            'name' => 'Toko Tanpa NIB',
+            'alamat' => 'Jln. Merdeka No. 1',
+        ])
+        ->assertSessionHasErrors('nib');
+});
+
+it('memvalidasi format nama, alamat, dan NIB toko dari admin', function () {
+    $market = Market::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.recipient-stores.store'), [
+            'market_id' => $market->id,
+            'name' => 'Toko !@#',
+            'alamat' => 'Jln. Merdeka @ 1',
+            'nib' => '12345ABC90123',
+        ])
+        ->assertSessionHasErrors(['name', 'alamat', 'nib']);
+
+    $this->assertDatabaseCount('recipient_stores', 0);
+});
+
+it('menghapus laporan penyaluran saat toko penerima dihapus', function () {
+    $store = RecipientStore::factory()->create();
+    $distribution = Distribution::factory()->create([
+        'recipient_store_id' => $store->id,
+        'market_id' => $store->market_id,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->delete(route('admin.recipient-stores.destroy', $store))
+        ->assertRedirect(route('admin.recipient-stores.index'));
+
+    $this->assertDatabaseMissing('recipient_stores', ['id' => $store->id]);
+    $this->assertDatabaseMissing('distributions', ['id' => $distribution->id]);
 });
 
 it('menampilkan keadaan kosong saat belum ada toko penerima', function () {

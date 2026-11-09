@@ -141,3 +141,28 @@ it('menghapus laporan penyaluran dari database', function () {
 
     $this->assertDatabaseMissing('distributions', ['id' => $distribution->id]);
 });
+
+it('tidak menampilkan laporan draft pada halaman laporan penyaluran admin', function () {
+    $distributor = Distributor::factory()->create();
+    $market = Market::factory()->create();
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 111,
+    ]);
+
+    Distribution::factory()->draft()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 4321,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSee('111 karton')
+        ->assertDontSee('4.321 karton');
+});

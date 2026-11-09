@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\Distributor;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class DistributorController extends Controller
@@ -32,7 +34,8 @@ class DistributorController extends Controller
                 ->when($searchId !== null, fn ($query) => $query->orWhereKey($searchId))))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('name')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -59,27 +62,30 @@ class DistributorController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'wilayah' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
+            'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,15}$/'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')],
             'password' => ['required', 'string', 'min:8'],
         ], $this->accountMessages());
 
-        DB::transaction(function () use ($validated, $request): void {
+        DB::transaction(function () use ($validated): void {
             $distributor = Distributor::create([
                 'name' => $validated['name'],
-                'wilayah' => $validated['wilayah'],
-                'is_active' => $request->boolean('is_active'),
+                'wilayah' => 'Padang',
+                'penanggung_jawab' => $validated['penanggung_jawab'],
+                'telepon' => $validated['telepon'],
+                'alamat_kantor' => null,
+                'is_active' => true,
             ]);
 
             $distributor->account()->create([
                 'name' => $distributor->name,
-                'username' => $validated['username'],
+                'username' => $this->generateUsername($distributor->name),
                 'email' => $validated['email'],
                 'password' => $validated['password'],
                 'role' => Role::Distributor->value,
-                'is_active' => $distributor->is_active,
+                'is_active' => true,
             ]);
         });
 
@@ -106,34 +112,29 @@ class DistributorController extends Controller
         $account = $distributor->account;
 
         $emailRule = Rule::unique('users', 'email');
-        $usernameRule = Rule::unique('users', 'username');
 
         if ($account !== null) {
             $emailRule->ignore($account->id);
-            $usernameRule->ignore($account->id);
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'wilayah' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
+            'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,15}$/'],
             'email' => ['required', 'string', 'email', 'max:255', $emailRule],
-            'username' => ['required', 'string', 'max:255', $usernameRule],
             'password' => [$account === null ? 'required' : 'nullable', 'string', 'min:8'],
         ], $this->accountMessages());
 
-        DB::transaction(function () use ($distributor, $validated, $request, $account): void {
+        DB::transaction(function () use ($distributor, $validated, $account): void {
             $distributor->update([
                 'name' => $validated['name'],
-                'wilayah' => $validated['wilayah'],
-                'is_active' => $request->boolean('is_active'),
+                'penanggung_jawab' => $validated['penanggung_jawab'],
+                'telepon' => $validated['telepon'],
             ]);
 
             $attributes = [
                 'name' => $distributor->name,
-                'username' => $validated['username'],
                 'email' => $validated['email'],
-                'role' => Role::Distributor->value,
-                'is_active' => $distributor->is_active,
             ];
 
             if (! empty($validated['password'])) {
@@ -143,7 +144,12 @@ class DistributorController extends Controller
             if ($account !== null) {
                 $account->update($attributes);
             } else {
-                $distributor->account()->create($attributes);
+                $distributor->account()->create([
+                    ...$attributes,
+                    'username' => $this->generateUsername($distributor->name),
+                    'role' => Role::Distributor->value,
+                    'is_active' => $distributor->is_active,
+                ]);
             }
         });
 
@@ -170,6 +176,28 @@ class DistributorController extends Controller
     }
 
     /**
+     * Buat username unik dari nama perusahaan distributor.
+     */
+    private function generateUsername(string $name): string
+    {
+        $base = Str::slug($name);
+
+        if ($base === '') {
+            $base = 'distributor';
+        }
+
+        $username = $base;
+        $suffix = 2;
+
+        while (User::where('username', $username)->exists()) {
+            $username = "{$base}-{$suffix}";
+            $suffix++;
+        }
+
+        return $username;
+    }
+
+    /**
      * Pesan validasi untuk akun login distributor.
      *
      * @return array<string, string>
@@ -177,10 +205,14 @@ class DistributorController extends Controller
     private function accountMessages(): array
     {
         return [
+            'name.required' => 'Nama perusahaan distributor wajib diisi.',
+            'name.regex' => 'Nama perusahaan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
+            'penanggung_jawab.required' => 'Nama penanggung jawab wajib diisi.',
+            'penanggung_jawab.regex' => 'Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
+            'telepon.required' => 'No. handphone penanggung jawab wajib diisi.',
+            'telepon.regex' => 'No. handphone hanya boleh berisi angka (10 sampai 15 digit).',
             'email.required' => 'Email perusahaan wajib diisi.',
             'email.unique' => 'Email perusahaan sudah digunakan akun lain.',
-            'username.required' => 'Username wajib diisi.',
-            'username.unique' => 'Username sudah digunakan akun lain.',
             'password.required' => 'Password wajib diisi untuk membuat akun distributor.',
             'password.min' => 'Password minimal 8 karakter.',
         ];

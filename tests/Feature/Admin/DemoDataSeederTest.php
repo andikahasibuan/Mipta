@@ -18,7 +18,7 @@ it('membuat data contoh tanpa akun dan data distributor', function () {
 
     expect(Distributor::count())->toBe(0)
         ->and(Market::count())->toBe(3)
-        ->and(RecipientStore::count())->toBe(4)
+        ->and(RecipientStore::count())->toBe(0)
         ->and(MarketMonitoring::count())->toBe(4)
         ->and(Distribution::count())->toBe(0)
         ->and(FieldDistributionReport::count())->toBe(2)
@@ -55,8 +55,5 @@ it('menampilkan data contoh yang tersedia pada dashboard dan menu pengguna dan d
 
     $this->get(route('admin.recipient-stores.index'))
         ->assertOk()
-        ->assertSee('Toko Atong')
-        ->assertSee('Toko Mak Itam')
-        ->assertSee('Toko Mail')
-        ->assertSee('Toko Hisyam');
+        ->assertSee('Belum ada data toko penerima');
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DistributionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Distribution;
 use App\Models\Distributor;
@@ -50,6 +51,7 @@ class MonitoringController extends Controller
         $periodEnd = $start->copy()->endOfMonth()->toDateString();
 
         $distributions = Distribution::query()
+            ->where('status', DistributionStatus::Submitted->value)
             ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
             ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
             ->whereBetween('distribution_date', [$periodStart, $periodEnd])

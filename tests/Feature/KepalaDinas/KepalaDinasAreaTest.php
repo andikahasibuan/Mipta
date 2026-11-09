@@ -3,6 +3,7 @@
 use App\Enums\FieldCondition;
 use App\Enums\Role;
 use App\Models\Distribution;
+use App\Models\Distributor;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\User;
@@ -212,4 +213,29 @@ it('menampilkan dua tombol ekspor nonaktif untuk kepala dinas', function () {
         ->assertDontSee('akan tersedia segera');
 
     expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
+});
+
+it('tidak menampilkan laporan draft pada halaman laporan kepala dinas', function () {
+    $distributor = Distributor::factory()->create();
+    $market = Market::factory()->create();
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 111,
+    ]);
+
+    Distribution::factory()->draft()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 4321,
+    ]);
+
+    $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
+        ->get(route('kepala-dinas.distribution.index'))
+        ->assertOk()
+        ->assertSee('111 karton')
+        ->assertDontSee('4.321 karton');
 });

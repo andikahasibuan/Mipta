@@ -38,6 +38,17 @@ it('menampilkan keadaan kosong saat belum ada pasar', function () {
         ->assertSee('Belum ada data pasar');
 });
 
+it('menolak nama pasar dan lokasi yang mengandung karakter khusus', function () {
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.markets.store'), [
+            'name' => 'Pasar !@#$%',
+            'lokasi' => 'Jln. Merdeka & Co',
+        ])
+        ->assertSessionHasErrors(['name', 'lokasi']);
+
+    $this->assertDatabaseCount('markets', 0);
+});
+
 it('menampilkan navigasi tab pengguna, distributor, dan pasar', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.markets.index'))

@@ -30,7 +30,8 @@ class UptdContributorController extends Controller
                 ->orWhere('email', 'like', "%{$search}%")))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('name')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(5)
             ->withQueryString();
 
@@ -59,12 +60,12 @@ class UptdContributorController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
             'market_id' => ['nullable', 'integer', 'exists:markets,id'],
-        ]);
+        ], $this->validationMessages());
 
         User::create([
             'name' => $validated['name'],
@@ -100,12 +101,12 @@ class UptdContributorController extends Controller
         $this->ensureUptdContributor($contributor);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($contributor->id)],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($contributor->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($contributor->id)],
             'password' => ['nullable', 'string', 'min:8'],
             'market_id' => ['nullable', 'integer', 'exists:markets,id'],
-        ]);
+        ], $this->validationMessages());
 
         $data = [
             'name' => $validated['name'],
@@ -138,6 +139,19 @@ class UptdContributorController extends Controller
         $contributor->delete();
 
         return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil dihapus.');
+    }
+
+    /**
+     * Pesan validasi akun kontributor UPTD.
+     *
+     * @return array<string, string>
+     */
+    private function validationMessages(): array
+    {
+        return [
+            'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
+            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+        ];
     }
 
     /**

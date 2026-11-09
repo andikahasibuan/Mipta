@@ -43,14 +43,117 @@ it('menampilkan formulir tambah distributor beserta akun perusahaan', function (
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.create'))
         ->assertOk()
-        ->assertSee('Nama Distributor')
+        ->assertSee('Nama Perusahaan Distributor')
+        ->assertSee('Nama Penanggung Jawab')
+        ->assertSee('No. Handphone Penanggung Jawab')
         ->assertSee('Email Perusahaan')
-        ->assertSee('Username')
-        ->assertSee('Password');
+        ->assertSee('Password')
+        ->assertDontSee('Wilayah')
+        ->assertDontSee('Username')
+        ->assertDontSee('Alamat Kantor')
+        ->assertDontSee('Status aktif');
 });
 
-it('menampilkan email akun perusahaan pada daftar distributor', function () {
-    $distributor = Distributor::factory()->create(['name' => 'PT Akun']);
+it('menyimpan distributor baru dengan wilayah otomatis dan username dari nama perusahaan', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('admin.distributors.store'), [
+        'name' => 'PT Profil Lengkap',
+        'penanggung_jawab' => 'Budi Santoso',
+        'telepon' => '081234567890',
+        'email' => 'profil@example.com',
+        'password' => 'password123',
+    ])->assertRedirect(route('admin.distributors.index'));
+
+    $this->assertDatabaseHas('distributors', [
+        'name' => 'PT Profil Lengkap',
+        'wilayah' => 'Padang',
+        'penanggung_jawab' => 'Budi Santoso',
+        'telepon' => '081234567890',
+        'alamat_kantor' => null,
+        'is_active' => true,
+    ]);
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'PT Profil Lengkap',
+        'username' => 'pt-profil-lengkap',
+        'email' => 'profil@example.com',
+        'role' => Role::Distributor->value,
+        'is_active' => true,
+    ]);
+});
+
+it('membuat username unik dengan akhiran angka saat nama perusahaan sama', function () {
+    $this->actingAs(User::factory()->create());
+
+    $payload = [
+        'name' => 'PT Sama Nama',
+        'penanggung_jawab' => 'Budi Santoso',
+        'telepon' => '081234567890',
+        'password' => 'password123',
+    ];
+
+    $this->post(route('admin.distributors.store'), [...$payload, 'email' => 'satu@example.com'])
+        ->assertRedirect(route('admin.distributors.index'));
+    $this->post(route('admin.distributors.store'), [...$payload, 'email' => 'dua@example.com'])
+        ->assertRedirect(route('admin.distributors.index'));
+
+    $this->assertDatabaseHas('users', ['username' => 'pt-sama-nama']);
+    $this->assertDatabaseHas('users', ['username' => 'pt-sama-nama-2']);
+});
+
+it('memperbarui data distributor tanpa mengubah username, wilayah, alamat, dan status', function () {
+    $this->actingAs(User::factory()->create());
+    $distributor = Distributor::factory()->create([
+        'name' => 'PT Profil Admin',
+        'wilayah' => 'Padang',
+        'penanggung_jawab' => 'Pengelola Lama',
+        'telepon' => '0751-000000',
+        'alamat_kantor' => 'Alamat Lama',
+        'is_active' => false,
+    ]);
+    $account = User::factory()->distributor()->create([
+        'distributor_id' => $distributor->id,
+        'name' => 'PT Profil Admin',
+        'username' => 'pt-profil-admin',
+        'email' => 'admin@example.com',
+    ]);
+
+    $this->get(route('admin.distributors.edit', $distributor))
+        ->assertOk()
+        ->assertSee('Pengelola Lama')
+        ->assertSee('0751-000000')
+        ->assertSee('admin@example.com')
+        ->assertDontSee('Username')
+        ->assertDontSee('Alamat Kantor')
+        ->assertDontSee('Status aktif');
+
+    $this->put(route('admin.distributors.update', $distributor), [
+        'name' => 'PT Nama Berubah',
+        'penanggung_jawab' => 'Pengelola Baru',
+        'telepon' => '0812345678',
+        'email' => 'baru@example.com',
+    ])->assertRedirect(route('admin.distributors.index'));
+
+    $distributor->refresh();
+    $account->refresh();
+
+    expect($distributor->name)->toBe('PT Nama Berubah')
+        ->and($distributor->penanggung_jawab)->toBe('Pengelola Baru')
+        ->and($distributor->telepon)->toBe('0812345678')
+        ->and($distributor->wilayah)->toBe('Padang')
+        ->and($distributor->alamat_kantor)->toBe('Alamat Lama')
+        ->and($distributor->is_active)->toBeFalse()
+        ->and($account->name)->toBe('PT Nama Berubah')
+        ->and($account->username)->toBe('pt-profil-admin')
+        ->and($account->email)->toBe('baru@example.com');
+});
+
+it('menampilkan email akun perusahaan dan tanda minus alamat kantor kosong pada daftar distributor', function () {
+    $distributor = Distributor::factory()->create([
+        'name' => 'PT Akun',
+        'alamat_kantor' => null,
+    ]);
     User::factory()->distributor()->create([
         'distributor_id' => $distributor->id,
         'email' => 'akun@pt.test',
@@ -59,7 +162,9 @@ it('menampilkan email akun perusahaan pada daftar distributor', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.index'))
         ->assertOk()
-        ->assertSee('akun@pt.test');
+        ->assertSeeInOrder(['Alamat Kantor', 'Email Akun'])
+        ->assertSee('akun@pt.test')
+        ->assertSeeInOrder(['Alamat Kantor', '-']);
 });
 
 it('membuat akun untuk distributor lama yang belum memiliki akun', function () {
@@ -68,22 +173,22 @@ it('membuat akun untuk distributor lama yang belum memiliki akun', function () {
 
     $this->put(route('admin.distributors.update', $distributor), [
         'name' => 'PT Lama',
-        'wilayah' => 'Padang',
+        'penanggung_jawab' => 'Pengelola Lama',
+        'telepon' => '081234567890',
         'email' => 'pt.lama@example.com',
-        'username' => 'pt.lama',
         'password' => 'password123',
     ])->assertRedirect(route('admin.distributors.index'));
 
     $this->assertDatabaseHas('users', [
         'name' => 'PT Lama',
         'email' => 'pt.lama@example.com',
-        'username' => 'pt.lama',
+        'username' => 'pt-lama',
         'role' => Role::Distributor->value,
         'distributor_id' => $distributor->id,
     ]);
 });
 
-it('menolak email atau username yang sudah dipakai akun lain', function () {
+it('menolak email yang sudah dipakai akun lain', function () {
     $this->actingAs(User::factory()->create());
     User::factory()->create([
         'email' => 'dipakai@example.com',
@@ -92,42 +197,55 @@ it('menolak email atau username yang sudah dipakai akun lain', function () {
 
     $this->post(route('admin.distributors.store'), [
         'name' => 'PT Duplikat',
-        'wilayah' => 'Padang',
+        'penanggung_jawab' => 'Budi Santoso',
+        'telepon' => '081234567890',
         'email' => 'dipakai@example.com',
-        'username' => 'dipakai',
         'password' => 'password123',
-        'is_active' => '1',
-    ])->assertSessionHasErrors(['email', 'username']);
+    ])->assertSessionHasErrors(['email']);
 
     $this->assertDatabaseMissing('distributors', ['name' => 'PT Duplikat']);
 });
 
-it('menyinkronkan nama dan status akun saat distributor diperbarui', function () {
+it('menyinkronkan nama dan email akun tanpa mengubah status saat distributor diperbarui', function () {
     $this->actingAs(User::factory()->create());
-    $distributor = Distributor::factory()->create(['name' => 'PT Awal']);
+    $distributor = Distributor::factory()->create(['name' => 'PT Awal', 'is_active' => false]);
     $account = User::factory()->distributor()->create([
         'distributor_id' => $distributor->id,
         'name' => 'PT Awal',
         'email' => 'awal@example.com',
         'username' => 'awal',
         'password' => 'password-lama',
+        'is_active' => false,
     ]);
 
     $this->put(route('admin.distributors.update', $distributor), [
         'name' => 'PT Baru',
-        'wilayah' => 'Padang',
+        'penanggung_jawab' => 'Pengelola Baru',
+        'telepon' => '081234567890',
         'email' => 'baru@example.com',
-        'username' => 'baru',
-        'is_active' => '0',
     ])->assertRedirect(route('admin.distributors.index'));
 
     $account->refresh();
 
     expect($account->name)->toBe('PT Baru')
         ->and($account->email)->toBe('baru@example.com')
-        ->and($account->username)->toBe('baru')
+        ->and($account->username)->toBe('awal')
         ->and($account->is_active)->toBeFalse()
         ->and(Hash::check('password-lama', $account->password))->toBeTrue();
+});
+
+it('menolak nama perusahaan, nama penanggung jawab, dan no handphone yang mengandung karakter tidak valid', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('admin.distributors.store'), [
+        'name' => 'PT !@#$%',
+        'penanggung_jawab' => 'Budi 123',
+        'telepon' => '0812-3456-7890',
+        'email' => 'tidak.valid@example.com',
+        'password' => 'password123',
+    ])->assertSessionHasErrors(['name', 'penanggung_jawab', 'telepon']);
+
+    $this->assertDatabaseMissing('users', ['email' => 'tidak.valid@example.com']);
 });
 
 it('menghapus akun perusahaan saat distributor dihapus', function () {

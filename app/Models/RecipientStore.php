@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['market_id', 'name', 'nib', 'is_active'])]
+#[Fillable(['distributor_id', 'market_id', 'name', 'alamat', 'nib', 'is_active'])]
 class RecipientStore extends Model
 {
     /** @use HasFactory<RecipientStoreFactory> */
@@ -24,11 +25,27 @@ class RecipientStore extends Model
     }
 
     /**
+     * Distributor pemilik data toko.
+     */
+    public function distributor(): BelongsTo
+    {
+        return $this->belongsTo(Distributor::class);
+    }
+
+    /**
      * Pasar tempat toko penerima berada.
      */
     public function market(): BelongsTo
     {
         return $this->belongsTo(Market::class);
+    }
+
+    /**
+     * Laporan penyaluran yang ditujukan ke toko ini.
+     */
+    public function distributions(): HasMany
+    {
+        return $this->hasMany(Distribution::class);
     }
 
     /**

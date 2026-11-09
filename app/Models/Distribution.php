@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DistributionStatus;
 use Database\Factories\DistributionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['distributor_id', 'market_id', 'uptd_user_id', 'recipient_store_id', 'distribution_date', 'cartons'])]
+#[Fillable(['distributor_id', 'market_id', 'uptd_user_id', 'recipient_store_id', 'distribution_date', 'cartons', 'status'])]
 class Distribution extends Model
 {
     /** @use HasFactory<DistributionFactory> */
@@ -65,6 +66,7 @@ class Distribution extends Model
         return [
             'distribution_date' => 'date',
             'cartons' => 'integer',
+            'status' => DistributionStatus::class,
         ];
     }
 }
