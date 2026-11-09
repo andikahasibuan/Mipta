@@ -56,9 +56,9 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-center text-[11px] uppercase tracking-widest text-slate-500">
+                <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
                     <tr>
-                        <th scope="col" class="px-5 py-3 font-semibold">ID Data</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">ID</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Nama Distributor</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Wilayah</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Alamat Kantor</th>

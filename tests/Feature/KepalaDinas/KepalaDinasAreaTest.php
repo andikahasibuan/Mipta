@@ -87,7 +87,7 @@ it('menampilkan tabel laporan penyaluran tanpa aksi hapus untuk kepala dinas', f
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.distribution.index'))
         ->assertOk()
-        ->assertSeeInOrder(['ID Data', 'Tanggal', 'Pasar', 'Nama Toko', 'Distributor', 'Jumlah Karton'])
+        ->assertSeeInOrder(['ID', 'Tanggal', 'Pasar', 'Nama Toko', 'Distributor', 'Jumlah Karton'])
         ->assertSee('action="'.route('kepala-dinas.distribution.index').'"', false)
         ->assertDontSee('aria-label="Hapus"', false)
         ->assertDontSee('Aksi');

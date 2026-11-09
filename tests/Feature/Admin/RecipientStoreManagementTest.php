@@ -26,7 +26,7 @@ it('menampilkan daftar toko penerima beserta pasarnya', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.recipient-stores.index'))
         ->assertOk()
-        ->assertSeeInOrder(['ID Data', 'Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Distributor', 'Status', 'Aksi'])
+        ->assertSeeInOrder(['ID', 'Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Distributor', 'Status', 'Aksi'])
         ->assertSee('TKS-001')
         ->assertSee('Toko Berkah')
         ->assertSee('Pasar Raya Padang')

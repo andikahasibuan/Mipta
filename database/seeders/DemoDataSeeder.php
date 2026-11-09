@@ -13,11 +13,12 @@ use Illuminate\Database\Seeder;
 class DemoDataSeeder extends Seeder
 {
     /**
-     * Seed data contoh untuk dashboard dan menu pengguna & data master.
+     * Seed data contoh untuk kebutuhan pengujian.
      *
-     * Akun dan data distributor sengaja tidak di-seed. Distributor dibuat
-     * melalui menu Distributor agar akun perusahaan dan data PT terbentuk
-     * bersamaan.
+     * Seeder ini sengaja tidak dipanggil oleh DatabaseSeeder agar data demo
+     * tidak masuk ke database aplikasi. Akun dan data distributor juga tidak
+     * di-seed; distributor dibuat melalui menu Distributor agar akun
+     * perusahaan dan data PT terbentuk bersamaan.
      */
     public function run(): void
     {

@@ -35,7 +35,7 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari ID data, nama, atau alamat toko..."
+                    placeholder="Cari ID, nama, atau alamat toko..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
             </div>
@@ -83,17 +83,17 @@
         </form>
 
         <div class="mt-4 overflow-x-auto">
-            <table class="min-w-[64rem] divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-center text-[11px] uppercase tracking-widest text-slate-500">
+            <table class="w-full min-w-[72rem] table-fixed divide-y divide-slate-200 text-sm">
+                <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
                     <tr>
-                        <th scope="col" class="px-5 py-3 font-semibold">ID Data</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Nama Toko</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Alamat</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">NIB</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Pasar</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Distributor</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Status</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Aksi</th>
+                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID</th>
+                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[11%] px-5 py-3 align-middle font-semibold">NIB</th>
+                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Pasar</th>
+                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Distributor</th>
+                        <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">Status</th>
+                        <th scope="col" class="w-[9%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">

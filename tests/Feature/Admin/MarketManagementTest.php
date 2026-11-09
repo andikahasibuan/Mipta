@@ -22,7 +22,7 @@ it('menampilkan daftar pasar dari database', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.markets.index'))
         ->assertOk()
-        ->assertSeeInOrder(['ID Data', 'Nama Pasar', 'Lokasi', 'Status'])
+        ->assertSeeInOrder(['ID', 'Nama Pasar', 'Lokasi', 'Status'])
         ->assertSee('PSR-001')
         ->assertSee('PSR-002')
         ->assertSee('Pasar Raya Padang')

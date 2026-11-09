@@ -22,7 +22,7 @@ it('menampilkan daftar distributor dari database', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.index'))
         ->assertOk()
-        ->assertSeeInOrder(['ID Data', 'Nama Distributor', 'Wilayah', 'Status'])
+        ->assertSeeInOrder(['ID', 'Nama Distributor', 'Wilayah', 'Status'])
         ->assertSee('DST-001')
         ->assertSee('DST-002')
         ->assertSee('PT Contoh Distributor')
