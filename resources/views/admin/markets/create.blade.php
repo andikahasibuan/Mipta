@@ -19,7 +19,6 @@
                         name="name"
                         type="text"
                         value="{{ old('name') }}"
-                        placeholder="Contoh: Pasar Raya Padang"
                         required
                         pattern="[A-Za-z0-9 .'-]+"
                         title="Nama pasar hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
@@ -37,7 +36,6 @@
                         name="lokasi"
                         type="text"
                         value="{{ old('lokasi') }}"
-                        placeholder="Contoh: Jln. Merdeka"
                         required
                         pattern="[A-Za-z0-9 .,/'-]+"
                         title="Lokasi hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/'-)."

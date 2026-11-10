@@ -66,8 +66,8 @@ it('mengautentikasi kepala dinas dan mengarahkan ke dashboard kepala dinas', fun
     $this->assertAuthenticatedAs($kepalaDinas);
 });
 
-it('mengautentikasi kontributor UPTD dan mengarahkan ke dashboard UPTD', function () {
-    $contributor = User::factory()->create([
+it('menolak login langsung kontributor UPTD tanpa pemilihan identitas', function () {
+    User::factory()->create([
         'email' => 'kontributor.uptd.01@mipta.test',
         'password' => 'admin123',
         'role' => Role::UptdPasar,
@@ -77,27 +77,27 @@ it('mengautentikasi kontributor UPTD dan mengarahkan ke dashboard UPTD', functio
     $this->post(route('login'), [
         'identifier' => 'kontributor.uptd.01@mipta.test',
         'password' => 'admin123',
-    ])->assertRedirect(route('uptd.dashboard'));
+    ])->assertSessionHasErrors('identifier');
 
-    $this->assertAuthenticatedAs($contributor);
+    expect(session('errors')->first('identifier'))
+        ->toContain('Silakan masuk melalui akun bersama UPTD Pasar, lalu pilih identitas kontributor.');
+
+    $this->assertGuest();
 });
 
-it('menolak kontributor UPTD yang belum dikaitkan ke pasar', function () {
-    User::factory()->create([
-        'email' => 'uptd.lepas@mipta.test',
+it('mengarahkan akun bersama UPTD ke halaman pemilihan identitas', function () {
+    $shared = User::factory()->create([
+        'email' => 'uptd@mipta.test',
         'password' => 'admin123',
         'role' => Role::UptdPasar,
     ]);
 
     $this->post(route('login'), [
-        'identifier' => 'uptd.lepas@mipta.test',
+        'identifier' => 'uptd@mipta.test',
         'password' => 'admin123',
-    ])->assertSessionHasErrors('identifier');
+    ])->assertRedirect(route('uptd.contributors.index'));
 
-    expect(session('errors')->first('identifier'))
-        ->toContain('Akun kontributor UPTD belum dikaitkan ke pasar. Hubungi administrator.');
-
-    $this->assertGuest();
+    $this->assertAuthenticatedAs($shared);
 });
 
 it('menolak distributor yang belum dikaitkan ke PT', function () {

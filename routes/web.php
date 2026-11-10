@@ -45,14 +45,8 @@ Route::get('/', function () {
         ]);
     }
 
-    if ($user->role === Role::UptdPasar && $user->market_id === null) {
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-
-        return redirect()->route('login')->withErrors([
-            'identifier' => 'Akun kontributor UPTD belum dikaitkan ke pasar. Hubungi administrator.',
-        ]);
+    if ($user->isSharedUptdAccount()) {
+        return redirect()->route('uptd.contributors.index');
     }
 
     $home = $user->role->homeRoute();
@@ -76,6 +70,11 @@ Route::middleware('guest')->group(function () {
 Route::post('logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::middleware(['auth', 'role:uptd_pasar'])->group(function () {
+    Route::get('uptd/contributors', [UptdAreaContributorController::class, 'index'])->name('uptd.contributors.index');
+    Route::post('uptd/contributors', [UptdAreaContributorController::class, 'select'])->name('uptd.contributors.select');
+});
 
 Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])
     ->middleware('auth')
@@ -139,7 +138,6 @@ Route::prefix('uptd')->name('uptd.')->middleware(['auth', 'role:uptd_pasar', 'up
     Route::put('reports/{report}', [UptdReportController::class, 'update'])->name('reports.update');
     Route::delete('reports/{report}', [UptdReportController::class, 'destroy'])->name('reports.destroy');
     Route::get('reports', [UptdReportController::class, 'index'])->name('reports.index');
-    Route::get('contributors', [UptdAreaContributorController::class, 'index'])->name('contributors.index');
 });
 
 Route::prefix('distributor')->name('distributor.')->middleware(['auth', 'role:distributor', 'distributor.linked'])->group(function () {

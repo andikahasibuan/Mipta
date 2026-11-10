@@ -188,6 +188,21 @@ it('membatasi halaman kontributor hanya untuk admin', function () {
         ->assertForbidden();
 });
 
+it('menampilkan penanda akun bersama untuk kontributor tanpa pasar', function () {
+    $admin = User::factory()->create();
+
+    User::factory()->create([
+        'name' => 'Kontributor Bersama',
+        'role' => Role::UptdPasar,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.uptd-contributors.index'))
+        ->assertOk()
+        ->assertSee('Kontributor Bersama')
+        ->assertSee('Akun bersama');
+});
+
 it('menolak mengelola akun yang bukan kontributor UPTD lewat halaman kontributor', function () {
     $admin = User::factory()->create();
     $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);

@@ -13,6 +13,14 @@
         <p class="mt-1 text-sm text-slate-500">Silahkan masuk menggunakan akun yang telah terdaftar</p>
     </div>
 
+    @if ($selectedContributor)
+        <div class="mt-5 space-y-2 rounded-lg border border-[#BFD6F2] bg-[#EAF2FB] px-5 py-4 text-left">
+            <p class="text-sm font-bold uppercase tracking-wide text-[#4C6F9C]">Identitas dipilih</p>
+            <p class="text-base font-semibold text-[#1F3A5F]">{{ $selectedContributor['name'] }}</p>
+            <p class="text-sm text-slate-500">Masukkan kata sandi akun tersebut untuk melanjutkan.</p>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('login') }}" class="mt-6 flex flex-col gap-4">
         @csrf
 
@@ -22,10 +30,10 @@
                 id="identifier"
                 name="identifier"
                 type="text"
-                value="{{ old('identifier') }}"
+                value="{{ old('identifier', $selectedContributor['username'] ?? '') }}"
                 placeholder="Masukkan email atau username"
                 required
-                autofocus
+                @if (! $selectedContributor) autofocus @endif
                 autocomplete="username"
                 @class([
                     'mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.12)] focus:outline-none focus:ring-2',
@@ -46,6 +54,7 @@
                 type="password"
                 placeholder="Masukkan kata sandi"
                 required
+                @if ($selectedContributor) autofocus @endif
                 autocomplete="current-password"
                 @class([
                     'mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.12)] focus:outline-none focus:ring-2',

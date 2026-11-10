@@ -20,7 +20,6 @@
                         name="name"
                         type="text"
                         value="{{ old('name', $contributor->name) }}"
-                        placeholder="Contoh: Kontributor UPTD 01"
                         required
                         pattern="[A-Za-z0-9 .'-]+"
                         title="Nama hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
@@ -38,7 +37,6 @@
                         name="username"
                         type="text"
                         value="{{ old('username', $contributor->username) }}"
-                        placeholder="Contoh: kontributor.uptd.01"
                         required
                         pattern="[A-Za-z0-9._-]+"
                         title="Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung."
@@ -56,7 +54,6 @@
                         name="email"
                         type="email"
                         value="{{ old('email', $contributor->email) }}"
-                        placeholder="Contoh: rina@example.com"
                         required
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
@@ -77,6 +74,7 @@
                             <option value="{{ $market->id }}" @selected(old('market_id', $contributor->market_id) == $market->id)>{{ $market->name }}</option>
                         @endforeach
                     </select>
+                    <p class="mt-1 text-xs text-slate-500">Kosongkan jika akun ini adalah akun bersama untuk login awal kontributor UPTD.</p>
                     @error('market_id')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
@@ -88,7 +86,6 @@
                         id="password"
                         name="password"
                         type="password"
-                        placeholder="Kosongkan jika tidak ingin mengubah"
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
                     @error('password')

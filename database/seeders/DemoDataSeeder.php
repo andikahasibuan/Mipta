@@ -41,8 +41,8 @@ class DemoDataSeeder extends Seeder
         $users = [
             [
                 'name' => 'Andi Pratama',
-                'username' => 'uptd',
-                'email' => 'uptd@mipta.test',
+                'username' => 'demo.uptd',
+                'email' => 'demo.uptd@mipta.test',
                 'role' => Role::UptdPasar,
             ],
             [
@@ -66,7 +66,7 @@ class DemoDataSeeder extends Seeder
             );
         }
 
-        $uptdUser = User::where('email', 'uptd@mipta.test')->firstOrFail();
+        $uptdUser = User::where('email', 'demo.uptd@mipta.test')->firstOrFail();
         $uptdUser->update(['market_id' => Market::where('name', 'Pasar Raya Padang')->value('id')]);
         $currentMonthStart = now()->startOfMonth();
         $previousMonthStart = now()->subMonthNoOverflow()->startOfMonth();

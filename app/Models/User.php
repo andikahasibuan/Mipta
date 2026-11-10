@@ -52,6 +52,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Periksa apakah akun ini adalah akun bersama untuk login awal kontributor UPTD.
+     */
+    public function isSharedUptdAccount(): bool
+    {
+        return $this->role === Role::UptdPasar && $this->market_id === null;
+    }
+
+    /**
+     * Periksa apakah akun ini adalah kontributor UPTD yang terkait ke satu pasar.
+     */
+    public function isMarketUptdContributor(): bool
+    {
+        return $this->role === Role::UptdPasar && $this->market_id !== null;
+    }
+
+    /**
      * Inisial nama pengguna untuk avatar (maksimal dua huruf).
      */
     public function initials(): string

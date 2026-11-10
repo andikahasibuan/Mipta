@@ -37,7 +37,6 @@
                         name="name"
                         type="text"
                         value="{{ old('name', $store->name) }}"
-                        placeholder="Contoh: Toko Berkah"
                         required
                         pattern="[A-Za-z0-9 ]+"
                         title="Nama toko hanya boleh berisi huruf, angka, dan spasi."
@@ -55,7 +54,6 @@
                         name="alamat"
                         type="text"
                         value="{{ old('alamat', $store->alamat) }}"
-                        placeholder="Contoh: Jln. Pasar Raya No. 12"
                         required
                         pattern="[A-Za-z0-9 .,/-]+"
                         title="Alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-)."
@@ -73,7 +71,6 @@
                         name="nib"
                         type="text"
                         value="{{ old('nib', $store->nib) }}"
-                        placeholder="Contoh: 1234567890123"
                         required
                         inputmode="numeric"
                         minlength="13"

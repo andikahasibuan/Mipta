@@ -19,7 +19,6 @@
                         name="name"
                         type="text"
                         value="{{ old('name') }}"
-                        placeholder="Contoh: PT Amanah Niaga Mandiri"
                         required
                         pattern="[A-Za-z0-9 .'-]+"
                         title="Nama perusahaan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
@@ -37,7 +36,6 @@
                         name="penanggung_jawab"
                         type="text"
                         value="{{ old('penanggung_jawab') }}"
-                        placeholder="Contoh: Budi Santoso"
                         required
                         pattern="[A-Za-z .'-]+"
                         title="Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung."
@@ -55,7 +53,6 @@
                         name="telepon"
                         type="tel"
                         value="{{ old('telepon') }}"
-                        placeholder="Contoh: 081234567890"
                         required
                         inputmode="numeric"
                         minlength="10"
@@ -76,7 +73,6 @@
                         name="email"
                         type="email"
                         value="{{ old('email') }}"
-                        placeholder="Contoh: admin@amanahniaga.co.id"
                         required
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
@@ -91,7 +87,6 @@
                         id="password"
                         name="password"
                         type="password"
-                        placeholder="Minimal 8 karakter"
                         required
                         minlength="8"
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"

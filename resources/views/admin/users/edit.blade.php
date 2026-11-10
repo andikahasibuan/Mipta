@@ -20,7 +20,6 @@
                         name="name"
                         type="text"
                         value="{{ old('name', $user->name) }}"
-                        placeholder="Contoh: Andi Pratama"
                         required
                         pattern="[A-Za-z .'-]+"
                         title="Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung."
@@ -38,7 +37,6 @@
                         name="username"
                         type="text"
                         value="{{ old('username', $user->username) }}"
-                        placeholder="Contoh: andi.pratama"
                         required
                         pattern="[A-Za-z0-9._-]+"
                         title="Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung."
@@ -56,7 +54,6 @@
                         name="email"
                         type="email"
                         value="{{ old('email', $user->email) }}"
-                        placeholder="Contoh: andi@example.com"
                         required
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
@@ -71,7 +68,6 @@
                         id="password"
                         name="password"
                         type="password"
-                        placeholder="Kosongkan jika tidak ingin mengubah"
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
                     @error('password')

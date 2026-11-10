@@ -16,8 +16,12 @@ class EnsureUptdIsLinked
     {
         $user = $request->user();
 
-        if (! $user || $user->role !== Role::UptdPasar || $user->market_id === null) {
-            abort(403, 'Akun kontributor UPTD belum dikaitkan ke pasar.');
+        if (! $user || $user->role !== Role::UptdPasar) {
+            abort(403, 'Akun ini bukan kontributor UPTD Pasar.');
+        }
+
+        if ($user->isSharedUptdAccount()) {
+            return redirect()->route('uptd.contributors.index');
         }
 
         return $next($request);

@@ -99,8 +99,8 @@ it('menolak peran selain kontributor UPTD saat menyimpan laporan', function () {
         ->assertForbidden();
 });
 
-it('menolak kontributor UPTD tanpa pasar saat menyimpan laporan', function () {
+it('mengarahkan kontributor UPTD tanpa pasar saat menyimpan laporan ke pemilihan identitas', function () {
     $this->actingAs(User::factory()->create(['role' => Role::UptdPasar]))
         ->post(route('uptd.reports.store'), [])
-        ->assertForbidden();
+        ->assertRedirect(route('uptd.contributors.index'));
 });

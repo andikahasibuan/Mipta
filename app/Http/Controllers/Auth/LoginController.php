@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,9 @@ class LoginController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        return view('auth.login', [
+            'selectedContributor' => session('uptd_selected_contributor'),
+        ]);
     }
 
     /**
@@ -42,6 +45,22 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        if ($user->isSharedUptdAccount()) {
+            $request->session()->forget('uptd_selected_contributor');
+
+            return redirect()->route('uptd.contributors.index');
+        }
+
+        if ($user->isMarketUptdContributor() && ! $this->hasSelectedContributor($request, $user)) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'identifier' => 'Silakan masuk melalui akun bersama UPTD Pasar, lalu pilih identitas kontributor.',
+            ])->onlyInput('identifier');
+        }
+
         if ($user->role === Role::Distributor && $user->distributor_id === null) {
             Auth::logout();
             $request->session()->invalidate();
@@ -52,17 +71,20 @@ class LoginController extends Controller
             ])->onlyInput('identifier');
         }
 
-        if ($user->role === Role::UptdPasar && $user->market_id === null) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return back()->withErrors([
-                'identifier' => 'Akun kontributor UPTD belum dikaitkan ke pasar. Hubungi administrator.',
-            ])->onlyInput('identifier');
-        }
+        $request->session()->forget('uptd_selected_contributor');
 
         return redirect()->to($this->intendedUrl(route($home), $user->role->routePrefix()));
+    }
+
+    /**
+     * Pastikan akun kontributor pasar yang login sama dengan identitas yang dipilih.
+     */
+    private function hasSelectedContributor(Request $request, User $user): bool
+    {
+        $selected = $request->session()->get('uptd_selected_contributor');
+
+        return is_array($selected)
+            && (int) ($selected['id'] ?? 0) === $user->id;
     }
 
     /**
