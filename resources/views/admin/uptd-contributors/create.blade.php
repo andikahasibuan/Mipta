@@ -4,7 +4,19 @@
 
 @section('content')
     <div class="mx-auto max-w-2xl">
-        <form method="POST" action="{{ route('admin.uptd-contributors.store') }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        @if ($markets->isEmpty())
+            <div class="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+                <p class="font-semibold">Belum ada pasar yang tersedia.</p>
+                <p class="mt-1">Semua pasar sudah memiliki kontributor UPTD. Tambahkan pasar baru terlebih dahulu.</p>
+                <a
+                    href="{{ route('admin.markets.create') }}"
+                    class="mt-3 inline-flex rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+                >
+                    Tambah pasar
+                </a>
+            </div>
+        @else
+            <form method="POST" action="{{ route('admin.uptd-contributors.store') }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
             @csrf
 
             <div class="border-b border-slate-200 px-5 py-4">
@@ -47,33 +59,19 @@
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
-                    <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value="{{ old('email') }}"
-                        required
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
-                    >
-                    @error('email')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
                     <label for="market_id" class="block text-sm font-medium text-slate-700">Pasar Terkait</label>
                     <select
                         id="market_id"
                         name="market_id"
+                        required
                         class="mt-1 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
-                        <option value="">— Belum ditentukan —</option>
+                        <option value="">Pilih pasar</option>
                         @foreach ($markets as $market)
                             <option value="{{ $market->id }}" @selected(old('market_id') == $market->id)>{{ $market->name }}</option>
                         @endforeach
                     </select>
-                    <p class="mt-1 text-xs text-slate-500">Kosongkan jika akun ini adalah akun bersama untuk login awal kontributor UPTD.</p>
+                    <p class="mt-1 text-xs text-slate-500">Hanya pasar yang belum memiliki kontributor UPTD yang ditampilkan.</p>
                     @error('market_id')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
@@ -120,6 +118,7 @@
                     Simpan
                 </button>
             </div>
-        </form>
+            </form>
+        @endif
     </div>
 @endsection

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Market;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -16,6 +17,19 @@ it('menampilkan profil pengguna yang sedang login di topbar', function () {
         ->assertSeeInOrder(['Masuk sebagai', $admin->email, 'Keluar'])
         ->assertSee('aria-label="Menu profil"', false)
         ->assertSee('action="'.route('logout').'"', false);
+});
+
+it('menampilkan username di dropdown profil untuk kontributor tanpa email', function () {
+    $contributor = User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
+        'email' => null,
+    ]);
+
+    $this->actingAs($contributor)
+        ->get(route('uptd.dashboard'))
+        ->assertOk()
+        ->assertSeeInOrder(['Masuk sebagai', $contributor->username, 'Keluar']);
 });
 
 it('mengambil inisial dari dua kata pertama nama', function (string $name, string $initials) {

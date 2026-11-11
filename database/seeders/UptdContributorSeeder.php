@@ -49,7 +49,7 @@ class UptdContributorSeeder extends Seeder
             $this->upsertAccount(
                 name: 'Kontributor UPTD '.$number,
                 username: 'kontributor.uptd.'.$number,
-                email: 'kontributor.uptd.'.$number.'@mipta.test',
+                email: null,
                 password: 'KontributorUptd#'.$number,
                 marketId: $marketIds[$market['name']],
             );
@@ -62,7 +62,7 @@ class UptdContributorSeeder extends Seeder
     private function upsertAccount(
         string $name,
         string $username,
-        string $email,
+        ?string $email,
         string $password,
         ?int $marketId,
     ): void {

@@ -140,3 +140,18 @@ it('menolak menghapus pasar yang masih memiliki laporan kondisi lapangan', funct
     $this->assertDatabaseHas('markets', ['id' => $market->id]);
     $this->assertDatabaseCount('field_distribution_reports', 1);
 });
+
+it('menolak menghapus pasar yang masih memiliki kontributor UPTD', function () {
+    $market = Market::factory()->create();
+
+    User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $market->id,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->delete(route('admin.markets.destroy', $market))
+        ->assertSessionHasErrors('delete');
+
+    $this->assertDatabaseHas('markets', ['id' => $market->id]);
+});

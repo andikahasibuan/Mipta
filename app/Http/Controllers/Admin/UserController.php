@@ -27,7 +27,11 @@ class UserController extends Controller
         }
 
         $users = User::query()
-            ->where('role', '!=', Role::Distributor->value)
+            ->where(fn ($query) => $query
+                ->whereIn('role', [Role::Admin->value, Role::KepalaDinas->value])
+                ->orWhere(fn ($query) => $query
+                    ->where('role', Role::UptdPasar->value)
+                    ->whereNull('market_id')))
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('username', 'like', "%{$search}%")
@@ -57,7 +61,7 @@ class UserController extends Controller
     public function create(): View
     {
         return view('admin.users.create', [
-            'roles' => $this->assignableRoles(),
+            'roles' => $this->assignableRoles(! $this->sharedUptdExists()),
         ]);
     }
 
@@ -78,6 +82,12 @@ class UserController extends Controller
             'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
 
+        if ($validated['role'] === Role::UptdPasar->value && $this->sharedUptdExists()) {
+            return back()->withErrors([
+                'role' => 'Akun bersama UPTD sudah ada. Hanya satu akun UPTD bersama yang diizinkan.',
+            ])->withInput();
+        }
+
         User::create([
             'name' => $validated['name'],
             'username' => $validated['username'],
@@ -95,11 +105,13 @@ class UserController extends Controller
      */
     public function edit(User $user): View
     {
-        $this->ensureNotDistributorAccount($user);
+        $this->ensureManageableUser($user);
 
         return view('admin.users.edit', [
             'user' => $user,
-            'roles' => $this->assignableRoles(),
+            'roles' => $this->assignableRoles(
+                $user->isSharedUptdAccount() || ! $this->sharedUptdExists(),
+            ),
         ]);
     }
 
@@ -108,7 +120,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
-        $this->ensureNotDistributorAccount($user);
+        $this->ensureManageableUser($user);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
@@ -144,6 +156,12 @@ class UserController extends Controller
             }
         }
 
+        if ($validated['role'] === Role::UptdPasar->value && $this->sharedUptdExists($user->id)) {
+            return back()->withErrors([
+                'role' => 'Akun bersama UPTD sudah ada. Hanya satu akun UPTD bersama yang diizinkan.',
+            ])->withInput();
+        }
+
         if (! empty($validated['password'])) {
             $data['password'] = $validated['password'];
         }
@@ -158,7 +176,7 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
-        $this->ensureNotDistributorAccount($user);
+        $this->ensureManageableUser($user);
 
         if ($user->is(auth()->user())) {
             return back()->withErrors(['delete' => 'Anda tidak dapat menghapus akun yang sedang digunakan untuk login.']);
@@ -174,19 +192,37 @@ class UserController extends Controller
      *
      * @return array<int, Role>
      */
-    private function assignableRoles(): array
+    private function assignableRoles(bool $includeUptd = true): array
     {
         return array_values(array_filter(
             Role::cases(),
-            fn (Role $role): bool => $role !== Role::Distributor,
+            fn (Role $role): bool => $role !== Role::Distributor
+                && ($includeUptd || $role !== Role::UptdPasar),
         ));
     }
 
     /**
-     * Pastikan akun distributor tidak dikelola melalui halaman pengguna.
+     * Periksa apakah akun bersama UPTD sudah ada.
      */
-    private function ensureNotDistributorAccount(User $user): void
+    private function sharedUptdExists(?int $exceptUserId = null): bool
     {
-        abort_if($user->role === Role::Distributor, 404);
+        return User::query()
+            ->where('role', Role::UptdPasar->value)
+            ->whereNull('market_id')
+            ->when($exceptUserId !== null, fn ($query) => $query->where('id', '!=', $exceptUserId))
+            ->exists();
+    }
+
+    /**
+     * Pastikan hanya akun yang dikelola di tab Pengguna yang dapat diakses.
+     */
+    private function ensureManageableUser(User $user): void
+    {
+        abort_unless(
+            $user->role === Role::Admin
+            || $user->role === Role::KepalaDinas
+            || $user->isSharedUptdAccount(),
+            404,
+        );
     }
 }

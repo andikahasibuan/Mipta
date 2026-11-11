@@ -42,7 +42,7 @@ class DemoDataSeeder extends Seeder
             [
                 'name' => 'Andi Pratama',
                 'username' => 'demo.uptd',
-                'email' => 'demo.uptd@mipta.test',
+                'email' => null,
                 'role' => Role::UptdPasar,
             ],
             [
@@ -55,10 +55,10 @@ class DemoDataSeeder extends Seeder
 
         foreach ($users as $user) {
             User::updateOrCreate(
-                ['email' => $user['email']],
+                ['username' => $user['username']],
                 [
                     'name' => $user['name'],
-                    'username' => $user['username'],
+                    'email' => $user['email'],
                     'password' => 'password',
                     'role' => $user['role'],
                     'is_active' => true,
@@ -66,7 +66,7 @@ class DemoDataSeeder extends Seeder
             );
         }
 
-        $uptdUser = User::where('email', 'demo.uptd@mipta.test')->firstOrFail();
+        $uptdUser = User::where('username', 'demo.uptd')->firstOrFail();
         $uptdUser->update(['market_id' => Market::where('name', 'Pasar Raya Padang')->value('id')]);
         $currentMonthStart = now()->startOfMonth();
         $previousMonthStart = now()->subMonthNoOverflow()->startOfMonth();

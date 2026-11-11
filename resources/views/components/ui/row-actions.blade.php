@@ -10,7 +10,7 @@
             <x-heroicon-o-eye class="h-5 w-5" />
         </summary>
 
-        <div class="absolute right-0 z-20 mt-2 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div data-row-actions-menu class="fixed z-50 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
             <a
                 href="{{ $edit }}"
                 class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"

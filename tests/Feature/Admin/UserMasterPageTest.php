@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Market;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -48,7 +49,7 @@ it('menampilkan tabel data pengguna dari database', function () {
     ]);
 
     User::factory()->inactive()->create([
-        'name' => 'Kontributor UPTD 01',
+        'name' => 'Kontributor UPTD Bersama',
         'username' => 'kontributor.01',
         'role' => Role::UptdPasar,
     ]);
@@ -61,8 +62,7 @@ it('menampilkan tabel data pengguna dari database', function () {
         ->assertSee('Admin MIPTA')
         ->assertSee('admin.mipta')
         ->assertSee('kepala.dinas')
-        ->assertSee('UPTD Pasar')
-        ->assertSee('Nonaktif')
+        ->assertSeeInOrder(['Kontributor UPTD Bersama', 'kontributor.01', 'UPTD', 'Nonaktif'])
         ->assertSee('Menampilkan 3 dari 3 pengguna')
         ->assertDontSee('Total Pengguna');
 });
@@ -119,6 +119,31 @@ it('menyembunyikan semua akun distributor dari daftar pengguna', function () {
         ->assertDontSee('PT Akun Distributor')
         ->assertDontSee('Distributor Tanpa PT')
         ->assertDontSee('value="'.Role::Distributor->value.'"', false);
+});
+
+it('hanya menampilkan admin, kepala dinas, dan akun bersama UPTD di tab pengguna', function () {
+    $admin = User::factory()->create(['name' => 'Admin MIPTA']);
+    User::factory()->create([
+        'name' => 'Kepala Dinas',
+        'role' => Role::KepalaDinas,
+    ]);
+    User::factory()->create([
+        'name' => 'UPTD Bersama',
+        'role' => Role::UptdPasar,
+    ]);
+    User::factory()->create([
+        'name' => 'Kontributor Pasar',
+        'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index'))
+        ->assertOk()
+        ->assertSee('Admin MIPTA')
+        ->assertSee('Kepala Dinas')
+        ->assertSee('UPTD Bersama')
+        ->assertDontSee('Kontributor Pasar');
 });
 
 it('memfilter pengguna berdasarkan peran dan status', function () {

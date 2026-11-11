@@ -48,7 +48,7 @@
                 >
                     <option value="">Semua peran</option>
                     @foreach ($roles as $role)
-                        <option value="{{ $role->value }}" @selected($filters['role'] === $role->value)>{{ $role->label() }}</option>
+                        <option value="{{ $role->value }}" @selected($filters['role'] === $role->value)>{{ $role->managementLabel() }}</option>
                     @endforeach
                 </select>
                 <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -88,7 +88,7 @@
                             </td>
                             <td class="px-5 py-4 align-middle">
                                 <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                                    {{ $user->role->label() }}
+                                    {{ $user->role->managementLabel() }}
                                 </span>
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">

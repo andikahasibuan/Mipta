@@ -7,18 +7,26 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('hanya menampilkan akun berperan UPTD Pasar', function () {
+it('hanya menampilkan kontributor UPTD yang terkait ke pasar', function () {
     $admin = User::factory()->create(['name' => 'Admin MIPTA']);
 
     User::factory()->create([
         'name' => 'Kontributor Satu',
         'username' => 'kontributor.01',
         'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
     ]);
 
     User::factory()->inactive()->create([
         'name' => 'Kontributor Dua',
         'username' => 'kontributor.02',
+        'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
+    ]);
+
+    User::factory()->create([
+        'name' => 'Kontributor Bersama',
+        'username' => 'kontributor.bersama',
         'role' => Role::UptdPasar,
     ]);
 
@@ -35,6 +43,7 @@ it('hanya menampilkan akun berperan UPTD Pasar', function () {
         ->assertSee('Kontributor Satu')
         ->assertSee('Kontributor Dua')
         ->assertSee('Nonaktif')
+        ->assertDontSee('Kontributor Bersama')
         ->assertDontSee('Kepala Dinas Lain')
         ->assertSee('Menampilkan 2 dari 2 kontributor');
 });
@@ -47,7 +56,6 @@ it('menyimpan kontributor UPTD dengan nama akun generik dan username bernomor', 
         ->post(route('admin.uptd-contributors.store'), [
             'name' => 'Kontributor UPTD 01',
             'username' => 'kontributor.uptd.01',
-            'email' => 'kontributor.uptd.01@mipta.test',
             'password' => 'password123',
             'market_id' => $market->id,
             'is_active' => '1',
@@ -57,6 +65,7 @@ it('menyimpan kontributor UPTD dengan nama akun generik dan username bernomor', 
     $this->assertDatabaseHas('users', [
         'name' => 'Kontributor UPTD 01',
         'username' => 'kontributor.uptd.01',
+        'email' => null,
         'role' => Role::UptdPasar->value,
         'market_id' => $market->id,
     ]);
@@ -96,21 +105,21 @@ it('menampilkan navigasi tab hingga kontributor UPTD', function () {
         ->assertSee('href="'.route('admin.uptd-contributors.index').'"', false);
 });
 
-it('mencari kontributor berdasarkan nama, username, atau email', function () {
+it('mencari kontributor berdasarkan nama atau username', function () {
     $admin = User::factory()->create(['name' => 'Admin MIPTA']);
 
     User::factory()->create([
         'name' => 'Kontributor Pasar Raya',
         'username' => 'kontributor.raya',
-        'email' => 'raya@mipta.test',
         'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
     ]);
 
     User::factory()->create([
         'name' => 'Kontributor Lubuk',
         'username' => 'kontributor.lubuk',
-        'email' => 'lubuk@mipta.test',
         'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
     ]);
 
     $this->actingAs($admin)
@@ -120,7 +129,7 @@ it('mencari kontributor berdasarkan nama, username, atau email', function () {
         ->assertDontSee('Kontributor Lubuk');
 
     $this->actingAs($admin)
-        ->get(route('admin.uptd-contributors.index', ['q' => 'lubuk@mipta.test']))
+        ->get(route('admin.uptd-contributors.index', ['q' => 'kontributor.lubuk']))
         ->assertOk()
         ->assertSee('Kontributor Lubuk')
         ->assertDontSee('Kontributor Pasar Raya');
@@ -132,11 +141,13 @@ it('memfilter kontributor berdasarkan status', function () {
     User::factory()->create([
         'name' => 'Kontributor Aktif',
         'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
     ]);
 
     User::factory()->inactive()->create([
         'name' => 'Kontributor Nonaktif',
         'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
     ]);
 
     $this->actingAs($admin)
@@ -170,6 +181,7 @@ it('membatasi lima kontributor per halaman', function () {
         'name' => 'Kontributor 0'.$number,
         'username' => 'kontributor.0'.$number,
         'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
     ]));
 
     $this->actingAs($admin)
@@ -188,19 +200,18 @@ it('membatasi halaman kontributor hanya untuk admin', function () {
         ->assertForbidden();
 });
 
-it('menampilkan penanda akun bersama untuk kontributor tanpa pasar', function () {
+it('menolak mengelola akun bersama lewat tab kontributor UPTD', function () {
     $admin = User::factory()->create();
-
-    User::factory()->create([
-        'name' => 'Kontributor Bersama',
-        'role' => Role::UptdPasar,
-    ]);
+    $shared = User::factory()->create(['role' => Role::UptdPasar]);
 
     $this->actingAs($admin)
-        ->get(route('admin.uptd-contributors.index'))
-        ->assertOk()
-        ->assertSee('Kontributor Bersama')
-        ->assertSee('Akun bersama');
+        ->get(route('admin.uptd-contributors.edit', $shared))
+        ->assertNotFound();
+
+    $this->delete(route('admin.uptd-contributors.destroy', $shared))
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('users', ['id' => $shared->id]);
 });
 
 it('menolak mengelola akun yang bukan kontributor UPTD lewat halaman kontributor', function () {
@@ -215,4 +226,116 @@ it('menolak mengelola akun yang bukan kontributor UPTD lewat halaman kontributor
         ->assertNotFound();
 
     $this->assertDatabaseHas('users', ['id' => $kepalaDinas->id]);
+});
+
+it('menampilkan pesan untuk menambah pasar baru saat semua pasar sudah memiliki kontributor', function () {
+    $admin = User::factory()->create();
+    $market = Market::factory()->create();
+
+    User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $market->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.uptd-contributors.create'))
+        ->assertOk()
+        ->assertSee('Belum ada pasar yang tersedia')
+        ->assertSee(route('admin.markets.create'), false);
+});
+
+it('hanya menampilkan pasar yang belum memiliki kontributor pada form tambah', function () {
+    $admin = User::factory()->create();
+
+    Market::factory()->create(['name' => 'Pasar Baru']);
+    $usedMarket = Market::factory()->create(['name' => 'Pasar Terpakai']);
+
+    User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $usedMarket->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.uptd-contributors.create'))
+        ->assertOk()
+        ->assertSee('Pasar Baru')
+        ->assertDontSee('Pasar Terpakai')
+        ->assertDontSee('Email');
+});
+
+it('menolak pasar yang sudah memiliki kontributor UPTD', function () {
+    $admin = User::factory()->create();
+    $market = Market::factory()->create();
+
+    User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $market->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.uptd-contributors.store'), [
+            'name' => 'Kontributor Baru',
+            'username' => 'kontributor.baru',
+            'password' => 'password123',
+            'market_id' => $market->id,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('market_id');
+
+    expect(session('errors')->first('market_id'))
+        ->toContain('Pasar ini sudah memiliki kontributor UPTD.');
+
+    $this->assertDatabaseMissing('users', ['username' => 'kontributor.baru']);
+});
+
+it('mempertahankan pasar saat ini dan hanya menampilkan pasar kosong pada form edit', function () {
+    $admin = User::factory()->create();
+    $currentMarket = Market::factory()->create(['name' => 'Pasar Saat Ini']);
+    $availableMarket = Market::factory()->create(['name' => 'Pasar Kosong']);
+    $usedMarket = Market::factory()->create(['name' => 'Pasar Terpakai Lain']);
+
+    $contributor = User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $currentMarket->id,
+    ]);
+
+    User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $usedMarket->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.uptd-contributors.edit', $contributor))
+        ->assertOk()
+        ->assertSee('Pasar Saat Ini')
+        ->assertSee('Pasar Kosong')
+        ->assertDontSee('Pasar Terpakai Lain')
+        ->assertDontSee('Email');
+});
+
+it('menolak memindahkan kontributor ke pasar yang sudah memiliki kontributor lain', function () {
+    $admin = User::factory()->create();
+    $currentMarket = Market::factory()->create();
+    $usedMarket = Market::factory()->create();
+
+    $contributor = User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $currentMarket->id,
+    ]);
+
+    User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => $usedMarket->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->put(route('admin.uptd-contributors.update', $contributor), [
+            'name' => $contributor->name,
+            'username' => $contributor->username,
+            'market_id' => $usedMarket->id,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('market_id');
+
+    expect($contributor->fresh()->market_id)->toBe($currentMarket->id);
 });

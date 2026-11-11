@@ -23,11 +23,11 @@ class UptdContributorController extends Controller
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
         $contributors = User::where('role', Role::UptdPasar->value)
+            ->whereNotNull('market_id')
             ->with('market:id,name')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
-                ->orWhere('username', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")))
+                ->orWhere('username', 'like', "%{$search}%")))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
             ->orderByDesc('created_at')
@@ -50,7 +50,9 @@ class UptdContributorController extends Controller
     public function create(): View
     {
         return view('admin.uptd-contributors.create', [
-            'markets' => Market::orderBy('name')->get(['id', 'name']),
+            'markets' => Market::whereDoesntHave('uptdContributors')
+                ->orderBy('name')
+                ->get(['id', 'name']),
         ]);
     }
 
@@ -62,18 +64,23 @@ class UptdContributorController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
             'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
-            'market_id' => ['nullable', 'integer', 'exists:markets,id'],
+            'market_id' => [
+                'required',
+                'integer',
+                Rule::exists('markets', 'id'),
+                Rule::unique('users', 'market_id')
+                    ->where(fn ($query) => $query->where('role', Role::UptdPasar->value)),
+            ],
         ], $this->validationMessages());
 
         User::create([
             'name' => $validated['name'],
             'username' => $validated['username'],
-            'email' => $validated['email'],
+            'email' => null,
             'password' => $validated['password'],
             'role' => Role::UptdPasar->value,
-            'market_id' => $validated['market_id'] ?? null,
+            'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
         ]);
 
@@ -89,7 +96,11 @@ class UptdContributorController extends Controller
 
         return view('admin.uptd-contributors.edit', [
             'contributor' => $contributor,
-            'markets' => Market::orderBy('name')->get(['id', 'name']),
+            'markets' => Market::where(fn ($query) => $query
+                ->whereDoesntHave('uptdContributors')
+                ->orWhere('id', $contributor->market_id))
+                ->orderBy('name')
+                ->get(['id', 'name']),
         ]);
     }
 
@@ -103,16 +114,21 @@ class UptdContributorController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
             'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($contributor->id)],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($contributor->id)],
             'password' => ['nullable', 'string', 'min:8'],
-            'market_id' => ['nullable', 'integer', 'exists:markets,id'],
+            'market_id' => [
+                'required',
+                'integer',
+                Rule::exists('markets', 'id'),
+                Rule::unique('users', 'market_id')
+                    ->where(fn ($query) => $query->where('role', Role::UptdPasar->value))
+                    ->ignore($contributor->id),
+            ],
         ], $this->validationMessages());
 
         $data = [
             'name' => $validated['name'],
             'username' => $validated['username'],
-            'email' => $validated['email'],
-            'market_id' => $validated['market_id'] ?? null,
+            'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
         ];
 
@@ -151,14 +167,20 @@ class UptdContributorController extends Controller
         return [
             'name.regex' => 'Nama hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
             'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'market_id.required' => 'Pasar terkait wajib dipilih.',
+            'market_id.exists' => 'Pasar yang dipilih tidak valid.',
+            'market_id.unique' => 'Pasar ini sudah memiliki kontributor UPTD.',
         ];
     }
 
     /**
-     * Pastikan pengguna yang diakses benar-benar berkontribusi sebagai UPTD Pasar.
+     * Pastikan pengguna yang diakses adalah kontributor UPTD yang terkait ke pasar.
      */
     private function ensureUptdContributor(User $contributor): void
     {
-        abort_unless($contributor->role === Role::UptdPasar, 404);
+        abort_unless(
+            $contributor->role === Role::UptdPasar && $contributor->market_id !== null,
+            404,
+        );
     }
 }

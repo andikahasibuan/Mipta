@@ -48,33 +48,19 @@
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
-                    <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value="{{ old('email', $contributor->email) }}"
-                        required
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
-                    >
-                    @error('email')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
                     <label for="market_id" class="block text-sm font-medium text-slate-700">Pasar Terkait</label>
                     <select
                         id="market_id"
                         name="market_id"
+                        required
                         class="mt-1 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                     >
-                        <option value="">— Belum ditentukan —</option>
+                        <option value="">Pilih pasar</option>
                         @foreach ($markets as $market)
                             <option value="{{ $market->id }}" @selected(old('market_id', $contributor->market_id) == $market->id)>{{ $market->name }}</option>
                         @endforeach
                     </select>
-                    <p class="mt-1 text-xs text-slate-500">Kosongkan jika akun ini adalah akun bersama untuk login awal kontributor UPTD.</p>
+                    <p class="mt-1 text-xs text-slate-500">Pasar yang sudah memiliki kontributor lain tidak ditampilkan.</p>
                     @error('market_id')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror

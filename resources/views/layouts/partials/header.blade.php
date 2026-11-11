@@ -85,7 +85,7 @@
 
             <div class="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Masuk sebagai</p>
-                <p class="mt-1 truncate text-sm font-medium text-slate-900">{{ auth()->user()->email }}</p>
+                <p class="mt-1 truncate text-sm font-medium text-slate-900">{{ auth()->user()->email ?? auth()->user()->username }}</p>
 
                 <form method="POST" action="{{ route('logout') }}" class="mt-4">
                     @csrf

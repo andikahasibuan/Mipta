@@ -23,6 +23,16 @@ enum Role: string
     }
 
     /**
+     * Label peran pada tab Pengguna & Data Master.
+     *
+     * Akun UPTD di tab tersebut adalah akun bersama tanpa pasar.
+     */
+    public function managementLabel(): string
+    {
+        return $this === self::UptdPasar ? 'UPTD' : $this->label();
+    }
+
+    /**
      * Periksa apakah peran ini kepala dinas.
      */
     public function isKepalaDinas(): bool

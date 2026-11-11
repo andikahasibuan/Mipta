@@ -84,7 +84,7 @@
                     >
                         <option value="">Pilih peran</option>
                         @foreach ($roles as $role)
-                            <option value="{{ $role->value }}" @selected(old('role', $user->role->value) === $role->value)>{{ $role->label() }}</option>
+                            <option value="{{ $role->value }}" @selected(old('role', $user->role->value) === $role->value)>{{ $role->managementLabel() }}</option>
                         @endforeach
                     </select>
                     @error('role')

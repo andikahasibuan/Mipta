@@ -35,7 +35,7 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari nama, username, atau email kontributor..."
+                    placeholder="Cari nama atau username kontributor..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
                 >
             </div>
@@ -70,13 +70,7 @@
                         <tr>
                             <td class="px-5 py-4 align-middle text-slate-900">{{ $contributor->name }}</td>
                             <td class="px-5 py-4 align-middle">
-                                @if ($contributor->market)
-                                    <span class="text-sm text-slate-600">{{ $contributor->market->name }}</span>
-                                @else
-                                    <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
-                                        Akun bersama
-                                    </span>
-                                @endif
+                                <span class="text-sm text-slate-600">{{ $contributor->market?->name }}</span>
                             </td>
                             <td class="px-5 py-4 align-middle">
                                 <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">

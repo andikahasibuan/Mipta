@@ -116,8 +116,8 @@ class MarketController extends Controller
      */
     public function destroy(Market $market): RedirectResponse
     {
-        if ($market->stores()->exists() || $market->distributions()->exists() || $market->fieldReports()->exists()) {
-            return back()->withErrors(['delete' => 'Pasar tidak dapat dihapus karena masih memiliki toko penerima, laporan kondisi, atau data penyaluran.']);
+        if ($market->stores()->exists() || $market->distributions()->exists() || $market->fieldReports()->exists() || $market->uptdContributors()->exists()) {
+            return back()->withErrors(['delete' => 'Pasar tidak dapat dihapus karena masih memiliki kontributor UPTD, toko penerima, laporan kondisi, atau data penyaluran.']);
         }
 
         $market->delete();

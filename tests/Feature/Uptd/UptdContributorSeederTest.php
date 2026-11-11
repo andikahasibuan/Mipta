@@ -25,7 +25,8 @@ it('membuat akun bersama dan sembilan kontributor dengan password berbeda', func
 
     expect(Market::count())->toBe(9)
         ->and($contributors)->toHaveCount(9)
-        ->and($contributors->pluck('market_id')->unique())->toHaveCount(9);
+        ->and($contributors->pluck('market_id')->unique())->toHaveCount(9)
+        ->and($contributors->every(fn (User $contributor): bool => $contributor->email === null))->toBeTrue();
 
     foreach ($contributors->values() as $index => $contributor) {
         $number = str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
@@ -33,4 +34,21 @@ it('membuat akun bersama dan sembilan kontributor dengan password berbeda', func
         expect($contributor->username)->toBe('kontributor.uptd.'.$number)
             ->and(Hash::check('KontributorUptd#'.$number, $contributor->password))->toBeTrue();
     }
+});
+
+it('memisahkan akun bersama dan kontributor pasar pada tab admin', function () {
+    $this->seed(UptdContributorSeeder::class);
+
+    $admin = User::factory()->create();
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index'))
+        ->assertOk()
+        ->assertSee('Kontributor UPTD Pasar')
+        ->assertDontSee('Kontributor UPTD 01');
+
+    $this->get(route('admin.uptd-contributors.index'))
+        ->assertOk()
+        ->assertSee('Kontributor UPTD 09')
+        ->assertDontSee('Kontributor UPTD Pasar');
 });
