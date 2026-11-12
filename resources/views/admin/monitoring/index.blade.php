@@ -3,11 +3,6 @@
 @section('title', 'Monitoring & Analisis')
 
 @section('content')
-    <x-ui.page-heading
-        title="Monitoring & Analisis"
-        subtitle="Cari, filter, dan kelola data sistem secara terpusat"
-    />
-
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
         $formatAvg = fn (float $value): string => number_format($value, 1, ',', '.');
@@ -20,7 +15,7 @@
                 <select
                     id="filter-month"
                     name="month"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     @foreach ($months as $option)
                         <option value="{{ $option['value'] }}" @selected($filters['month'] === $option['value'])>
@@ -36,7 +31,7 @@
                 <select
                     id="filter-distributor"
                     name="distributor"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     <option value="">Semua Distributor</option>
                     @foreach ($distributors as $distributor)
@@ -51,7 +46,7 @@
                 <select
                     id="filter-market"
                     name="market"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     <option value="">Semua Pasar</option>
                     @foreach ($markets as $market)
@@ -63,7 +58,7 @@
 
             <button
                 type="submit"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 Terapkan Filter
             </button>
@@ -71,10 +66,7 @@
     </form>
 
     <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
-            <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
-                <x-heroicon-o-truck class="h-6 w-6" />
-            </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-5">
             <div class="min-w-0">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Penyaluran Periode Ini</p>
                 <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['cartons']) }}</p>
@@ -82,10 +74,7 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
-            <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
-                <x-heroicon-o-chart-bar class="h-6 w-6" />
-            </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-5">
             <div class="min-w-0">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Rata-rata per Laporan</p>
                 <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatAvg($summary['avg_per_report']) }}</p>
@@ -93,10 +82,7 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
-            <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
-                <x-heroicon-o-map-pin class="h-6 w-6" />
-            </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-5">
             <div class="min-w-0">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Terjangkau</p>
                 <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['reached_markets']) }}</p>
@@ -120,7 +106,7 @@
 
             <div class="mt-4 overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
+                    <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
                         <tr>
                             <th scope="col" class="px-5 py-3 font-semibold">Pasar</th>
                             <th scope="col" class="px-5 py-3 font-semibold">Jumlah Laporan</th>
@@ -184,7 +170,7 @@
             }
 
             const donutData = @json($donut);
-            const palette = ['#2D507E', '#5191E4', '#FDBA12', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#3B82F6'];
+            const palette = ['#018F98', '#33B8C0', '#FDBA12', '#7C3AED', '#10B981', '#F59E0B', '#EF4444', '#3B82F6'];
 
             new Chart(canvas, {
                 type: 'doughnut',

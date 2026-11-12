@@ -47,7 +47,7 @@ it('menampilkan seluruh menu sidebar kontributor UPTD', function () {
             'Input Laporan',
             'Riwayat Laporan',
             'Ganti Kontributor',
-            'Keluar dari Sistem',
+            'Logout',
         ]);
 });
 

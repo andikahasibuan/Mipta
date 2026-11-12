@@ -22,7 +22,7 @@
                         required
                         pattern="[A-Za-z0-9 .'-]+"
                         title="Nama pasar hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('name')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -39,7 +39,7 @@
                         required
                         pattern="[A-Za-z0-9 .,/'-]+"
                         title="Lokasi hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/'-)."
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('lokasi')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -52,7 +52,7 @@
                         type="checkbox"
                         value="1"
                         @checked(old('is_active', true))
-                        class="h-4 w-4 rounded border-slate-300 text-[#2D507E] focus:ring-[#5191E4]"
+                        class="h-4 w-4 rounded border-slate-300 text-[#018F98] focus:ring-[#018F98]"
                     >
                     <span class="text-sm text-slate-700">Status aktif</span>
                 </label>
@@ -67,7 +67,7 @@
                 </a>
                 <button
                     type="submit"
-                    class="rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+                    class="rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
                 >
                     Simpan
                 </button>

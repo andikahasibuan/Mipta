@@ -25,20 +25,20 @@
                 @endif
 
                 <div class="grid gap-5 sm:grid-cols-2">
-                    <div class="rounded-lg border border-[#D6E3F2] bg-[#E8F0FB] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-widest text-[#2D507E]/70">
+                    <div class="rounded-lg border border-[#CFE9EB] bg-[#E0F2F3] px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-widest text-[#018F98]/70">
                             Identitas Kontributor
                         </p>
                         <p class="mt-1 truncate text-sm font-semibold text-slate-900">{{ $contributor->name }}</p>
-                        <p class="mt-0.5 text-xs text-[#2D507E]">Terisi otomatis</p>
+                        <p class="mt-0.5 text-xs text-[#018F98]">Terisi otomatis</p>
                     </div>
 
-                    <div class="rounded-lg border border-[#D6E3F2] bg-[#E8F0FB] px-4 py-4">
-                        <p class="text-[11px] font-semibold uppercase tracking-widest text-[#2D507E]/70">
+                    <div class="rounded-lg border border-[#CFE9EB] bg-[#E0F2F3] px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-widest text-[#018F98]/70">
                             Pasar yang Ditugaskan
                         </p>
                         <p class="mt-1 truncate text-sm font-semibold text-slate-900">{{ $contributor->market?->name ?? '—' }}</p>
-                        <p class="mt-0.5 text-xs text-[#2D507E]">Tidak dapat diubah</p>
+                        <p class="mt-0.5 text-xs text-[#018F98]">Tidak dapat diubah</p>
                     </div>
                 </div>
 
@@ -53,7 +53,7 @@
                             type="date"
                             value="{{ old('report_date', $report?->report_date?->format('Y-m-d') ?? now()->toDateString()) }}"
                             max="{{ now()->toDateString() }}"
-                            class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                            class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                         >
                         @error('report_date')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -68,7 +68,7 @@
                             <select
                                 id="condition"
                                 name="condition"
-                                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3 pr-10 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3 pr-10 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                             >
                                 @foreach ($conditions as $condition)
                                     <option
@@ -96,7 +96,7 @@
                         name="description"
                         rows="4"
                         placeholder="Jelaskan kondisi pasar atau kendala distribusi yang ditemukan di pasar..."
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >{{ old('description', $report?->description) }}</textarea>
                     @error('description')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -113,7 +113,7 @@
 
                     <button
                         type="submit"
-                        class="cursor-pointer rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+                        class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
                     >
                         {{ $isEdit ? 'Perbarui Laporan' : 'Simpan Laporan' }}
                     </button>
@@ -123,15 +123,15 @@
     </div>
 
     <aside class="min-w-0 self-start lg:col-span-1">
-        <div class="rounded-xl border border-slate-200 bg-[#E8F0FB] p-5">
+        <div class="rounded-xl border border-slate-200 bg-[#E0F2F3] p-5">
             <div class="flex items-center gap-3">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white text-[#2D507E]">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white text-[#018F98]">
                     <x-heroicon-o-exclamation-triangle class="h-6 w-6" />
                 </span>
-                <h3 class="text-base font-semibold text-[#1F3A5F]">Catatan laporan</h3>
+                <h3 class="text-base font-semibold text-[#016B72]">Catatan laporan</h3>
             </div>
 
-            <p class="mt-4 text-sm leading-snug text-[#2D507E]">
+            <p class="mt-4 text-sm leading-snug text-[#018F98]">
                 Gunakan data yang sesuai dengan kondisi pasar. Laporan yang dikirim akan menjadi bahan evaluasi
                 dan dapat dilihat oleh Admin serta Kepala Dinas.
             </p>

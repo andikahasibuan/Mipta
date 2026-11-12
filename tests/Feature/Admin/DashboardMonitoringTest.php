@@ -10,14 +10,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menampilkan sapaan pada dashboard monitoring', function () {
+it('menampilkan dashboard monitoring tanpa tombol unduh rekap', function () {
     $admin = User::factory()->create(['name' => 'Iqbal Shyhab']);
 
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('Selamat datang, Iqbal Shyhab')
-        ->assertSee('Pantau penyaluran Minyakita secara terintegrasi')
+        ->assertSee('Total Laporan')
         ->assertDontSee('Unduh Rekap Bulanan');
 });
 
@@ -180,11 +179,7 @@ it('menampilkan filter dengan pilihan default bulan berjalan', function () {
         ->assertSee('Semua Pasar')
         ->assertSee('Semua Distributor')
         ->assertSee('Terapkan Filter')
-        ->assertSee('value="'.now()->format('Y-m').'" selected', false)
-        ->assertSeeInOrder(['for="filter-month"', 'M6.75 3v2.25M17.25 3v2.25', 'id="filter-month"'], false)
-        ->assertSeeInOrder(['for="filter-market"', 'M19.5 10.5c0 7.142-7.5 11.25', 'id="filter-market"'], false)
-        ->assertSeeInOrder(['for="filter-distributor"', 'M15.75 6a3.75 3.75 0 1 1-7.5 0', 'id="filter-distributor"'], false)
-        ->assertSeeInOrder(['type="submit"', 'M12 3c2.755 0 5.455.232 8.083.678', 'Terapkan Filter'], false);
+        ->assertSee('value="'.now()->format('Y-m').'" selected', false);
 });
 
 it('menerapkan filter distributor pada kartu statistik', function () {

@@ -3,16 +3,6 @@
 @section('title', 'Manajemen Data Toko')
 
 @section('content')
-    <x-ui.page-heading title="Manajemen data toko" subtitle="Kelola daftar toko penerima Minyakita milik distributor">
-        <a
-            href="{{ route('distributor.stores.create') }}"
-            class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
-        >
-            <x-heroicon-o-plus class="h-4 w-4" />
-            Tambah data
-        </a>
-    </x-ui.page-heading>
-
     <x-ui.flash-messages />
 
     @php
@@ -20,13 +10,20 @@
     @endphp
 
     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div class="px-5 pt-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-5 pt-5">
             <h2 class="text-lg font-semibold text-slate-900">Data toko penerima</h2>
+            <a
+                href="{{ route('distributor.stores.create') }}"
+                class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
+            >
+                <x-heroicon-o-plus class="h-4 w-4" />
+                Tambah data
+            </a>
         </div>
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
+                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
                     <tr>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                         <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Alamat</th>
@@ -55,7 +52,7 @@
                                     href="{{ route('distributor.stores.edit', $store) }}"
                                     aria-label="Edit"
                                     title="Edit"
-                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#5191E4] hover:text-[#2D507E]"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#018F98] hover:text-[#018F98]"
                                 >
                                     <x-heroicon-o-pencil-square class="h-4 w-4" />
                                 </a>

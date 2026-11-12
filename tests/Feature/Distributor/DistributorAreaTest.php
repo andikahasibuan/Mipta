@@ -40,7 +40,7 @@ it('menampilkan seluruh menu sidebar distributor', function () {
             'Laporan Penyaluran',
             'Riwayat Laporan',
             'Manajemen Profil',
-            'Keluar dari Sistem',
+            'Logout',
         ]);
 });
 

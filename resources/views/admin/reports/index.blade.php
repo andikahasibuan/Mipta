@@ -5,8 +5,6 @@
 @section('content')
     @include('partials.report-recap-content', [
         'area' => 'admin',
-        'title' => 'Rekap & Ekspor Laporan',
-        'subtitle' => 'Cari, filter, dan kelola data sistem secara terpusat',
         'exports' => [
             ['label' => 'Ekspor Data', 'icon' => 'arrow-down-tray'],
         ],

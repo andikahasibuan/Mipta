@@ -47,7 +47,7 @@ it('menampilkan daftar toko milik distributor dengan subjudul', function () {
     $this->actingAs($user)
         ->get(route('distributor.stores.index'))
         ->assertOk()
-        ->assertSee('Manajemen data toko')
+        ->assertSee('Manajemen Data Toko')
         ->assertSee('Tambah data')
         ->assertSee(route('distributor.stores.create'), false)
         ->assertSeeInOrder(['Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Aksi'])

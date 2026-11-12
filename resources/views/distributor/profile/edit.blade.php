@@ -3,11 +3,6 @@
 @section('title', 'Manajemen Profil')
 
 @section('content')
-    <x-ui.page-heading
-        title="Manajemen Profil"
-        subtitle="Kelola informasi akun"
-    />
-
     <x-ui.flash-messages />
 
     @php
@@ -42,7 +37,7 @@
 
             <div class="px-6 py-6">
                 <div class="flex items-center gap-4">
-                    <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#2D507E] text-xl font-semibold text-white">
+                    <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#018F98] text-xl font-semibold text-white">
                         {{ $account->initials() }}
                     </span>
 
@@ -122,7 +117,7 @@
                                         data-inline-edit
                                         aria-label="Edit {{ $field['label'] }}"
                                         title="Edit {{ $field['label'] }}"
-                                        class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#5191E4] hover:text-[#2D507E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50"
+                                        class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#018F98] hover:text-[#018F98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50"
                                     >
                                         <x-heroicon-o-pencil-square class="h-4 w-4" />
                                     </button>
@@ -158,7 +153,7 @@
                                             pattern="[A-Za-z0-9 .,/'-]+"
                                             title="Alamat kantor hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/'-)."
                                         @endif
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                                     >
 
                                     @error($field['name'])
@@ -168,7 +163,7 @@
                                     <div class="mt-2 flex items-center gap-2">
                                         <button
                                             type="submit"
-                                            class="cursor-pointer rounded-lg bg-[#2D507E] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#2D507E]/90"
+                                            class="cursor-pointer rounded-lg bg-[#018F98] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#018F98]/90"
                                         >
                                             Simpan
                                         </button>
@@ -193,7 +188,7 @@
                 <h2 class="text-lg font-semibold text-slate-900">Keamanan akun</h2>
 
                 <div class="mt-5 flex items-start gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E8F0FB] text-[#2D507E]">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E0F2F3] text-[#018F98]">
                         <x-heroicon-o-key class="h-5 w-5" />
                     </span>
                     <div class="min-w-0 flex-1">
@@ -205,7 +200,7 @@
                     <button
                         type="button"
                         data-password-open
-                        class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-[#2D507E] transition hover:bg-slate-50"
+                        class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-[#018F98] transition hover:bg-slate-50"
                     >
                         Ubah
                     </button>
@@ -245,7 +240,7 @@
                         name="current_password"
                         type="password"
                         autocomplete="current-password"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('current_password')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -259,7 +254,7 @@
                         name="password"
                         type="password"
                         autocomplete="new-password"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('password')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -273,7 +268,7 @@
                         name="password_confirmation"
                         type="password"
                         autocomplete="new-password"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                 </div>
             </div>
@@ -288,7 +283,7 @@
                 </button>
                 <button
                     type="submit"
-                    class="cursor-pointer rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+                    class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
                 >
                     Simpan kata sandi
                 </button>

@@ -14,24 +14,14 @@
     };
 @endphp
 
-<div class="min-w-0">
-    <h2 class="text-2xl font-semibold text-slate-900">
-        Selamat datang, {{ auth()->user()->name }}
-    </h2>
-    <p class="mt-1 text-sm text-slate-500">
-        Pantau penyaluran Minyakita secara terintegrasi
-    </p>
-</div>
-
-<form method="GET" action="{{ route($area.'.dashboard') }}" class="mt-6 rounded-xl border border-slate-200 bg-white p-3">
+<form method="GET" action="{{ route($area.'.dashboard') }}" class="rounded-xl border border-slate-200 bg-white p-3">
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div class="relative">
             <label for="filter-month" class="sr-only">Bulan</label>
-            <x-heroicon-o-calendar-days class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#2D507E]" />
             <select
                 id="filter-month"
                 name="month"
-                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 @foreach ($months as $option)
                     <option value="{{ $option['value'] }}" @selected($filters['month'] === $option['value'])>
@@ -44,11 +34,10 @@
 
         <div class="relative">
             <label for="filter-market" class="sr-only">Pasar</label>
-            <x-heroicon-o-map-pin class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#2D507E]" />
             <select
                 id="filter-market"
                 name="market"
-                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 <option value="">Semua Pasar</option>
                 @foreach ($markets as $market)
@@ -60,11 +49,10 @@
 
         <div class="relative">
             <label for="filter-distributor" class="sr-only">Distributor</label>
-            <x-heroicon-o-user class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#2D507E]" />
             <select
                 id="filter-distributor"
                 name="distributor"
-                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-11 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 <option value="">Semua Distributor</option>
                 @foreach ($distributors as $distributor)
@@ -76,19 +64,15 @@
 
         <button
             type="submit"
-            class="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+            class="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
         >
-            <x-heroicon-o-funnel class="h-5 w-5 text-[#2D507E]" />
             Terapkan Filter
         </button>
     </div>
 </form>
 
 <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
-        <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
-            <x-heroicon-o-document-text class="h-6 w-6" />
-        </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
         <div class="min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
             <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['reports']) }}</p>
@@ -96,10 +80,7 @@
         </div>
     </div>
 
-    <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
-        <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
-            <x-heroicon-o-truck class="h-6 w-6" />
-        </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
         <div class="min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Penyaluran</p>
             <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['cartons']) }}</p>
@@ -107,10 +88,7 @@
         </div>
     </div>
 
-    <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
-        <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
-            <x-heroicon-o-building-office-2 class="h-6 w-6" />
-        </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
         <div class="min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Distributor Aktif</p>
             <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['active_distributors']) }}</p>
@@ -126,10 +104,7 @@
         </div>
     </div>
 
-    <div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5">
-        <div aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E8F0FB] text-[#2D507E]">
-            <x-heroicon-o-map-pin class="h-6 w-6" />
-        </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
         <div class="min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Terpantau</p>
             <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['monitored_markets']) }}</p>
@@ -182,7 +157,7 @@
                         </p>
                     </div>
                     <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-                        <div class="h-full rounded-full bg-[#5191E4]" style="width: {{ $width }}%"></div>
+                        <div class="h-full rounded-full bg-[#018F98]" style="width: {{ $width }}%"></div>
                     </div>
                 </div>
             @empty
@@ -218,10 +193,10 @@
                     datasets: [{
                         label: 'Penyaluran Minyakita',
                         data: chartData.values,
-                        borderColor: '#5191E4',
+                        borderColor: '#018F98',
                         backgroundColor: 'rgba(81, 145, 228, 0.12)',
-                        pointBackgroundColor: '#5191E4',
-                        pointBorderColor: '#5191E4',
+                        pointBackgroundColor: '#018F98',
+                        pointBorderColor: '#018F98',
                         pointRadius: 3,
                         pointHoverRadius: 5,
                         borderWidth: 2,

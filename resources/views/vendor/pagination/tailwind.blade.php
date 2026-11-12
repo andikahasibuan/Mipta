@@ -16,7 +16,7 @@
                 href="{{ $paginator->previousPageUrl() }}"
                 rel="prev"
                 aria-label="{{ __('pagination.previous') }}"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-[#2D507E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-[#018F98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50"
             >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -42,7 +42,7 @@
                     @if ($page == $paginator->currentPage())
                         <span
                             aria-current="page"
-                            class="inline-flex h-9 min-w-9 cursor-default items-center justify-center rounded-md border border-[#2D507E] bg-[#2D507E] px-2 text-sm font-semibold text-white"
+                            class="inline-flex h-9 min-w-9 cursor-default items-center justify-center rounded-md border border-[#018F98] bg-[#018F98] px-2 text-sm font-semibold text-white"
                         >
                             {{ $page }}
                         </span>
@@ -50,7 +50,7 @@
                         <a
                             href="{{ $url }}"
                             aria-label="{{ __('Go to page :page', ['page' => $page]) }}"
-                            class="inline-flex h-9 min-w-9 items-center justify-center rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-[#2D507E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50"
+                            class="inline-flex h-9 min-w-9 items-center justify-center rounded-md border border-slate-200 bg-white px-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-[#018F98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50"
                         >
                             {{ $page }}
                         </a>
@@ -65,7 +65,7 @@
                 href="{{ $paginator->nextPageUrl() }}"
                 rel="next"
                 aria-label="{{ __('pagination.next') }}"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-[#2D507E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-[#018F98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50"
             >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />

@@ -6,7 +6,7 @@
     <x-ui.master-tabs active="users">
         <a
             href="{{ route('admin.users.create') }}"
-            class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+            class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
         >
             <x-heroicon-o-plus class="h-4 w-4" />
             Tambah data
@@ -36,7 +36,7 @@
                     name="q"
                     value="{{ $filters['q'] }}"
                     placeholder="Cari pengguna & data master..."
-                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
             </div>
 
@@ -44,7 +44,7 @@
                 <select
                     name="role"
                     onchange="this.form.submit()"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     <option value="">Semua peran</option>
                     @foreach ($roles as $role)
@@ -58,7 +58,7 @@
                 <select
                     name="status"
                     onchange="this.form.submit()"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     <option value="">Semua Status</option>
                     <option value="aktif" @selected($filters['status'] === 'aktif')>Aktif</option>
@@ -70,7 +70,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[50rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
+                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
                     <tr>
                         <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Nama / Identitas</th>
                         <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Nama Akun</th>

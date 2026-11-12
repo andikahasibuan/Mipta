@@ -11,7 +11,7 @@
                 class="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20"
             >
             <div class="min-w-0 leading-tight">
-                <p class="text-xl font-semibold tracking-wide text-[#2D507E] sm:text-2xl">MIPTA</p>
+                <p class="text-xl font-semibold tracking-wide text-[#018F98] sm:text-2xl">MIPTA</p>
                 <p class="text-xs text-slate-500 sm:text-sm">Portal UPTD Pasar</p>
             </div>
 
@@ -32,9 +32,8 @@
 
     <main class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
         <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.06)]">
-            <div class="border-b border-slate-100 px-5 py-5 sm:px-6 sm:py-6">
+            <div class="border-b border-slate-100 px-5 py-4 sm:px-6 sm:py-5">
                 <h1 class="text-2xl font-semibold text-slate-900">Pilih identitas kontributor</h1>
-                <p class="mt-2 text-sm text-slate-500">Identitas menentukan pasar yang dapat dilihat dan dilaporkan pada sesi ini</p>
             </div>
 
             @if ($contributors->isEmpty())
@@ -75,8 +74,8 @@
                                         class="peer sr-only"
                                         @checked($selectedId == $contributor->id)
                                     >
-                                    <span class="flex h-full items-center gap-4 rounded-lg border border-slate-200 bg-white px-5 py-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition hover:border-slate-300 peer-checked:border-[#2D507E] peer-checked:bg-blue-50 peer-checked:ring-1 peer-checked:ring-[#2D507E] peer-focus-visible:ring-2 peer-focus-visible:ring-[#5191E4]">
-                                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#E8F0FB] text-sm font-semibold text-[#2D507E]">
+                                    <span class="flex h-full items-center gap-4 rounded-lg border border-slate-200 bg-white px-5 py-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition hover:border-slate-300 peer-checked:border-[#018F98] peer-checked:bg-[#E0F2F3] peer-checked:ring-1 peer-checked:ring-[#018F98] peer-focus-visible:ring-2 peer-focus-visible:ring-[#018F98]">
+                                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#E0F2F3] text-sm font-semibold text-[#018F98]">
                                             {{ $number }}
                                         </span>
                                         <span class="min-w-0">
@@ -101,7 +100,7 @@
 
                         <button
                             type="submit"
-                            class="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#1E3A66] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/50"
+                            class="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#018F98] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#017A81] focus:outline-none focus:ring-2 focus:ring-[#018F98]/50"
                         >
                             <span id="selection-submit-label">{{ $isCurrentSelection ? 'Kembali ke dashboard' : 'Lanjut ke login' }}</span>
                             <x-heroicon-o-chevron-right class="h-4 w-4" />

@@ -20,7 +20,7 @@ it('menampilkan formulir laporan kondisi lapangan', function () {
     $this->actingAs($contributor)
         ->get(route('uptd.reports.create'))
         ->assertOk()
-        ->assertSee('Input Laporan Kondisi Lapangan')
+        ->assertSee('Input Laporan')
         ->assertSee('Kontributor UPTD 01')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Terisi otomatis')

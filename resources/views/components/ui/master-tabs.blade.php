@@ -10,11 +10,6 @@
     ];
 @endphp
 
-<div class="-mt-2 mb-4 min-w-0">
-    <h2 class="text-2xl font-semibold text-[#1F3A5F]">Pengguna &amp; Data Master</h2>
-    <p class="mt-1 text-sm text-[#2D507E]">Cari, filter, dan kelola data sistem secara terpusat</p>
-</div>
-
 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
     <nav class="flex flex-wrap items-center gap-2" aria-label="Navigasi Pengguna dan Data Master">
         @foreach ($tabs as $tab)
@@ -23,8 +18,8 @@
                 @if ($active === $tab['key']) aria-current="page" @endif
                 @class([
                     'rounded-md border px-4 py-2 text-sm transition',
-                    'border-[#2D507E] bg-white font-semibold text-[#1F3A5F] shadow-sm' => $active === $tab['key'],
-                    'border-transparent bg-[#DCE6F5] text-[#2D507E] hover:bg-[#CBD9EE]' => $active !== $tab['key'],
+                    'border-[#018F98] bg-white font-semibold text-[#016B72] shadow-sm' => $active === $tab['key'],
+                    'border-transparent bg-[#E0F2F3] text-[#018F98] hover:bg-[#CFE9EB]' => $active !== $tab['key'],
                 ])
             >
                 {{ $tab['label'] }}

@@ -5,7 +5,7 @@
         <summary
             aria-label="Aksi"
             title="Aksi"
-            class="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#5191E4] hover:text-[#2D507E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50 [&::-webkit-details-marker]:hidden"
+            class="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#018F98] hover:text-[#018F98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50 [&::-webkit-details-marker]:hidden"
         >
             <x-heroicon-o-eye class="h-5 w-5" />
         </summary>

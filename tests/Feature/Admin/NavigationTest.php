@@ -20,7 +20,7 @@ it('menampilkan halaman admin dengan menu yang sesuai aktif', function (string $
 
     $response->assertOk()
         ->assertSee('<title>'.e($title).'</title>', false)
-        ->assertSeeInOrder(['Sistem Monitoring Distribusi', $label]);
+        ->assertSee($label);
 
     $html = $response->getContent();
 

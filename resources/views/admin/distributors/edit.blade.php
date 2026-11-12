@@ -23,7 +23,7 @@
                         required
                         pattern="[A-Za-z0-9 .'-]+"
                         title="Nama perusahaan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('name')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -40,7 +40,7 @@
                         required
                         pattern="[A-Za-z .'-]+"
                         title="Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung."
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('penanggung_jawab')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -60,7 +60,7 @@
                         maxlength="15"
                         pattern="[0-9]{10,15}"
                         title="No. handphone hanya boleh berisi angka (10 sampai 15 digit)."
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('telepon')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -75,7 +75,7 @@
                         type="email"
                         value="{{ old('email', $account?->email) }}"
                         required
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('email')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -88,7 +88,7 @@
                         id="password"
                         name="password"
                         type="password"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('password')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -105,7 +105,7 @@
                 </a>
                 <button
                     type="submit"
-                    class="rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90"
+                    class="rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
                 >
                     Simpan
                 </button>

@@ -48,7 +48,7 @@
                                 type="date"
                                 value="{{ old('distribution_date', $report?->distribution_date?->format('Y-m-d') ?? now()->toDateString()) }}"
                                 max="{{ now()->toDateString() }}"
-                                class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                                class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                             >
                             @error('distribution_date')
                                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -62,7 +62,7 @@
                             <select
                                 id="recipient_store_id"
                                 name="recipient_store_id"
-                                class="mt-1 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                                class="mt-1 w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                             >
                                 <option value="">Pilih toko penerima</option>
                                 @foreach ($stores as $store)
@@ -131,7 +131,7 @@
                             type="number"
                             min="1"
                             value="{{ old('cartons', $report?->cartons) }}"
-                            class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                            class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                         >
                         @error('cartons')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -152,7 +152,7 @@
                                 name="action"
                                 value="draft"
                                 @disabled($stores->isEmpty())
-                                class="cursor-pointer rounded-lg border border-[#2D507E] bg-white px-4 py-2.5 text-sm font-semibold text-[#2D507E] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                class="cursor-pointer rounded-lg border border-[#018F98] bg-white px-4 py-2.5 text-sm font-semibold text-[#018F98] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Simpan Draft
                             </button>
@@ -161,7 +161,7 @@
                                 name="action"
                                 value="submit"
                                 @disabled($stores->isEmpty())
-                                class="cursor-pointer rounded-lg bg-[#2D507E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2D507E]/90 disabled:cursor-not-allowed disabled:opacity-50"
+                                class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Kirim Laporan
                             </button>
@@ -172,15 +172,15 @@
         </div>
 
         <aside class="min-w-0 self-start lg:col-span-1">
-            <div class="rounded-xl border border-slate-200 bg-[#E8F0FB] p-5">
+            <div class="rounded-xl border border-slate-200 bg-[#E0F2F3] p-5">
                 <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#2D507E]">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#018F98]">
                         <x-heroicon-o-document-text class="h-5 w-5" />
                     </span>
-                    <h3 class="text-base font-semibold text-[#1F3A5F]">Panduan pengisian</h3>
+                    <h3 class="text-base font-semibold text-[#016B72]">Panduan pengisian</h3>
                 </div>
 
-                <ul class="mt-4 list-disc space-y-2 pl-5 text-sm leading-snug text-[#2D507E]">
+                <ul class="mt-4 list-disc space-y-2 pl-5 text-sm leading-snug text-[#018F98]">
                     <li>Pastikan toko penerima yang sudah terdaftar.</li>
                     <li>Alamat, NIB, dan pasar akan terisi otomatis.</li>
                     <li>Jumlah penyaluran dicatat dalam karton.</li>
@@ -209,7 +209,7 @@
 
                                 <a
                                     href="{{ route('distributor.distribution-reports.edit', $draft) }}"
-                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#2D507E] transition hover:bg-slate-50"
+                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#018F98] transition hover:bg-slate-50"
                                 >
                                     Edit draft
                                 </a>

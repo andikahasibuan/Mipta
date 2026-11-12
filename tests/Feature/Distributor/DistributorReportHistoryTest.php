@@ -63,8 +63,6 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
     $this->actingAs($user)
         ->get(route('distributor.report-history.index'))
         ->assertOk()
-        ->assertSee('Riwayat Laporan Penyaluran')
-        ->assertSee('Daftar laporan penyaluran yang pernah dibuat oleh distributor')
         ->assertSeeInOrder(['ID Laporan', 'Tanggal', 'Nama Toko', 'Pasar', 'Jumlah Karton', 'Status Laporan', 'Aksi'])
         ->assertSee($report->code)
         ->assertSee('Toko Riwayat')

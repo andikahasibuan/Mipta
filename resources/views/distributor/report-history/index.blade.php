@@ -3,11 +3,6 @@
 @section('title', 'Riwayat Laporan')
 
 @section('content')
-    <x-ui.page-heading
-        title="Riwayat Laporan Penyaluran"
-        subtitle="Daftar laporan penyaluran yang pernah dibuat oleh distributor"
-    />
-
     <x-ui.flash-messages />
 
     @php
@@ -25,7 +20,7 @@
                 <select
                     id="filter-month"
                     name="month"
-                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     @foreach ($months as $option)
                         <option value="{{ $option['value'] }}" @selected($filters['month'] === $option['value'])>
@@ -40,7 +35,7 @@
                 <select
                     id="filter-status"
                     name="status"
-                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     <option value="">Semua Status</option>
                     <option value="submitted" @selected($filters['status'] === 'submitted')>Terkirim</option>
@@ -56,13 +51,13 @@
                     name="search"
                     value="{{ $filters['search'] }}"
                     placeholder="Cari nama toko"
-                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
             </div>
 
             <button
                 type="submit"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 Terapkan Filter
             </button>
@@ -72,7 +67,7 @@
     <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
+                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
                     <tr>
                         <th scope="col" class="w-[9%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal</th>

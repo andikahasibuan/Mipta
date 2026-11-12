@@ -11,7 +11,7 @@
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="min-h-dvh bg-[#F3F7FB] text-slate-800 antialiased">
+    <body class="min-h-dvh bg-[#F0F9FA] text-slate-800 antialiased">
         @yield('content')
 
         @stack('scripts')

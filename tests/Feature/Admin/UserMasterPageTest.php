@@ -17,7 +17,7 @@ it('menampilkan tombol tambah data yang mengarah ke halaman tambah', function ()
         ->assertDontSee('Ekspor Data');
 });
 
-it('menampilkan judul dan deskripsi pengguna dan data master di setiap tab', function () {
+it('menampilkan judul pengguna dan data master di setiap tab', function () {
     $admin = User::factory()->create();
 
     collect([
@@ -31,7 +31,6 @@ it('menampilkan judul dan deskripsi pengguna dan data master di setiap tab', fun
             ->get(route($route))
             ->assertOk()
             ->assertSee('Pengguna & Data Master')
-            ->assertSee('Cari, filter, dan kelola data sistem secara terpusat')
             ->assertDontSee('aria-label="Breadcrumb"', false);
     });
 });

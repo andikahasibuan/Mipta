@@ -6,6 +6,5 @@
     @include('partials.distribution-content', [
         'area' => 'kepala-dinas',
         'readOnly' => true,
-        'subtitle' => 'Pantau laporan penyaluran Minyakita',
     ])
 @endsection

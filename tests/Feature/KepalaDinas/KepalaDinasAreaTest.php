@@ -79,7 +79,6 @@ it('menampilkan konten dashboard untuk kepala dinas', function () {
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.dashboard'))
         ->assertOk()
-        ->assertSee('Selamat datang')
         ->assertSee('Total Laporan');
 });
 

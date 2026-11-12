@@ -1,9 +1,6 @@
-<header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-5 lg:px-8">
+<header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-4 lg:px-8">
     <div class="min-w-0">
-        <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-            Sistem Monitoring Distribusi
-        </p>
-        <h1 class="mt-1 truncate text-2xl font-semibold text-slate-900">
+        <h1 class="truncate text-2xl font-semibold text-slate-900">
             {{ $activeMenuLabel }}
         </h1>
     </div>
@@ -18,7 +15,7 @@
             <details class="relative" data-notification-menu>
                 <summary
                     aria-label="Notifikasi"
-                    class="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-[#2D507E] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50 [&::-webkit-details-marker]:hidden"
+                    class="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-[#018F98] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50 [&::-webkit-details-marker]:hidden"
                 >
                     <x-heroicon-o-bell class="h-5 w-5" />
 
@@ -38,7 +35,7 @@
                                 @csrf
                                 <button
                                     type="submit"
-                                    class="cursor-pointer text-xs font-semibold text-[#2D507E] transition hover:underline"
+                                    class="cursor-pointer text-xs font-semibold text-[#018F98] transition hover:underline"
                                 >
                                     Tandai semua dibaca
                                 </button>
@@ -50,7 +47,7 @@
                         @forelse ($notifications as $notification)
                             <div @class([
                                 'border-b border-slate-100 px-4 py-3 last:border-b-0',
-                                'bg-[#E8F0FB]/60' => $notification->read_at === null,
+                                'bg-[#E0F2F3]/60' => $notification->read_at === null,
                             ])>
                                 <p class="text-sm leading-snug text-slate-700">
                                     {{ data_get($notification->data, 'message', 'Notifikasi baru') }}
@@ -69,9 +66,9 @@
             <details class="relative" data-profile-menu>
             <summary
                 aria-label="Menu profil"
-                class="flex cursor-pointer list-none items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5191E4]/50 [&::-webkit-details-marker]:hidden"
+                class="flex cursor-pointer list-none items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50 [&::-webkit-details-marker]:hidden"
             >
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2D507E] text-sm font-semibold text-white">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#018F98] text-sm font-semibold text-white">
                     {{ auth()->user()->initials() }}
                 </span>
                 <span class="hidden min-w-0 text-left sm:block">
@@ -91,7 +88,7 @@
                     @csrf
                     <button
                         type="submit"
-                        class="w-full cursor-pointer rounded-md bg-[#2D507E] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#2D507E]/90"
+                        class="w-full cursor-pointer rounded-md bg-[#018F98] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#018F98]/90"
                     >
                         Keluar
                     </button>

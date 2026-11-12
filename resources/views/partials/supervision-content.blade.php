@@ -1,8 +1,3 @@
-<x-ui.page-heading
-    :title="$title"
-    :subtitle="$subtitle"
-/>
-
 @php
     $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
 @endphp
@@ -22,7 +17,7 @@
                 name="q"
                 value="{{ $filters['q'] }}"
                 placeholder="Cari kontributor atau pasar..."
-                class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
         </div>
 
@@ -33,7 +28,7 @@
                 id="filter-month"
                 name="month"
                 value="{{ $filters['month'] }}"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
         </div>
 
@@ -42,7 +37,7 @@
             <select
                 id="filter-condition"
                 name="condition"
-                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#5191E4] focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 <option value="">Semua Kondisi</option>
                 @foreach ($conditions as $condition)
@@ -56,7 +51,7 @@
 
         <button
             type="submit"
-            class="shrink-0 cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#5191E4]/30"
+            class="shrink-0 cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
         >
             Terapkan Filter
         </button>
@@ -70,7 +65,7 @@
 
     <div class="mt-4 overflow-x-auto">
         <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
-            <thead class="bg-[#E8F0FB] text-center text-[11px] uppercase tracking-widest text-[#2D507E]">
+            <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
                 <tr>
                     <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
                     <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
