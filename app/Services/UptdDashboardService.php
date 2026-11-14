@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Enums\DistributionStatus;
-use App\Enums\FieldCondition;
-use App\Models\Distribution;
 use App\Models\FieldDistributionReport;
+use App\Models\RecipientStore;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -16,7 +14,7 @@ class UptdDashboardService
      *
      * @return array{
      *     contributor: User,
-     *     summary: array{reports: int, normal_reports: int, active_distributors: int},
+     *     summary: array{reports: int, stores: int},
      *     reports: LengthAwarePaginator
      * }
      */
@@ -30,12 +28,6 @@ class UptdDashboardService
             ->where('market_id', $marketId)
             ->where('uptd_user_id', $contributor->id);
 
-        $activeDistributors = Distribution::query()
-            ->where('market_id', $marketId)
-            ->where('status', DistributionStatus::Submitted->value)
-            ->distinct()
-            ->count('distributor_id');
-
         $reports = $reportQuery()
             ->with('contributor:id,name')
             ->orderByDesc('report_date')
@@ -47,10 +39,10 @@ class UptdDashboardService
             'contributor' => $contributor,
             'summary' => [
                 'reports' => $reportQuery()->count(),
-                'normal_reports' => $reportQuery()
-                    ->where('condition', FieldCondition::Normal->value)
+                'stores' => RecipientStore::query()
+                    ->where('market_id', $marketId)
+                    ->where('is_active', true)
                     ->count(),
-                'active_distributors' => $activeDistributors,
             ],
             'reports' => $reports,
         ];

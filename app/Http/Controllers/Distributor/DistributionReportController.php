@@ -95,10 +95,12 @@ class DistributionReportController extends Controller
         if ($wasSubmitted) {
             if ($changed) {
                 $this->notifyReportUpdated($request, $distribution);
+
+                return redirect()->route('distributor.report-history.index')
+                    ->with('success', 'Laporan penyaluran berhasil diperbarui.');
             }
 
-            return redirect()->route('distributor.report-history.index')
-                ->with('success', 'Laporan penyaluran berhasil diperbarui.');
+            return redirect()->route('distributor.report-history.index');
         }
 
         if ($validated['action'] === 'draft') {

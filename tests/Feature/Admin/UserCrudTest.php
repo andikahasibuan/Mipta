@@ -188,7 +188,7 @@ it('mengizinkan pengelolaan akun bersama UPTD dari tab pengguna', function () {
         ->assertOk();
 });
 
-it('menampilkan pilihan peran UPTD pada form pengguna saat belum ada akun bersama', function () {
+it('menampilkan pilihan peran UPTD pada form pengguna', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.users.create'))
         ->assertOk()
@@ -196,13 +196,13 @@ it('menampilkan pilihan peran UPTD pada form pengguna saat belum ada akun bersam
         ->assertDontSee('Peran UPTD di sini');
 });
 
-it('menyembunyikan pilihan peran UPTD pada form pengguna saat akun bersama sudah ada', function () {
+it('tetap menampilkan pilihan peran UPTD pada form pengguna saat akun bersama sudah ada', function () {
     User::factory()->create(['role' => Role::UptdPasar]);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.users.create'))
         ->assertOk()
-        ->assertDontSee('value="'.Role::UptdPasar->value.'"', false);
+        ->assertSee('value="'.Role::UptdPasar->value.'"', false);
 });
 
 it('mengizinkan pembuatan akun bersama UPTD pertama', function () {
@@ -226,7 +226,7 @@ it('mengizinkan pembuatan akun bersama UPTD pertama', function () {
     ]);
 });
 
-it('menolak pembuatan akun bersama UPTD kedua', function () {
+it('mengizinkan pembuatan akun bersama UPTD kedua', function () {
     $admin = User::factory()->create();
     User::factory()->create(['role' => Role::UptdPasar]);
 
@@ -239,11 +239,15 @@ it('menolak pembuatan akun bersama UPTD kedua', function () {
             'role' => Role::UptdPasar->value,
             'is_active' => '1',
         ])
-        ->assertSessionHasErrors('role');
+        ->assertRedirect(route('admin.users.index'));
 
-    $this->assertDatabaseMissing('users', ['username' => 'uptd.kedua']);
+    $this->assertDatabaseHas('users', [
+        'username' => 'uptd.kedua',
+        'role' => Role::UptdPasar->value,
+        'market_id' => null,
+    ]);
 
-    expect(User::where('role', Role::UptdPasar->value)->whereNull('market_id')->count())->toBe(1);
+    expect(User::where('role', Role::UptdPasar->value)->whereNull('market_id')->count())->toBe(2);
 });
 
 it('tetap menampilkan pilihan peran UPTD saat mengedit akun bersama UPTD', function () {
@@ -256,7 +260,7 @@ it('tetap menampilkan pilihan peran UPTD saat mengedit akun bersama UPTD', funct
         ->assertSee('value="'.Role::UptdPasar->value.'"', false);
 });
 
-it('menyembunyikan pilihan peran UPTD saat mengedit akun lain jika akun bersama sudah ada', function () {
+it('tetap menampilkan pilihan peran UPTD saat mengedit akun lain jika akun bersama sudah ada', function () {
     $admin = User::factory()->create();
     User::factory()->create(['role' => Role::UptdPasar]);
     $target = User::factory()->create(['role' => Role::Admin]);
@@ -264,7 +268,7 @@ it('menyembunyikan pilihan peran UPTD saat mengedit akun lain jika akun bersama 
     $this->actingAs($admin)
         ->get(route('admin.users.edit', $target))
         ->assertOk()
-        ->assertDontSee('value="'.Role::UptdPasar->value.'"', false);
+        ->assertSee('value="'.Role::UptdPasar->value.'"', false);
 });
 
 it('mengizinkan pembaruan akun bersama UPTD tanpa menolak akun itu sendiri', function () {
@@ -284,7 +288,7 @@ it('mengizinkan pembaruan akun bersama UPTD tanpa menolak akun itu sendiri', fun
     expect($shared->fresh()->role)->toBe(Role::UptdPasar);
 });
 
-it('menolak mengubah pengguna lain menjadi UPTD saat akun bersama sudah ada', function () {
+it('mengizinkan mengubah pengguna lain menjadi UPTD saat akun bersama sudah ada', function () {
     $admin = User::factory()->create();
     User::factory()->create(['role' => Role::UptdPasar]);
     $target = User::factory()->create(['role' => Role::Admin]);
@@ -297,9 +301,9 @@ it('menolak mengubah pengguna lain menjadi UPTD saat akun bersama sudah ada', fu
             'role' => Role::UptdPasar->value,
             'is_active' => '1',
         ])
-        ->assertSessionHasErrors('role');
+        ->assertRedirect(route('admin.users.index'));
 
-    expect($target->fresh()->role)->toBe(Role::Admin);
+    expect($target->fresh()->role)->toBe(Role::UptdPasar);
 });
 
 it('mencegah admin mengubah peran atau menonaktifkan akunnya sendiri', function () {

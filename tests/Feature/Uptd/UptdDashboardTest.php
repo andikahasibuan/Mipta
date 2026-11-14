@@ -2,10 +2,9 @@
 
 use App\Enums\FieldCondition;
 use App\Enums\Role;
-use App\Models\Distribution;
-use App\Models\Distributor;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
+use App\Models\RecipientStore;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -36,7 +35,7 @@ it('menampilkan identitas kontributor dan tautan navigasi dashboard', function (
     expect($main)->not->toContain(route('uptd.reports.create'));
 });
 
-it('menghitung total laporan dan kondisi normal hanya dari laporan milik kontributor', function () {
+it('menghitung total laporan kondisi pasar milik kontributor di pasar ini', function () {
     $market = Market::factory()->create();
     $otherMarket = Market::factory()->create();
     $contributor = User::factory()->create([
@@ -75,11 +74,10 @@ it('menghitung total laporan dan kondisi normal hanya dari laporan milik kontrib
     $this->actingAs($contributor)
         ->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Total Laporan', '2', 'Laporan kontributor aktif'])
-        ->assertSeeInOrder(['Kondisi normal', '1', 'Berdasarkan riwayat laporan']);
+        ->assertSeeInOrder(['Total Laporan', '2']);
 });
 
-it('menghitung distributor yang menyalurkan ke pasar kontributor tanpa melihat status akun', function () {
+it('menghitung toko penerima aktif di pasar kontributor', function () {
     $market = Market::factory()->create();
     $otherMarket = Market::factory()->create();
     $contributor = User::factory()->create([
@@ -87,59 +85,30 @@ it('menghitung distributor yang menyalurkan ke pasar kontributor tanpa melihat s
         'market_id' => $market->id,
     ]);
 
-    $activeDistributor = Distributor::factory()->create(['is_active' => true]);
-    $inactiveDistributor = Distributor::factory()->create(['is_active' => false]);
-    $draftOnlyDistributor = Distributor::factory()->create(['is_active' => true]);
-    $otherMarketDistributor = Distributor::factory()->create(['is_active' => true]);
-    Distributor::factory()->create(['is_active' => true]);
-
-    Distribution::factory()->create([
-        'distributor_id' => $activeDistributor->id,
+    RecipientStore::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'is_active' => true,
     ]);
 
-    Distribution::factory()->create([
-        'distributor_id' => $inactiveDistributor->id,
+    RecipientStore::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'is_active' => true,
     ]);
 
-    Distribution::factory()->draft()->create([
-        'distributor_id' => $draftOnlyDistributor->id,
+    RecipientStore::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'is_active' => false,
     ]);
 
-    Distribution::factory()->create([
-        'distributor_id' => $otherMarketDistributor->id,
+    RecipientStore::factory()->create([
         'market_id' => $otherMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'is_active' => true,
     ]);
 
     $this->actingAs($contributor)
         ->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Distributor Aktif', '2', 'Melakukan penyaluran ke pasar ini']);
-});
-
-it('menampilkan catatan penyaluran saat distributor menyalurkan ke pasar', function () {
-    $market = Market::factory()->create();
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
-
-    Distribution::factory()->create([
-        'distributor_id' => Distributor::factory()->create(['is_active' => true]),
-        'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
-    ]);
-
-    $this->actingAs($contributor)
-        ->get(route('uptd.dashboard'))
-        ->assertOk()
-        ->assertSeeInOrder(['Distributor Aktif', '1', 'Melakukan penyaluran ke pasar ini']);
+        ->assertSeeInOrder(['Toko Penerima', '2']);
 });
 
 it('menampilkan lima laporan kondisi pasar terbaru per halaman secara berurutan', function () {
@@ -189,7 +158,7 @@ it('menampilkan lima laporan kondisi pasar terbaru per halaman secara berurutan'
         ->assertSee('Menampilkan 1 dari 6 laporan');
 });
 
-it('menampilkan keadaan kosong saat belum ada laporan dan distributor', function () {
+it('menampilkan keadaan kosong saat belum ada laporan dan toko penerima', function () {
     $market = Market::factory()->create();
     $contributor = User::factory()->create([
         'role' => Role::UptdPasar,
@@ -200,5 +169,7 @@ it('menampilkan keadaan kosong saat belum ada laporan dan distributor', function
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSee('Belum ada laporan kondisi pasar')
-        ->assertSeeInOrder(['Distributor Aktif', '0', 'Belum ada penyaluran ke pasar']);
+        ->assertSeeInOrder(['Total Laporan', '0', 'Toko Penerima', '0'])
+        ->assertDontSee('Laporan kondisi pasar kontributor ini')
+        ->assertDontSee('Toko aktif di pasar ini');
 });

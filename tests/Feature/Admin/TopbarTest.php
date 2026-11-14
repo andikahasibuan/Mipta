@@ -57,3 +57,34 @@ it('menampilkan ikon notifikasi', function () {
         ->assertSee('Notifikasi')
         ->assertSee('Belum ada notifikasi');
 });
+
+it('menampilkan ikon notifikasi untuk kepala dinas', function () {
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+
+    $this->actingAs($kepalaDinas)
+        ->get(route('kepala-dinas.dashboard'))
+        ->assertOk()
+        ->assertSee('aria-label="Notifikasi"', false)
+        ->assertSee('Belum ada notifikasi');
+});
+
+it('menyembunyikan ikon notifikasi dari distributor dan kontributor uptd', function () {
+    $distributor = User::factory()->distributor()->create();
+
+    $this->actingAs($distributor)
+        ->get(route('distributor.dashboard'))
+        ->assertOk()
+        ->assertDontSee('aria-label="Notifikasi"', false)
+        ->assertDontSee('Belum ada notifikasi');
+
+    $uptd = User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
+    ]);
+
+    $this->actingAs($uptd)
+        ->get(route('uptd.dashboard'))
+        ->assertOk()
+        ->assertDontSee('aria-label="Notifikasi"', false)
+        ->assertDontSee('Belum ada notifikasi');
+});

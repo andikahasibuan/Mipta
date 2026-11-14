@@ -33,11 +33,27 @@ enum Role: string
     }
 
     /**
+     * Periksa apakah peran ini admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this === self::Admin;
+    }
+
+    /**
      * Periksa apakah peran ini kepala dinas.
      */
     public function isKepalaDinas(): bool
     {
         return $this === self::KepalaDinas;
+    }
+
+    /**
+     * Periksa apakah peran ini menerima notifikasi laporan.
+     */
+    public function canReceiveNotifications(): bool
+    {
+        return in_array($this, [self::Admin, self::KepalaDinas], true);
     }
 
     /**

@@ -5,45 +5,26 @@
 @section('content')
     @php
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
-
-        $distributorNote = $summary['active_distributors'] === 0
-            ? 'Belum ada penyaluran ke pasar'
-            : 'Melakukan penyaluran ke pasar ini';
     @endphp
 
     <div class="min-w-0">
         <x-ui.flash-messages />
 
-        <div class="mt-4 min-w-0 rounded-xl bg-[#018F98] px-5 py-6 text-white shadow-sm">
-            <div class="min-w-0">
-                <p class="truncate text-xl font-semibold text-white">{{ $contributor->name }}</p>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="flex h-28 flex-col justify-center rounded-xl bg-[#018F98] px-6 py-2.5 text-white shadow-sm sm:col-span-2 sm:px-8">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-[#E6F7F8]">Kontributor UPTD</p>
+                <h2 class="mt-1 truncate text-xl font-semibold sm:text-2xl">{{ $contributor->name }}</h2>
                 <p class="mt-1 truncate text-sm text-[#E6F7F8]">{{ $contributor->market?->name ?? '—' }}</p>
             </div>
-        </div>
 
-        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="rounded-xl border border-slate-200 bg-white p-5">
-                <div class="min-w-0">
-                    <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
-                    <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['reports']) }}</p>
-                    <p class="mt-1 text-xs text-slate-500">Laporan kontributor aktif</p>
-                </div>
+            <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
+                <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['reports']) }}</p>
             </div>
 
-            <div class="rounded-xl border border-slate-200 bg-white p-5">
-                <div class="min-w-0">
-                    <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Kondisi normal</p>
-                    <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['normal_reports']) }}</p>
-                    <p class="mt-1 text-xs text-slate-500">Berdasarkan riwayat laporan</p>
-                </div>
-            </div>
-
-            <div class="rounded-xl border border-slate-200 bg-white p-5">
-                <div class="min-w-0">
-                    <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Distributor Aktif</p>
-                    <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['active_distributors']) }}</p>
-                    <p class="mt-1 text-xs text-slate-500">{{ $distributorNote }}</p>
-                </div>
+            <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Toko Penerima</p>
+                <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['stores']) }}</p>
             </div>
         </div>
 

@@ -77,7 +77,7 @@ Route::middleware(['auth', 'role:uptd_pasar'])->group(function () {
 });
 
 Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])
-    ->middleware('auth')
+    ->middleware(['auth', 'role:admin,kepala_dinas'])
     ->name('notifications.read-all');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {

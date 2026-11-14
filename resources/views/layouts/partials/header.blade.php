@@ -20,13 +20,14 @@
     </div>
 
     @auth
-        @php
-            $notifications = auth()->user()->notifications()->latest()->take(5)->get();
-            $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
-        @endphp
-
         <div class="flex shrink-0 items-center gap-3">
-            <details class="relative" data-notification-menu>
+            @if (auth()->user()->role?->canReceiveNotifications())
+                @php
+                    $notifications = auth()->user()->notifications()->latest()->take(5)->get();
+                    $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
+                @endphp
+
+                <details class="relative" data-notification-menu>
                 <summary
                     aria-label="Notifikasi"
                     class="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-[#018F98] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50 [&::-webkit-details-marker]:hidden"
@@ -76,6 +77,8 @@
                     </div>
                 </div>
             </details>
+
+            @endif
 
             <details class="relative" data-profile-menu>
             <summary

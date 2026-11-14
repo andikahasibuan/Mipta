@@ -61,7 +61,7 @@ class UserController extends Controller
     public function create(): View
     {
         return view('admin.users.create', [
-            'roles' => $this->assignableRoles(! $this->sharedUptdExists()),
+            'roles' => $this->assignableRoles(),
         ]);
     }
 
@@ -81,12 +81,6 @@ class UserController extends Controller
             'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
             'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
-
-        if ($validated['role'] === Role::UptdPasar->value && $this->sharedUptdExists()) {
-            return back()->withErrors([
-                'role' => 'Akun bersama UPTD sudah ada. Hanya satu akun UPTD bersama yang diizinkan.',
-            ])->withInput();
-        }
 
         User::create([
             'name' => $validated['name'],
@@ -109,9 +103,7 @@ class UserController extends Controller
 
         return view('admin.users.edit', [
             'user' => $user,
-            'roles' => $this->assignableRoles(
-                $user->isSharedUptdAccount() || ! $this->sharedUptdExists(),
-            ),
+            'roles' => $this->assignableRoles(),
         ]);
     }
 
@@ -156,12 +148,6 @@ class UserController extends Controller
             }
         }
 
-        if ($validated['role'] === Role::UptdPasar->value && $this->sharedUptdExists($user->id)) {
-            return back()->withErrors([
-                'role' => 'Akun bersama UPTD sudah ada. Hanya satu akun UPTD bersama yang diizinkan.',
-            ])->withInput();
-        }
-
         if (! empty($validated['password'])) {
             $data['password'] = $validated['password'];
         }
@@ -192,25 +178,12 @@ class UserController extends Controller
      *
      * @return array<int, Role>
      */
-    private function assignableRoles(bool $includeUptd = true): array
+    private function assignableRoles(): array
     {
         return array_values(array_filter(
             Role::cases(),
-            fn (Role $role): bool => $role !== Role::Distributor
-                && ($includeUptd || $role !== Role::UptdPasar),
+            fn (Role $role): bool => $role !== Role::Distributor,
         ));
-    }
-
-    /**
-     * Periksa apakah akun bersama UPTD sudah ada.
-     */
-    private function sharedUptdExists(?int $exceptUserId = null): bool
-    {
-        return User::query()
-            ->where('role', Role::UptdPasar->value)
-            ->whereNull('market_id')
-            ->when($exceptUserId !== null, fn ($query) => $query->where('id', '!=', $exceptUserId))
-            ->exists();
     }
 
     /**

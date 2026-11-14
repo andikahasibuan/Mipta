@@ -86,14 +86,14 @@
             <table class="w-full min-w-[72rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
                     <tr>
-                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID</th>
+                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">ID</th>
                         <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Alamat</th>
                         <th scope="col" class="w-[11%] px-5 py-3 align-middle font-semibold">NIB</th>
                         <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Distributor</th>
+                        <th scope="col" class="w-[13%] px-5 py-3 align-middle font-semibold">Distributor</th>
                         <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">Status</th>
-                        <th scope="col" class="w-[9%] px-5 py-3 align-middle font-semibold">Aksi</th>
+                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">

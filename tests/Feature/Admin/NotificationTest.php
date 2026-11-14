@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Market;
 use App\Models\User;
 use App\Notifications\DistributionReportDeleted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -57,4 +58,28 @@ it('menandai seluruh notifikasi milik pengguna sebagai sudah dibaca', function (
 
 it('mengarahkan tamu yang menandai notifikasi ke halaman login', function () {
     $this->post(route('notifications.read-all'))->assertRedirect(route('login'));
+});
+
+it('hanya mengizinkan admin dan kepala dinas menandai notifikasi', function () {
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+
+    $this->actingAs($kepalaDinas)
+        ->from(route('kepala-dinas.dashboard'))
+        ->post(route('notifications.read-all'))
+        ->assertRedirect(route('kepala-dinas.dashboard'));
+
+    $distributor = User::factory()->distributor()->create();
+
+    $this->actingAs($distributor)
+        ->post(route('notifications.read-all'))
+        ->assertForbidden();
+
+    $uptd = User::factory()->create([
+        'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
+    ]);
+
+    $this->actingAs($uptd)
+        ->post(route('notifications.read-all'))
+        ->assertForbidden();
 });

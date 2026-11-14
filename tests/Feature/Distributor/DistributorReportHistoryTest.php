@@ -322,7 +322,8 @@ it('tidak mengirim notifikasi saat laporan terkirim diedit tanpa perubahan', fun
             'cartons' => 75,
             'action' => 'submit',
         ])
-        ->assertRedirect(route('distributor.report-history.index'));
+        ->assertRedirect(route('distributor.report-history.index'))
+        ->assertSessionMissing('success');
 
     $this->assertDatabaseCount('notifications', 0);
 });

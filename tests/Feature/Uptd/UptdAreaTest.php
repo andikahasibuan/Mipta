@@ -8,12 +8,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 dataset('uptd pages', [
-    'dashboard' => ['uptd.dashboard', 'Dashboard'],
-    'input laporan' => ['uptd.reports.create', 'Input Laporan'],
-    'riwayat laporan' => ['uptd.reports.index', 'Riwayat Laporan'],
+    'dashboard' => ['uptd.dashboard', 'Dashboard', 'Dashboard'],
+    'input laporan' => ['uptd.reports.create', 'Input Laporan', 'Kondisi Pasar'],
+    'riwayat laporan' => ['uptd.reports.index', 'Riwayat Laporan', 'Riwayat'],
 ]);
 
-it('menampilkan halaman kontributor UPTD dengan menu yang sesuai aktif', function (string $routeName, string $label) {
+it('menampilkan halaman kontributor UPTD dengan menu yang sesuai aktif', function (string $routeName, string $title, string $sidebarLabel) {
     $contributor = User::factory()->create([
         'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
@@ -22,7 +22,7 @@ it('menampilkan halaman kontributor UPTD dengan menu yang sesuai aktif', functio
     $response = $this->actingAs($contributor)->get(route($routeName));
 
     $response->assertOk()
-        ->assertSee('<title>'.e($label).'</title>', false);
+        ->assertSee('<title>'.e($title).'</title>', false);
 
     $html = $response->getContent();
 
@@ -30,7 +30,7 @@ it('menampilkan halaman kontributor UPTD dengan menu yang sesuai aktif', functio
     $sidebar = $matches[0] ?? '';
 
     expect(substr_count($sidebar, 'aria-current="page"'))->toBe(1)
-        ->and($sidebar)->toMatch('/aria-current="page"[^>]*>(?:(?!<\/a>).)*'.preg_quote(e($label), '/').'/s');
+        ->and($sidebar)->toMatch('/aria-current="page"[^>]*>(?:(?!<\/a>).)*'.preg_quote(e($sidebarLabel), '/').'/s');
 })->with('uptd pages');
 
 it('menampilkan seluruh menu sidebar kontributor UPTD', function () {
@@ -44,8 +44,8 @@ it('menampilkan seluruh menu sidebar kontributor UPTD', function () {
         ->assertOk()
         ->assertSeeInOrder([
             'Dashboard',
-            'Input Laporan',
-            'Riwayat Laporan',
+            'Kondisi Pasar',
+            'Riwayat',
             'Ganti Kontributor',
             'Logout',
         ]);
