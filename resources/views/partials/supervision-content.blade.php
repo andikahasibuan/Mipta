@@ -60,7 +60,7 @@
 
 <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
     <div class="px-5 pt-5">
-        <h2 class="text-lg font-semibold text-slate-900">Laporan Kondisi Lapangan</h2>
+        <h2 class="text-lg font-semibold text-slate-900">Laporan Kondisi Pasar</h2>
     </div>
 
     <div class="mt-4 overflow-x-auto">

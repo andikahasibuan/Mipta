@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Pengawasan')
+@section('title', 'Kondisi Pasar')
 
 @section('content')
     @include('partials.supervision-content', [

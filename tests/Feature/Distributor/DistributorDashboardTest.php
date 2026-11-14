@@ -33,13 +33,12 @@ it('menampilkan dashboard distributor dengan identitas perusahaan', function () 
     $this->actingAs($user)
         ->get(route('distributor.dashboard'))
         ->assertOk()
-        ->assertSee('Selamat datang, PT Rajawali Nusantara Indonesia')
-        ->assertSee('Periode aktif')
+        ->assertSee('Hai, PT Rajawali Nusantara Indonesia')
+        ->assertDontSee('Periode aktif')
         ->assertSee('Total Laporan')
         ->assertSee('Jumlah Penyaluran')
-        ->assertSee('Laporan Draf')
+        ->assertDontSee('Laporan Draf')
         ->assertSee('Laporan Penyaluran')
-        ->assertSee('value="'.now()->format('Y-m').'" selected', false)
         ->assertDontSee('MIPTA / DASHBOARD DISTRIBUTOR')
         ->assertDontSee('Buat Laporan')
         ->assertDontSee('Lihat semua');
@@ -87,7 +86,6 @@ it('menghitung ringkasan hanya dari laporan terkirim milik distributor', functio
         ->assertOk()
         ->assertSeeInOrder(['Total Laporan', '2'])
         ->assertSeeInOrder(['Jumlah Penyaluran', '400'])
-        ->assertSeeInOrder(['Laporan Draf', '1'])
         ->assertSee('250 karton')
         ->assertSee('150 karton')
         ->assertDontSee('333 karton')
@@ -125,7 +123,6 @@ it('memfilter ringkasan dan daftar laporan berdasarkan bulan', function () {
         ->assertOk()
         ->assertSeeInOrder(['Total Laporan', '1'])
         ->assertSeeInOrder(['Jumlah Penyaluran', '100'])
-        ->assertSeeInOrder(['Laporan Draf', '0'])
         ->assertSee('100 karton')
         ->assertDontSee('50 karton');
 
@@ -133,10 +130,8 @@ it('memfilter ringkasan dan daftar laporan berdasarkan bulan', function () {
         ->assertOk()
         ->assertSeeInOrder(['Total Laporan', '1'])
         ->assertSeeInOrder(['Jumlah Penyaluran', '50'])
-        ->assertSeeInOrder(['Laporan Draf', '1'])
         ->assertSee('50 karton')
-        ->assertDontSee('100 karton')
-        ->assertSee('value="'.$previousMonth->format('Y-m').'" selected', false);
+        ->assertDontSee('100 karton');
 });
 
 it('menampilkan lima laporan terkirim per halaman dengan pagination', function () {
@@ -198,10 +193,9 @@ it('menampilkan keadaan kosong saat belum ada laporan', function () {
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSee('Belum ada laporan penyaluran pada periode ini')
-        ->assertSee('Tidak ada laporan draf')
+        ->assertDontSee('Laporan Draf')
         ->assertSeeInOrder(['Total Laporan', '0'])
-        ->assertSeeInOrder(['Jumlah Penyaluran', '0'])
-        ->assertSeeInOrder(['Laporan Draf', '0']);
+        ->assertSeeInOrder(['Jumlah Penyaluran', '0']);
 });
 
 it('kembali ke bulan berjalan saat parameter bulan tidak valid', function () {
@@ -210,5 +204,5 @@ it('kembali ke bulan berjalan saat parameter bulan tidak valid', function () {
     $this->actingAs($user)
         ->get(route('distributor.dashboard', ['month' => 'bukan-bulan']))
         ->assertOk()
-        ->assertSee('value="'.now()->format('Y-m').'" selected', false);
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['month'] === now()->format('Y-m'));
 });

@@ -198,22 +198,42 @@ it('mengirim draft menjadi laporan terkirim', function () {
 
     expect($report->fresh()->status)->toBe(DistributionStatus::Submitted);
 
-    $this->get(route('distributor.distribution-reports.edit', $report))->assertNotFound();
+    $this->get(route('distributor.distribution-reports.edit', $report))
+        ->assertOk()
+        ->assertSee('Simpan Perubahan')
+        ->assertDontSee('Simpan Draft');
 });
 
-it('tidak mengizinkan edit laporan terkirim atau milik distributor lain', function () {
+it('memperbarui laporan terkirim dan statusnya tetap terkirim', function () {
     [$distributor, $user, $market, $store] = reportDistributorAccount();
 
-    $submitted = Distribution::factory()->create([
+    $report = Distribution::factory()->create([
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
         'recipient_store_id' => $store->id,
         'distribution_date' => now()->toDateString(),
-        'cartons' => 10,
+        'cartons' => 40,
     ]);
 
+    $this->actingAs($user)
+        ->put(route('distributor.distribution-reports.update', $report), [
+            'distribution_date' => now()->toDateString(),
+            'recipient_store_id' => $store->id,
+            'cartons' => 90,
+            'action' => 'submit',
+        ])
+        ->assertRedirect(route('distributor.report-history.index'))
+        ->assertSessionHas('success', 'Laporan penyaluran berhasil diperbarui.');
+
+    expect($report->fresh()->cartons)->toBe(90)
+        ->and($report->fresh()->status)->toBe(DistributionStatus::Submitted);
+});
+
+it('tidak mengizinkan edit laporan milik distributor lain', function () {
+    [, $user, $market] = reportDistributorAccount();
+
     [, $otherUser] = reportDistributorAccount('PT Distributor Lain');
-    $otherDraft = Distribution::factory()->draft()->create([
+    $otherReport = Distribution::factory()->create([
         'distributor_id' => $otherUser->distributor_id,
         'market_id' => $market->id,
         'distribution_date' => now()->toDateString(),
@@ -221,11 +241,15 @@ it('tidak mengizinkan edit laporan terkirim atau milik distributor lain', functi
     ]);
 
     $this->actingAs($user)
-        ->get(route('distributor.distribution-reports.edit', $submitted))
+        ->get(route('distributor.distribution-reports.edit', $otherReport))
         ->assertNotFound();
 
-    $this->get(route('distributor.distribution-reports.edit', $otherDraft))
-        ->assertNotFound();
+    $this->put(route('distributor.distribution-reports.update', $otherReport), [
+        'distribution_date' => now()->toDateString(),
+        'recipient_store_id' => $otherReport->recipient_store_id,
+        'cartons' => 10,
+        'action' => 'submit',
+    ])->assertNotFound();
 });
 
 it('menampilkan daftar draft tersimpan pada formulir', function () {

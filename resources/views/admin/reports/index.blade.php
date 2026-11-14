@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Ekspor Laporan')
+@section('title', 'Rekap Laporan')
 
 @section('content')
     @include('partials.report-recap-content', [

@@ -4,7 +4,6 @@ use App\Enums\Role;
 use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
-use App\Models\MarketMonitoring;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -16,32 +15,24 @@ it('menampilkan dashboard monitoring tanpa tombol unduh rekap', function () {
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
         ->assertOk()
+        ->assertSee('Hai, Iqbal Shyhab')
         ->assertSee('Total Laporan')
+        ->assertDontSee('dari bulan lalu')
+        ->assertDontSee('Distributor Aktif')
+        ->assertDontSee('Pasar Terpantau')
         ->assertDontSee('Unduh Rekap Bulanan');
 });
 
 it('menampilkan kartu statistik dari database', function () {
-    Distributor::factory()->create(['is_active' => true]);
-    Distributor::factory()->create(['is_active' => false]);
-    $markets = Market::factory()->count(2)->create();
-    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
-
-    foreach ($markets as $market) {
-        MarketMonitoring::factory()->for($market)->create([
-            'uptd_user_id' => $uptd->id,
-            'monitored_at' => now()->toDateString(),
-        ]);
-    }
-
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
         ->assertSeeInOrder([
-            'Total Laporan', '0', 'Belum ada data laporan',
+            'Total Laporan', '0',
             'Total Penyaluran', '0',
-            'Distributor Aktif', '1', '1 dari 2 distributor aktif',
-            'Pasar Terpantau', '2', '100% wilayah terpantau',
-        ]);
+        ])
+        ->assertDontSee('Belum ada data laporan')
+        ->assertDontSee('karton pada');
 });
 
 it('menghitung total laporan dan penyaluran dari data penyaluran', function () {
@@ -78,8 +69,9 @@ it('menghitung total laporan dan penyaluran dari data penyaluran', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Total Laporan', '2', '+100,0% dari bulan lalu'])
+        ->assertSeeInOrder(['Total Laporan', '2'])
         ->assertSeeInOrder(['Total Penyaluran', '430'])
+        ->assertDontSee('dari bulan lalu')
         ->assertSeeInOrder(['PT Alpha Niaga', '250'])
         ->assertSeeInOrder(['PT Beta Pangan', '180']);
 });
@@ -109,7 +101,8 @@ it('memfilter total penyaluran berdasarkan pasar yang dipilih', function () {
     $response->assertOk()
         ->assertSee('value="'.$firstMarket->id.'" selected', false)
         ->assertSeeInOrder(['Total Laporan', '1'])
-        ->assertSeeInOrder(['Total Penyaluran', '250']);
+        ->assertSeeInOrder(['Total Penyaluran', '250'])
+        ->assertDontSee('Belum ada data pembanding');
 
     preg_match('/const chartData = (\{.*?\});/s', $response->getContent(), $matches);
 
@@ -152,9 +145,8 @@ it('menampilkan keadaan kosong saat master belum berisi data', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('Belum ada data laporan')
-        ->assertSee('Belum ada data distributor')
-        ->assertSee('Belum ada data pasar');
+        ->assertDontSee('Belum ada data laporan')
+        ->assertDontSee('Belum ada data pasar');
 });
 
 it('mengambil pilihan filter pasar dan distributor dari database', function () {
@@ -184,58 +176,68 @@ it('menampilkan filter dengan pilihan default bulan berjalan', function () {
 
 it('menerapkan filter distributor pada kartu statistik', function () {
     $distributor = Distributor::factory()->create(['name' => 'PT Filter Distributor']);
-    Distributor::factory()->create();
+    $otherDistributor = Distributor::factory()->create();
+    $market = Market::factory()->create();
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 100,
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $otherDistributor->id,
+        'market_id' => $market->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 250,
+    ]);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard', ['distributor' => $distributor->id]))
         ->assertOk()
         ->assertSee('PT Filter Distributor')
         ->assertSee('value="'.$distributor->id.'" selected', false)
-        ->assertSeeInOrder(['Distributor Aktif', '1', 'Seluruhnya aktif']);
+        ->assertSeeInOrder(['Total Laporan', '1'])
+        ->assertSeeInOrder(['Total Penyaluran', '100'])
+        ->assertDontSee('250');
 });
 
-it('mempertahankan cakupan pasar global saat filter pasar diterapkan', function () {
-    $markets = Market::factory()->count(2)->create();
-    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
-
-    MarketMonitoring::factory()->for($markets[0])->create([
-        'uptd_user_id' => $uptd->id,
-        'monitored_at' => now()->toDateString(),
-    ]);
-
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.dashboard', ['market' => $markets[1]->id]))
-        ->assertOk()
-        ->assertSee('value="'.$markets[1]->id.'" selected', false)
-        ->assertSeeInOrder(['Pasar Terpantau', '1', '50% wilayah terpantau']);
-});
-
-it('menghitung cakupan pasar berdasarkan bulan yang dipilih', function () {
-    $markets = Market::factory()->count(3)->create();
-    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
-    $currentMonth = now()->startOfMonth();
-    $previousMonth = now()->subMonthNoOverflow()->startOfMonth();
-
-    foreach ([$markets[0], $markets[1]] as $market) {
-        MarketMonitoring::factory()->for($market)->create([
-            'uptd_user_id' => $uptd->id,
-            'monitored_at' => $currentMonth->toDateString(),
-        ]);
-    }
-
-    MarketMonitoring::factory()->for($markets[2])->create([
-        'uptd_user_id' => $uptd->id,
-        'monitored_at' => $previousMonth->toDateString(),
-    ]);
-
-    $this->actingAs(User::factory()->create())
+it('menempatkan filter di bawah card sapaan dan statistik', function () {
+    $this->actingAs(User::factory()->create(['name' => 'Admin Filter']))
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Pasar Terpantau', '2', '67% wilayah terpantau']);
+        ->assertSeeInOrder(['Hai, Admin Filter', 'Total Laporan', 'Total Penyaluran', 'Terapkan Filter']);
+});
 
-    $this->get(route('admin.dashboard', ['month' => $previousMonth->format('Y-m')]))
+it('memfilter total laporan dan penyaluran berdasarkan bulan yang dipilih', function () {
+    $market = Market::factory()->create();
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $previousMonth = now()->subMonthNoOverflow()->startOfMonth();
+
+    Distribution::factory()->create([
+        'market_id' => $market->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 100,
+    ]);
+
+    Distribution::factory()->create([
+        'market_id' => $market->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => $previousMonth->toDateString(),
+        'cartons' => 50,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.dashboard', ['month' => $previousMonth->format('Y-m')]))
         ->assertOk()
-        ->assertSeeInOrder(['Pasar Terpantau', '1', '33% wilayah terpantau']);
+        ->assertSee('value="'.$previousMonth->format('Y-m').'" selected', false)
+        ->assertSeeInOrder(['Total Laporan', '1'])
+        ->assertSeeInOrder(['Total Penyaluran', '50']);
 });
 
 it('kembali ke filter default saat nilai filter tidak valid', function () {

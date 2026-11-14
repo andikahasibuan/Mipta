@@ -37,11 +37,76 @@
     }
 }
 
+@layer components {
+    [class~='rounded-xl'][class~='bg-white'],
+    [class~='rounded-xl'][class~='bg-[#018F98]'],
+    [class~='rounded-xl'][class~='bg-[#E0F2F3]'],
+    [class~='rounded-xl'][class~='bg-amber-50'] {
+        box-shadow:
+            0 1px 2px 0 rgb(15 23 42 / 0.05),
+            0 2px 6px -1px rgb(15 23 42 / 0.06);
+    }
+}
+
 @utility no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
 
     &::-webkit-scrollbar {
         display: none;
+    }
+}
+
+/* Sidebar ciut: hanya menampilkan logo dan ikon menu. */
+#app-sidebar {
+    transition: width 200ms ease-in-out;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar {
+    width: 5rem;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logo-wrapper] {
+    padding-inline: 0;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logo] {
+    height: 3rem;
+    width: 3rem;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] {
+    padding-inline: 0.5rem;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] a,
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] button {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-label],
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-text] {
+    display: none;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-section],
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] {
+    padding-inline: 0.5rem;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help] {
+    padding: 0.5rem;
+}
+
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-content] {
+    justify-content: center;
+    gap: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #app-sidebar {
+        transition: none;
     }
 }

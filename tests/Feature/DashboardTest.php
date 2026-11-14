@@ -15,10 +15,10 @@ it('menampilkan dashboard admin dengan sidebar MIPTA', function () {
         ->assertSeeInOrder([
             'Dashboard',
             'Data Pengguna',
-            'Laporan',
+            'Penyaluran',
+            'Kondisi Pasar',
             'Monitoring',
-            'Pengawasan',
-            'Ekspor Laporan',
+            'Rekap Laporan',
             'Logout',
         ]);
 });

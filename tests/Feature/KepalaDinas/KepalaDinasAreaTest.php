@@ -13,7 +13,7 @@ uses(RefreshDatabase::class);
 
 dataset('kepala dinas pages', [
     'dashboard' => ['kepala-dinas.dashboard', 'Dashboard'],
-    'distribution' => ['kepala-dinas.distribution.index', 'Laporan Penyaluran'],
+    'distribution' => ['kepala-dinas.distribution.index', 'Penyaluran'],
     'supervision' => ['kepala-dinas.supervision.index', 'Kondisi Pasar'],
     'reports' => ['kepala-dinas.reports.index', 'Rekap Laporan'],
 ]);
@@ -111,7 +111,7 @@ it('menampilkan laporan kondisi lapangan untuk kepala dinas', function () {
         ->get(route('kepala-dinas.supervision.index'))
         ->assertOk()
         ->assertSee('Kondisi Pasar')
-        ->assertSee('Laporan Kondisi Lapangan')
+        ->assertSee('Laporan Kondisi Pasar')
         ->assertSee('KP-001')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
@@ -171,8 +171,8 @@ it('menampilkan rekapitulasi laporan untuk kepala dinas', function () {
         ->assertOk()
         ->assertSee('Rekap Laporan')
         ->assertSee('Laporan Penyaluran')
-        ->assertSee('Jumlah Penyaluran')
-        ->assertSee('Rekap Penyaluran per Pasar')
+        ->assertDontSee('Jumlah Penyaluran')
+        ->assertSee('Rekap Laporan Penyaluran')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('action="'.route('kepala-dinas.reports.index').'"', false)
         ->assertSee(route('kepala-dinas.reports.index', [
@@ -197,7 +197,7 @@ it('menampilkan rekap kondisi pasar pada tab kedua untuk kepala dinas', function
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.reports.index', ['tab' => 'kondisi']))
         ->assertOk()
-        ->assertSee('Rekap Kondisi Pasar')
+        ->assertSee('Rekap Laporan Kondisi Pasar')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Stok Minyakita menipis di beberapa kios')
         ->assertSee('Perlu Perhatian');

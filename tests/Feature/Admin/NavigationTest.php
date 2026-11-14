@@ -9,10 +9,10 @@ uses(RefreshDatabase::class);
 dataset('admin pages', [
     'dashboard' => ['admin.dashboard', 'Dashboard', 'Dashboard'],
     'users' => ['admin.users.index', 'Data Pengguna', 'Data Pengguna'],
-    'distribution' => ['admin.distribution.index', 'Laporan', 'Laporan'],
+    'distribution' => ['admin.distribution.index', 'Penyaluran', 'Penyaluran'],
     'monitoring' => ['admin.monitoring.index', 'Monitoring', 'Monitoring'],
-    'supervision' => ['admin.supervision.index', 'Pengawasan', 'Pengawasan'],
-    'reports' => ['admin.reports.index', 'Ekspor Laporan', 'Ekspor Laporan'],
+    'supervision' => ['admin.supervision.index', 'Kondisi Pasar', 'Kondisi Pasar'],
+    'reports' => ['admin.reports.index', 'Rekap Laporan', 'Rekap Laporan'],
 ]);
 
 it('menampilkan halaman admin dengan menu yang sesuai aktif', function (string $routeName, string $label, string $title) {

@@ -1,10 +1,14 @@
 @php
     $isEdit = $report !== null;
+    $isSubmitted = $report?->status === \App\Enums\DistributionStatus::Submitted;
     $selectedStoreId = (int) old('recipient_store_id', $report?->recipient_store_id);
     $selectedStore = $stores->firstWhere('id', $selectedStoreId);
     $formAction = $isEdit
         ? route('distributor.distribution-reports.update', $report)
         : route('distributor.distribution-reports.store');
+    $cancelUrl = $isSubmitted
+        ? route('distributor.report-history.index')
+        : route('distributor.dashboard');
 @endphp
 
 <div class="min-w-0">
@@ -17,6 +21,12 @@
                         Lengkapi data sesuai catatan penyaluran. Kolom bertanda * wajib diisi.
                     </p>
                 </div>
+
+                @if ($isSubmitted)
+                    <div class="mx-5 mt-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        Laporan ini sudah terkirim. Perubahan yang disimpan akan langsung memperbarui rekap laporan.
+                    </div>
+                @endif
 
                 @if ($stores->isEmpty())
                     <div class="mx-5 mt-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
@@ -140,31 +150,43 @@
 
                     <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-5">
                         <a
-                            href="{{ route('distributor.dashboard') }}"
+                            href="{{ $cancelUrl }}"
                             class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
                             Batal
                         </a>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            <button
-                                type="submit"
-                                name="action"
-                                value="draft"
-                                @disabled($stores->isEmpty())
-                                class="cursor-pointer rounded-lg border border-[#018F98] bg-white px-4 py-2.5 text-sm font-semibold text-[#018F98] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                Simpan Draft
-                            </button>
-                            <button
-                                type="submit"
-                                name="action"
-                                value="submit"
-                                @disabled($stores->isEmpty())
-                                class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                Kirim Laporan
-                            </button>
+                            @if ($isSubmitted)
+                                <button
+                                    type="submit"
+                                    name="action"
+                                    value="submit"
+                                    @disabled($stores->isEmpty())
+                                    class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Simpan Perubahan
+                                </button>
+                            @else
+                                <button
+                                    type="submit"
+                                    name="action"
+                                    value="draft"
+                                    @disabled($stores->isEmpty())
+                                    class="cursor-pointer rounded-lg border border-[#018F98] bg-white px-4 py-2.5 text-sm font-semibold text-[#018F98] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Simpan Draft
+                                </button>
+                                <button
+                                    type="submit"
+                                    name="action"
+                                    value="submit"
+                                    @disabled($stores->isEmpty())
+                                    class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Kirim Laporan
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </form>

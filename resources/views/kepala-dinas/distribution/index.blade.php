@@ -1,6 +1,6 @@
 @extends('layouts.kepala-dinas')
 
-@section('title', 'Laporan Penyaluran')
+@section('title', 'Penyaluran')
 
 @section('content')
     @include('partials.distribution-content', [

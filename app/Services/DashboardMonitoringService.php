@@ -60,21 +60,6 @@ class DashboardMonitoringService
         $periodStart = $start->toDateString();
         $periodEnd = $start->copy()->endOfMonth()->toDateString();
 
-        $totalDistributors = Distributor::query()
-            ->when($distributorId, fn ($query, int $id) => $query->whereKey($id))
-            ->count();
-
-        $activeDistributors = Distributor::query()
-            ->when($distributorId, fn ($query, int $id) => $query->whereKey($id))
-            ->where('is_active', true)
-            ->count();
-
-        $totalMarkets = Market::count();
-
-        $monitoredMarkets = Market::query()
-            ->whereHas('monitorings', fn ($query) => $query->whereBetween('monitored_at', [$periodStart, $periodEnd]))
-            ->count();
-
         $distributions = Distribution::query()
             ->where('status', DistributionStatus::Submitted->value)
             ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
@@ -92,31 +77,6 @@ class DashboardMonitoringService
         $totalReports = $distributions->count();
         $totalCartons = $distributions->sum('cartons');
 
-        $previousStart = $start->copy()->subMonthNoOverflow()->startOfMonth();
-        $previousReports = Distribution::query()
-            ->where('status', DistributionStatus::Submitted->value)
-            ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
-            ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
-            ->whereBetween('distribution_date', [
-                $previousStart->toDateString(),
-                $previousStart->copy()->endOfMonth()->toDateString(),
-            ])
-            ->count();
-
-        $reportsChange = null;
-        $reportsChangeDirection = 'none';
-
-        if ($previousReports > 0) {
-            $reportsChange = round((($totalReports - $previousReports) / $previousReports) * 100, 1);
-            $reportsChangeDirection = match (true) {
-                $reportsChange > 0 => 'up',
-                $reportsChange < 0 => 'down',
-                default => 'none',
-            };
-        } elseif ($totalReports > 0) {
-            $reportsChangeDirection = 'up';
-        }
-
         $breakdown = Distributor::query()
             ->when($distributorId, fn ($query, int $id) => $query->whereKey($id))
             ->orderBy('name')
@@ -133,15 +93,6 @@ class DashboardMonitoringService
                 'month_label' => $this->monthLabel($month),
                 'cartons' => $totalCartons,
                 'reports' => $totalReports,
-                'reports_change' => $reportsChange,
-                'reports_change_direction' => $reportsChangeDirection,
-                'active_distributors' => $activeDistributors,
-                'total_distributors' => $totalDistributors,
-                'monitored_markets' => $monitoredMarkets,
-                'total_markets' => $totalMarkets,
-                'coverage_percent' => $totalMarkets > 0
-                    ? (int) round(($monitoredMarkets / $totalMarkets) * 100)
-                    : 0,
             ],
             'chart' => [
                 'labels' => $this->dayLabels($month),

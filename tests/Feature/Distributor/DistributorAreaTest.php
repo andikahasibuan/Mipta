@@ -10,7 +10,7 @@ dataset('distributor pages', [
     'dashboard' => ['distributor.dashboard', 'Dashboard'],
     'stores' => ['distributor.stores.index', 'Data Toko'],
     'distribution report' => ['distributor.distribution-reports.create', 'Laporan'],
-    'report history' => ['distributor.report-history.index', 'Riwayat Laporan'],
+    'report history' => ['distributor.report-history.index', 'Riwayat'],
     'profile' => ['distributor.profile.edit', 'Profil'],
 ]);
 
@@ -38,7 +38,7 @@ it('menampilkan seluruh menu sidebar distributor', function () {
             'Dashboard',
             'Data Toko',
             'Laporan',
-            'Riwayat Laporan',
+            'Riwayat',
             'Profil',
             'Logout',
         ]);

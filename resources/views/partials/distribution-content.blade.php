@@ -63,7 +63,11 @@
 </form>
 
 <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div class="overflow-x-auto">
+    <div class="px-5 pt-5">
+        <h2 class="text-lg font-semibold text-slate-900">Laporan Penyaluran</h2>
+    </div>
+
+    <div class="mt-4 overflow-x-auto">
         <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
             <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
                 <tr>

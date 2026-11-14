@@ -3,6 +3,29 @@ import Chart from 'chart.js/auto';
 // Chart.js tersedia untuk grafik di halaman admin.
 window.Chart = Chart;
 
+// Sembunyikan atau tampilkan sidebar. Status kembali terbuka pada setiap muat halaman.
+const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+
+const setSidebarCollapsed = (collapsed) => {
+    document.documentElement.dataset.sidebarState = collapsed ? 'collapsed' : 'expanded';
+
+    if (!sidebarToggle) {
+        return;
+    }
+
+    const label = collapsed ? 'Tampilkan menu' : 'Sembunyikan menu';
+
+    sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+    sidebarToggle.setAttribute('aria-label', label);
+    sidebarToggle.setAttribute('title', label);
+};
+
+if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', () => {
+        setSidebarCollapsed(document.documentElement.dataset.sidebarState !== 'collapsed');
+    });
+}
+
 // Tutup dropdown (profil & notifikasi) saat klik di luar atau menekan Escape.
 const dropdownSelector = '[data-profile-menu][open], [data-notification-menu][open], [data-row-actions][open]';
 

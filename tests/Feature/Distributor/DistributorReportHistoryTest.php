@@ -73,6 +73,7 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
         ->assertSee('Draf')
         ->assertDontSee('999 karton')
         ->assertSee(route('distributor.report-history.destroy', $report), false)
+        ->assertSee(route('distributor.distribution-reports.edit', $report), false)
         ->assertSee('value="'.now()->format('Y-m').'" selected', false);
 });
 
@@ -259,4 +260,69 @@ it('mengirim notifikasi penghapusan ke admin dan kepala dinas', function () {
         ->and($user->notifications()->count())->toBe(0)
         ->and($uptd->notifications()->count())->toBe(0)
         ->and($otherDistributor->notifications()->count())->toBe(0);
+});
+
+it('mengirim notifikasi perubahan ke admin dan kepala dinas saat laporan terkirim diedit', function () {
+    [$distributor, $user, $market, $store] = reportHistoryAccount('PT Rajawali Nusantara');
+
+    $admin = User::factory()->create(['role' => Role::Admin]);
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $otherDistributor = User::factory()->distributor()->create();
+
+    $report = Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'recipient_store_id' => $store->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 75,
+    ]);
+
+    $expectedMessage = sprintf(
+        'Laporan %s tanggal %s telah diperbarui oleh PT Rajawali Nusantara.',
+        $report->code,
+        $report->distribution_date->format('d/m/Y'),
+    );
+
+    $this->actingAs($user)
+        ->put(route('distributor.distribution-reports.update', $report), [
+            'distribution_date' => $report->distribution_date->toDateString(),
+            'recipient_store_id' => $store->id,
+            'cartons' => 90,
+            'action' => 'submit',
+        ])
+        ->assertRedirect(route('distributor.report-history.index'));
+
+    $this->assertDatabaseCount('notifications', 2);
+
+    expect($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($kepalaDinas->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($user->notifications()->count())->toBe(0)
+        ->and($uptd->notifications()->count())->toBe(0)
+        ->and($otherDistributor->notifications()->count())->toBe(0);
+});
+
+it('tidak mengirim notifikasi saat laporan terkirim diedit tanpa perubahan', function () {
+    [$distributor, $user, $market, $store] = reportHistoryAccount();
+
+    User::factory()->create(['role' => Role::Admin]);
+
+    $report = Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'recipient_store_id' => $store->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 75,
+    ]);
+
+    $this->actingAs($user)
+        ->put(route('distributor.distribution-reports.update', $report), [
+            'distribution_date' => $report->distribution_date->toDateString(),
+            'recipient_store_id' => $store->id,
+            'cartons' => 75,
+            'action' => 'submit',
+        ])
+        ->assertRedirect(route('distributor.report-history.index'));
+
+    $this->assertDatabaseCount('notifications', 0);
 });

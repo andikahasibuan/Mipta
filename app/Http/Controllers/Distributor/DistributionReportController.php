@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Distributor;
 
 use App\Enums\DistributionStatus;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\Distribution;
 use App\Models\RecipientStore;
+use App\Models\User;
+use App\Notifications\DistributionReportUpdated;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -51,32 +55,51 @@ class DistributionReportController extends Controller
     }
 
     /**
-     * Tampilkan formulir edit draft laporan.
+     * Tampilkan formulir edit laporan penyaluran.
      */
     public function edit(Request $request, Distribution $distribution): View
     {
-        $this->ensureOwnedDraft($request, $distribution);
+        $this->ensureOwned($request, $distribution);
 
         return view('distributor.distribution-reports.edit', $this->formData($request, $distribution));
     }
 
     /**
-     * Perbarui draft laporan atau kirim sebagai laporan final.
+     * Perbarui laporan penyaluran yang sudah terkirim atau draft.
      */
     public function update(Request $request, Distribution $distribution): RedirectResponse
     {
-        $this->ensureOwnedDraft($request, $distribution);
+        $this->ensureOwned($request, $distribution);
+
+        $wasSubmitted = $distribution->status === DistributionStatus::Submitted;
 
         $validated = $this->validateReport($request);
         $store = $this->ownedStore($request, (int) $validated['recipient_store_id']);
 
-        $distribution->update([
+        $distribution->fill([
             'market_id' => $store->market_id,
             'recipient_store_id' => $store->id,
             'distribution_date' => $validated['distribution_date'],
             'cartons' => $validated['cartons'],
-            'status' => $this->statusFromAction($validated['action']),
+            'status' => $wasSubmitted
+                ? DistributionStatus::Submitted
+                : $this->statusFromAction($validated['action']),
         ]);
+
+        $changed = $distribution->isDirty();
+
+        if ($changed) {
+            $distribution->save();
+        }
+
+        if ($wasSubmitted) {
+            if ($changed) {
+                $this->notifyReportUpdated($request, $distribution);
+            }
+
+            return redirect()->route('distributor.report-history.index')
+                ->with('success', 'Laporan penyaluran berhasil diperbarui.');
+        }
 
         if ($validated['action'] === 'draft') {
             return redirect()->route('distributor.distribution-reports.edit', $distribution)
@@ -152,12 +175,35 @@ class DistributionReportController extends Controller
     }
 
     /**
-     * Pastikan laporan milik distributor dan masih berstatus draft.
+     * Pastikan laporan milik distributor yang sedang login.
      */
-    private function ensureOwnedDraft(Request $request, Distribution $distribution): void
+    private function ensureOwned(Request $request, Distribution $distribution): void
     {
         abort_unless($distribution->distributor_id === $request->user()->distributor_id, 404);
-        abort_unless($distribution->status === DistributionStatus::Draft, 404);
+    }
+
+    /**
+     * Kirim notifikasi perubahan laporan terkirim ke admin dan kepala dinas.
+     */
+    private function notifyReportUpdated(Request $request, Distribution $distribution): void
+    {
+        $recipients = User::query()
+            ->whereIn('role', [Role::Admin->value, Role::KepalaDinas->value])
+            ->where('is_active', true)
+            ->get();
+
+        if ($recipients->isEmpty()) {
+            return;
+        }
+
+        Notification::send(
+            $recipients,
+            new DistributionReportUpdated(
+                $distribution->code,
+                $distribution->distribution_date->format('d/m/Y'),
+                $request->user()->distributor->name,
+            ),
+        );
     }
 
     private function statusFromAction(string $action): DistributionStatus

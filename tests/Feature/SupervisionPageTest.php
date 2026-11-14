@@ -31,7 +31,7 @@ it('menampilkan laporan kondisi lapangan dari database', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.supervision.index'))
         ->assertOk()
-        ->assertSee('Laporan Kondisi Lapangan')
+        ->assertSee('Laporan Kondisi Pasar')
         ->assertSee('KP-001')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')

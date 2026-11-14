@@ -1,20 +1,32 @@
 @php
     $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
-
-    $change = $summary['reports_change'];
-    $changeLabel = $summary['reports'] === 0
-        ? 'Belum ada data laporan'
-        : ($change === null
-            ? 'Belum ada data pembanding'
-            : ($change > 0 ? '+' : '').number_format($change, 1, ',', '.').'% dari bulan lalu');
-    $changeColor = match ($summary['reports_change_direction']) {
-        'up' => 'text-emerald-600',
-        'down' => 'text-red-600',
-        default => 'text-slate-400',
-    };
 @endphp
 
-<form method="GET" action="{{ route($area.'.dashboard') }}" class="rounded-xl border border-slate-200 bg-white p-3">
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="flex h-28 flex-col justify-center rounded-xl bg-[#018F98] px-6 py-2.5 text-white shadow-sm sm:col-span-2 sm:px-8">
+        <p class="text-[11px] font-semibold uppercase tracking-widest text-[#E6F7F8]">
+            Periode {{ $summary['month_label'] }}
+        </p>
+        <h2 class="mt-1 text-xl font-semibold sm:text-2xl">
+            Hai, {{ auth()->user()->name }}
+        </h2>
+        <p class="mt-1 max-w-3xl text-sm text-[#E6F7F8]">
+            Pantau laporan penyaluran dan kondisi pasar Minyakita pada periode ini.
+        </p>
+    </div>
+
+    <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
+        <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
+        <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['reports']) }}</p>
+    </div>
+
+    <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
+        <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Penyaluran</p>
+        <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['cartons']) }}</p>
+    </div>
+</div>
+
+<form method="GET" action="{{ route($area.'.dashboard') }}" class="mt-4 rounded-xl border border-slate-200 bg-white p-3">
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div class="relative">
             <label for="filter-month" class="sr-only">Bulan</label>
@@ -70,54 +82,6 @@
         </button>
     </div>
 </form>
-
-<div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['reports']) }}</p>
-            <p class="mt-1 text-xs font-medium {{ $changeColor }}">{{ $changeLabel }}</p>
-        </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Penyaluran</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['cartons']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">karton pada {{ $summary['month_label'] }}</p>
-        </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Distributor Aktif</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['active_distributors']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">
-                @if ($summary['total_distributors'] === 0)
-                    Belum ada data distributor
-                @elseif ($summary['active_distributors'] === $summary['total_distributors'])
-                    Seluruhnya aktif
-                @else
-                    {{ $summary['active_distributors'] }} dari {{ $summary['total_distributors'] }} distributor aktif
-                @endif
-            </p>
-        </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Terpantau</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['monitored_markets']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">
-                @if ($summary['total_markets'] === 0)
-                    Belum ada data pasar
-                @else
-                    {{ $summary['coverage_percent'] }}% wilayah terpantau
-                @endif
-            </p>
-        </div>
-    </div>
-</div>
 
 @php
     $maxCartons = collect($breakdown)->max('cartons') ?: 0;

@@ -1,6 +1,6 @@
 @extends('layouts.distributor')
 
-@section('title', 'Riwayat Laporan')
+@section('title', 'Riwayat')
 
 @section('content')
     <x-ui.flash-messages />
@@ -71,11 +71,11 @@
                     <tr>
                         <th scope="col" class="w-[9%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal</th>
-                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Pasar</th>
+                        <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[17%] px-5 py-3 align-middle font-semibold">Pasar</th>
                         <th scope="col" class="w-[13%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
                         <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Status Laporan</th>
-                        <th scope="col" class="w-[9%] px-5 py-3 align-middle font-semibold">Aksi</th>
+                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
@@ -108,22 +108,33 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
-                                <form
-                                    method="POST"
-                                    action="{{ route('distributor.report-history.destroy', $report) }}"
-                                    onsubmit="return confirm('Yakin ingin menghapus riwayat laporan ini? Admin dan Kepala Dinas akan menerima notifikasi penghapusan.')"
-                                >
-                                    @csrf
-                                    @method('DELETE')
-                                    <button
-                                        type="submit"
-                                        aria-label="Hapus"
-                                        title="Hapus"
-                                        class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-red-500 transition hover:border-red-300 hover:bg-red-50"
+                                <div class="flex items-center justify-center gap-2">
+                                    <a
+                                        href="{{ route('distributor.distribution-reports.edit', $report) }}"
+                                        aria-label="Edit"
+                                        title="Edit"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-[#018F98] transition hover:border-[#018F98] hover:bg-[#E0F2F3]"
                                     >
-                                        <x-heroicon-o-trash class="h-4 w-4" />
-                                    </button>
-                                </form>
+                                        <x-heroicon-o-pencil-square class="h-4 w-4" />
+                                    </a>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ route('distributor.report-history.destroy', $report) }}"
+                                        onsubmit="return confirm('Yakin ingin menghapus riwayat laporan ini? Admin dan Kepala Dinas akan menerima notifikasi penghapusan.')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+                                        <button
+                                            type="submit"
+                                            aria-label="Hapus"
+                                            title="Hapus"
+                                            class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-red-500 transition hover:border-red-300 hover:bg-red-50"
+                                        >
+                                            <x-heroicon-o-trash class="h-4 w-4" />
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

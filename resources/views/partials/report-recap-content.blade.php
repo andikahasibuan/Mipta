@@ -46,37 +46,7 @@
     </div>
 </form>
 
-<div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Laporan Penyaluran</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['distribution_reports']) }}</p>
-        </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Jumlah Penyaluran</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['distribution_cartons']) }}</p>
-        </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Laporan Kondisi Pasar</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['condition_reports']) }}</p>
-        </div>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Perlu Perhatian</p>
-            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $formatNumber($summary['needs_attention']) }}</p>
-        </div>
-    </div>
-</div>
-
-<div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap gap-2">
         <a
             href="{{ route($area.'.reports.index', ['start_date' => $filters['start_date'], 'end_date' => $filters['end_date'], 'tab' => 'penyaluran']) }}"
@@ -118,7 +88,7 @@
 @if ($isPenyaluran)
     <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="px-5 pt-5">
-            <h2 class="text-lg font-semibold text-slate-900">Rekap Penyaluran per Pasar</h2>
+            <h2 class="text-lg font-semibold text-slate-900">Rekap Laporan Penyaluran</h2>
         </div>
 
         <div class="mt-4 overflow-x-auto">
@@ -161,7 +131,7 @@
 @else
     <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="px-5 pt-5">
-            <h2 class="text-lg font-semibold text-slate-900">Rekap Kondisi Pasar</h2>
+            <h2 class="text-lg font-semibold text-slate-900">Rekap Laporan Kondisi Pasar</h2>
         </div>
 
         <div class="mt-4 overflow-x-auto">

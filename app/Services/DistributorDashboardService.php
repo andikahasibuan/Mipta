@@ -34,10 +34,8 @@ class DistributorDashboardService
      *
      * @return array{
      *     distributor: Distributor,
-     *     summary: array{month: string, month_label: string, reports: int, cartons: int, drafts: int},
-     *     reports: LengthAwarePaginator,
-     *     filters: array{month: string},
-     *     months: array<int, array{value: string, label: string}>
+     *     summary: array{month: string, month_label: string, reports: int, cartons: int},
+     *     reports: LengthAwarePaginator
      * }
      */
     public function build(Request $request, Distributor $distributor): array
@@ -60,12 +58,6 @@ class DistributorDashboardService
         $reports = $submittedQuery()->count();
         $cartons = (int) $submittedQuery()->sum('cartons');
 
-        $drafts = Distribution::query()
-            ->where('distributor_id', $distributor->id)
-            ->where('status', DistributionStatus::Draft->value)
-            ->whereBetween('distribution_date', [$periodStart, $periodEnd])
-            ->count();
-
         $paginatedReports = $submittedQuery()
             ->with(['market:id,name', 'store:id,name'])
             ->orderByDesc('distribution_date')
@@ -80,43 +72,9 @@ class DistributorDashboardService
                 'month_label' => $this->monthLabel($month),
                 'reports' => $reports,
                 'cartons' => $cartons,
-                'drafts' => $drafts,
             ],
             'reports' => $paginatedReports,
-            'filters' => [
-                'month' => $month,
-            ],
-            'months' => $this->monthOptions($month),
         ];
-    }
-
-    /**
-     * @return array<int, array{value: string, label: string}>
-     */
-    private function monthOptions(string $selectedMonth): array
-    {
-        $months = [];
-        $cursor = Carbon::now()->startOfMonth();
-
-        for ($index = 0; $index < 6; $index++) {
-            $value = $cursor->format('Y-m');
-
-            $months[] = [
-                'value' => $value,
-                'label' => $this->monthLabel($value),
-            ];
-
-            $cursor = $cursor->subMonthNoOverflow();
-        }
-
-        if (! in_array($selectedMonth, array_column($months, 'value'), true)) {
-            array_unshift($months, [
-                'value' => $selectedMonth,
-                'label' => $this->monthLabel($selectedMonth),
-            ]);
-        }
-
-        return $months;
     }
 
     /**

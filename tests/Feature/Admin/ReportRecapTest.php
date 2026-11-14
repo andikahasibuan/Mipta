@@ -49,6 +49,9 @@ it('menampilkan ringkasan periode bulan berjalan secara default', function () {
                 && $summary['condition_reports'] === 2
                 && $summary['needs_attention'] === 1;
         })
+        ->assertDontSee('Jumlah Penyaluran')
+        ->assertDontSee('Laporan Kondisi Pasar')
+        ->assertDontSee('Perlu Perhatian')
         ->assertSee('value="'.now()->startOfMonth()->toDateString().'"', false)
         ->assertSee('value="'.now()->endOfMonth()->toDateString().'"', false);
 });
@@ -91,7 +94,7 @@ it('mengelompokkan rekap penyaluran per pasar beserta jumlah distributor unik', 
         ->get(route('admin.reports.index'));
 
     $response->assertOk()
-        ->assertSee('Rekap Penyaluran per Pasar')
+        ->assertSee('Rekap Laporan Penyaluran')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Pasar Bandar Buat');
 
@@ -124,7 +127,7 @@ it('menampilkan rekap kondisi pasar pada tab kedua', function () {
         ->get(route('admin.reports.index', ['tab' => 'kondisi']))
         ->assertOk()
         ->assertViewHas('activeTab', 'kondisi')
-        ->assertSee('Rekap Kondisi Pasar')
+        ->assertSee('Rekap Laporan Kondisi Pasar')
         ->assertSee('KP-001')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
