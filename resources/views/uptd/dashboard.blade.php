@@ -1,6 +1,6 @@
 @extends('layouts.uptd')
 
-@section('title', 'Dashboard UPTD Pasar')
+@section('title', 'Dashboard')
 
 @section('content')
     @php

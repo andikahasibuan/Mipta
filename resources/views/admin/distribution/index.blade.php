@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Laporan Penyaluran')
+@section('title', 'Laporan')
 
 @section('content')
     @include('partials.distribution-content', [

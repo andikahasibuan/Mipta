@@ -1,6 +1,6 @@
 @extends('layouts.kepala-dinas')
 
-@section('title', 'Monitoring Kondisi Pasar')
+@section('title', 'Kondisi Pasar')
 
 @section('content')
     @include('partials.supervision-content', [

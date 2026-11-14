@@ -1,6 +1,6 @@
 @extends('layouts.distributor')
 
-@section('title', 'Manajemen Profil')
+@section('title', 'Profil')
 
 @section('content')
     <x-ui.flash-messages />

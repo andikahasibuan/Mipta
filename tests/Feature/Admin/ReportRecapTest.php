@@ -49,9 +49,19 @@ it('menampilkan ringkasan periode bulan berjalan secara default', function () {
                 && $summary['condition_reports'] === 2
                 && $summary['needs_attention'] === 1;
         })
-        ->assertSee('Ekspor Data')
         ->assertSee('value="'.now()->startOfMonth()->toDateString().'"', false)
         ->assertSee('value="'.now()->endOfMonth()->toDateString().'"', false);
+});
+
+it('menampilkan dua tombol ekspor nonaktif untuk admin', function () {
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.reports.index'));
+
+    $response->assertOk()
+        ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])
+        ->assertDontSee('Ekspor Data');
+
+    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
 });
 
 it('mengelompokkan rekap penyaluran per pasar beserta jumlah distributor unik', function () {

@@ -7,11 +7,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 dataset('distributor pages', [
-    'dashboard' => ['distributor.dashboard', 'Dashboard Monitoring'],
-    'stores' => ['distributor.stores.index', 'Manajemen Data Toko'],
-    'distribution report' => ['distributor.distribution-reports.create', 'Laporan Penyaluran'],
+    'dashboard' => ['distributor.dashboard', 'Dashboard'],
+    'stores' => ['distributor.stores.index', 'Data Toko'],
+    'distribution report' => ['distributor.distribution-reports.create', 'Laporan'],
     'report history' => ['distributor.report-history.index', 'Riwayat Laporan'],
-    'profile' => ['distributor.profile.edit', 'Manajemen Profil'],
+    'profile' => ['distributor.profile.edit', 'Profil'],
 ]);
 
 it('menampilkan halaman distributor dengan menu yang sesuai aktif', function (string $routeName, string $label) {
@@ -35,11 +35,11 @@ it('menampilkan seluruh menu sidebar distributor', function () {
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSeeInOrder([
-            'Dashboard Monitoring',
-            'Manajemen Data Toko',
-            'Laporan Penyaluran',
+            'Dashboard',
+            'Data Toko',
+            'Laporan',
             'Riwayat Laporan',
-            'Manajemen Profil',
+            'Profil',
             'Logout',
         ]);
 });

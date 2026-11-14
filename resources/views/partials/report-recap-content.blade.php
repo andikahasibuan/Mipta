@@ -3,20 +3,6 @@
     $isPenyaluran = $activeTab === 'penyaluran';
 @endphp
 
-<div class="mb-4 flex flex-wrap items-center justify-end gap-2">
-    @foreach ($exports as $export)
-        <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
-        >
-            <x-dynamic-component :component="'heroicon-o-'.$export['icon']" class="h-4 w-4" />
-            {{ $export['label'] }}
-        </button>
-    @endforeach
-</div>
-
 <form
     method="GET"
     action="{{ route($area.'.reports.index') }}"
@@ -90,27 +76,43 @@
     </div>
 </div>
 
-<div class="mt-6 flex flex-wrap gap-2">
-    <a
-        href="{{ route($area.'.reports.index', ['start_date' => $filters['start_date'], 'end_date' => $filters['end_date'], 'tab' => 'penyaluran']) }}"
-        @class([
-            'rounded-lg px-4 py-2 text-sm font-semibold transition',
-            'bg-[#018F98] text-white' => $isPenyaluran,
-            'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50' => ! $isPenyaluran,
-        ])
-    >
-        Rekap Penyaluran
-    </a>
-    <a
-        href="{{ route($area.'.reports.index', ['start_date' => $filters['start_date'], 'end_date' => $filters['end_date'], 'tab' => 'kondisi']) }}"
-        @class([
-            'rounded-lg px-4 py-2 text-sm font-semibold transition',
-            'bg-[#018F98] text-white' => ! $isPenyaluran,
-            'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50' => $isPenyaluran,
-        ])
-    >
-        Rekap Kondisi Pasar
-    </a>
+<div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap gap-2">
+        <a
+            href="{{ route($area.'.reports.index', ['start_date' => $filters['start_date'], 'end_date' => $filters['end_date'], 'tab' => 'penyaluran']) }}"
+            @class([
+                'rounded-lg px-4 py-2 text-sm font-semibold transition',
+                'bg-[#018F98] text-white' => $isPenyaluran,
+                'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50' => ! $isPenyaluran,
+            ])
+        >
+            Rekap Penyaluran
+        </a>
+        <a
+            href="{{ route($area.'.reports.index', ['start_date' => $filters['start_date'], 'end_date' => $filters['end_date'], 'tab' => 'kondisi']) }}"
+            @class([
+                'rounded-lg px-4 py-2 text-sm font-semibold transition',
+                'bg-[#018F98] text-white' => ! $isPenyaluran,
+                'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50' => $isPenyaluran,
+            ])
+        >
+            Rekap Kondisi Pasar
+        </a>
+    </div>
+
+    <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+        @foreach ($exports as $export)
+            <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
+            >
+                <x-dynamic-component :component="'heroicon-o-'.$export['icon']" class="h-4 w-4" />
+                {{ $export['label'] }}
+            </button>
+        @endforeach
+    </div>
 </div>
 
 @if ($isPenyaluran)

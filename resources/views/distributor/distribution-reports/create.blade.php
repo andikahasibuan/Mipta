@@ -1,6 +1,6 @@
 @extends('layouts.distributor')
 
-@section('title', 'Laporan Penyaluran')
+@section('title', 'Laporan')
 
 @section('content')
     @include('partials.distribution-report-form')

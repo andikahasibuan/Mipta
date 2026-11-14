@@ -42,7 +42,7 @@ it('menampilkan informasi profil distributor sesuai desain', function () {
     $this->actingAs($user)
         ->get(route('distributor.profile.edit'))
         ->assertOk()
-        ->assertSee('Manajemen Profil')
+        ->assertSee('Profil')
         ->assertSee('Informasi Akun Distributor')
         ->assertSee('Data identitas yang terhubung dengan akun anda')
         ->assertSeeInOrder(['Nama akun', 'andalas.niaga'])

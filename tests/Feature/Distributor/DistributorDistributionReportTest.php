@@ -41,7 +41,7 @@ it('menampilkan formulir laporan penyaluran', function () {
     $this->actingAs($user)
         ->get(route('distributor.distribution-reports.create'))
         ->assertOk()
-        ->assertSee('Laporan Penyaluran')
+        ->assertSee('Laporan')
         ->assertSee('Formulir laporan penyaluran')
         ->assertSee('Tanggal Penyaluran')
         ->assertSee('Nama Toko')

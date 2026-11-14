@@ -1,6 +1,6 @@
 @extends('layouts.distributor')
 
-@section('title', 'Manajemen Data Toko')
+@section('title', 'Data Toko')
 
 @section('content')
     <x-ui.flash-messages />

@@ -12,10 +12,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 dataset('kepala dinas pages', [
-    'dashboard' => ['kepala-dinas.dashboard', 'Dashboard Monitoring'],
+    'dashboard' => ['kepala-dinas.dashboard', 'Dashboard'],
     'distribution' => ['kepala-dinas.distribution.index', 'Laporan Penyaluran'],
-    'supervision' => ['kepala-dinas.supervision.index', 'Monitoring Kondisi Pasar'],
-    'reports' => ['kepala-dinas.reports.index', 'Rekapitulasi Laporan'],
+    'supervision' => ['kepala-dinas.supervision.index', 'Kondisi Pasar'],
+    'reports' => ['kepala-dinas.reports.index', 'Rekap Laporan'],
 ]);
 
 it('menampilkan halaman kepala dinas dengan menu yang sesuai aktif', function (string $routeName, string $label) {
@@ -110,7 +110,7 @@ it('menampilkan laporan kondisi lapangan untuk kepala dinas', function () {
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.supervision.index'))
         ->assertOk()
-        ->assertSee('Monitoring Kondisi Pasar')
+        ->assertSee('Kondisi Pasar')
         ->assertSee('Laporan Kondisi Lapangan')
         ->assertSee('KP-001')
         ->assertSee('Andi Pratama')
@@ -169,7 +169,7 @@ it('menampilkan rekapitulasi laporan untuk kepala dinas', function () {
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.reports.index'))
         ->assertOk()
-        ->assertSee('Rekapitulasi Laporan')
+        ->assertSee('Rekap Laporan')
         ->assertSee('Laporan Penyaluran')
         ->assertSee('Jumlah Penyaluran')
         ->assertSee('Rekap Penyaluran per Pasar')

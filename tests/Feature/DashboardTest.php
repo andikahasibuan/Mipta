@@ -10,15 +10,15 @@ it('menampilkan dashboard admin dengan sidebar MIPTA', function () {
         ->get(route('admin.dashboard'));
 
     $response->assertOk()
-        ->assertSee('<title>Dashboard Admin</title>', false)
+        ->assertSee('<title>Dashboard</title>', false)
         ->assertSee('MIPTA')
         ->assertSeeInOrder([
-            'Dashboard Monitoring',
-            'Pengguna & Data Master',
-            'Laporan Penyaluran',
-            'Monitoring & Analisis',
-            'Pengawasan & Tindak Lanjut',
-            'Rekap & Ekspor Laporan',
+            'Dashboard',
+            'Data Pengguna',
+            'Laporan',
+            'Monitoring',
+            'Pengawasan',
+            'Ekspor Laporan',
             'Logout',
         ]);
 });

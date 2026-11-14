@@ -1,4 +1,4 @@
-<aside class="no-scrollbar flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-white/15 bg-[#018F98]">
+<aside class="no-scrollbar flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-white/15 bg-[#08858c]">
     <div class="px-6 py-6">
         <div class="flex w-full items-center justify-center">
             <img

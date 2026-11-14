@@ -33,7 +33,7 @@ it('menampilkan laporan penyaluran dari database', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))
         ->assertOk()
-        ->assertSee('Laporan Penyaluran')
+        ->assertSee('Laporan')
         ->assertSee('LP-001')
         ->assertDontSee('Tambah Data')
         ->assertSee('PT Sinar Pangan Nusantara')

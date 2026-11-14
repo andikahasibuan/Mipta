@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 dataset('uptd pages', [
-    'dashboard' => ['uptd.dashboard', 'Dashboard UPTD Pasar'],
+    'dashboard' => ['uptd.dashboard', 'Dashboard'],
     'input laporan' => ['uptd.reports.create', 'Input Laporan'],
     'riwayat laporan' => ['uptd.reports.index', 'Riwayat Laporan'],
 ]);
@@ -43,7 +43,7 @@ it('menampilkan seluruh menu sidebar kontributor UPTD', function () {
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSeeInOrder([
-            'Dashboard UPTD Pasar',
+            'Dashboard',
             'Input Laporan',
             'Riwayat Laporan',
             'Ganti Kontributor',

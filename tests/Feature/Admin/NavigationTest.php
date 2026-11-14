@@ -7,12 +7,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 dataset('admin pages', [
-    'dashboard' => ['admin.dashboard', 'Dashboard Monitoring', 'Dashboard Admin'],
-    'users' => ['admin.users.index', 'Pengguna & Data Master', 'Pengguna & Data Master'],
-    'distribution' => ['admin.distribution.index', 'Laporan Penyaluran', 'Laporan Penyaluran'],
-    'monitoring' => ['admin.monitoring.index', 'Monitoring & Analisis', 'Monitoring & Analisis'],
-    'supervision' => ['admin.supervision.index', 'Pengawasan & Tindak Lanjut', 'Pengawasan & Tindak Lanjut'],
-    'reports' => ['admin.reports.index', 'Rekap & Ekspor Laporan', 'Rekap & Ekspor Laporan'],
+    'dashboard' => ['admin.dashboard', 'Dashboard', 'Dashboard'],
+    'users' => ['admin.users.index', 'Data Pengguna', 'Data Pengguna'],
+    'distribution' => ['admin.distribution.index', 'Laporan', 'Laporan'],
+    'monitoring' => ['admin.monitoring.index', 'Monitoring', 'Monitoring'],
+    'supervision' => ['admin.supervision.index', 'Pengawasan', 'Pengawasan'],
+    'reports' => ['admin.reports.index', 'Ekspor Laporan', 'Ekspor Laporan'],
 ]);
 
 it('menampilkan halaman admin dengan menu yang sesuai aktif', function (string $routeName, string $label, string $title) {
@@ -78,5 +78,5 @@ it('menjaga konsistensi tab aktif dan sorotan sidebar pada seluruh tab pengguna 
     $sidebar = $sidebarMatches[0] ?? '';
 
     expect(substr_count($sidebar, 'aria-current="page"'))->toBe(1)
-        ->and($sidebar)->toContain('Pengguna &amp; Data Master');
+        ->and($sidebar)->toContain('Data Pengguna');
 })->with('master tabs');

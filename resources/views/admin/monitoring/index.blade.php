@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Monitoring & Analisis')
+@section('title', 'Monitoring')
 
 @section('content')
     @php

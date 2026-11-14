@@ -14,7 +14,7 @@ it('menampilkan tombol tambah data yang mengarah ke halaman tambah', function ()
         ->assertSee('Tambah data')
         ->assertSee(route('admin.users.create'), false)
         ->assertDontSee('aria-disabled="true"', false)
-        ->assertDontSee('Ekspor Data');
+        ->assertDontSee('Ekspor Excel');
 });
 
 it('menampilkan judul pengguna dan data master di setiap tab', function () {
@@ -30,7 +30,7 @@ it('menampilkan judul pengguna dan data master di setiap tab', function () {
         $this->actingAs($admin)
             ->get(route($route))
             ->assertOk()
-            ->assertSee('Pengguna & Data Master')
+            ->assertSee('Data Pengguna')
             ->assertDontSee('aria-label="Breadcrumb"', false);
     });
 });

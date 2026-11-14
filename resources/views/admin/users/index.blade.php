@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Pengguna & Data Master')
+@section('title', 'Data Pengguna')
 
 @section('content')
     <x-ui.master-tabs active="users">
