@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\DistributionStatus;
 use App\Enums\Role;
 use App\Models\Distribution;
 use App\Models\Distributor;
@@ -45,14 +44,6 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
         'cartons' => 120,
     ]);
 
-    Distribution::factory()->draft()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'recipient_store_id' => $store->id,
-        'distribution_date' => now()->startOfMonth()->toDateString(),
-        'cartons' => 80,
-    ]);
-
     Distribution::factory()->create([
         'distributor_id' => $otherUser->distributor_id,
         'market_id' => $market->id,
@@ -63,40 +54,28 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
     $this->actingAs($user)
         ->get(route('distributor.report-history.index'))
         ->assertOk()
-        ->assertSeeInOrder(['ID Laporan', 'Tanggal', 'Nama Toko', 'Pasar', 'Jumlah Karton', 'Status Laporan', 'Aksi'])
-        ->assertSee($report->code)
+        ->assertSeeInOrder(['NO', 'Tanggal', 'Nama Toko', 'Pasar', 'Jumlah Karton', 'Aksi'])
         ->assertSee('Toko Riwayat')
         ->assertSee('Pasar Riwayat')
         ->assertSee('120 karton')
-        ->assertSee('80 karton')
-        ->assertSee('Terkirim')
-        ->assertSee('Draf')
         ->assertDontSee('999 karton')
         ->assertSee(route('distributor.report-history.destroy', $report), false)
         ->assertSee(route('distributor.distribution-reports.edit', $report), false)
         ->assertSee('value="'.now()->format('Y-m').'" selected', false);
 });
 
-it('memfilter riwayat laporan berdasarkan bulan, status, dan nama toko', function () {
+it('memfilter riwayat laporan berdasarkan bulan dan nama toko', function () {
     [$distributor, $user, $market, $store] = reportHistoryAccount();
     $this->actingAs($user);
 
     $previousMonth = now()->subMonthNoOverflow()->startOfMonth();
 
-    $currentSubmitted = Distribution::factory()->create([
+    Distribution::factory()->create([
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
         'recipient_store_id' => $store->id,
         'distribution_date' => now()->startOfMonth()->toDateString(),
         'cartons' => 111,
-    ]);
-
-    $currentDraft = Distribution::factory()->draft()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'recipient_store_id' => $store->id,
-        'distribution_date' => now()->startOfMonth()->addDay()->toDateString(),
-        'cartons' => 222,
     ]);
 
     Distribution::factory()->create([
@@ -124,7 +103,6 @@ it('memfilter riwayat laporan berdasarkan bulan, status, dan nama toko', functio
     $this->get(route('distributor.report-history.index'))
         ->assertOk()
         ->assertSee('111 karton')
-        ->assertSee('222 karton')
         ->assertSee('444 karton')
         ->assertDontSee('333 karton');
 
@@ -140,17 +118,10 @@ it('memfilter riwayat laporan berdasarkan bulan, status, dan nama toko', functio
         ->assertSee('333 karton')
         ->assertDontSee('111 karton');
 
-    $this->get(route('distributor.report-history.index', ['status' => DistributionStatus::Draft->value]))
-        ->assertOk()
-        ->assertSee($currentDraft->code)
-        ->assertSee('222 karton')
-        ->assertDontSee($currentSubmitted->code);
-
     $this->get(route('distributor.report-history.index', ['search' => 'Berbeda']))
         ->assertOk()
         ->assertSee('444 karton')
-        ->assertDontSee('111 karton')
-        ->assertDontSee('222 karton');
+        ->assertDontSee('111 karton');
 });
 
 it('menampilkan sepuluh riwayat laporan per halaman dengan pagination', function () {
@@ -162,7 +133,7 @@ it('menampilkan sepuluh riwayat laporan per halaman dengan pagination', function
             'market_id' => $market->id,
             'recipient_store_id' => $store->id,
             'distribution_date' => now()->startOfMonth()->toDateString(),
-            'cartons' => 10,
+            'cartons' => 100 + $index,
         ]);
     }
 
@@ -171,25 +142,17 @@ it('menampilkan sepuluh riwayat laporan per halaman dengan pagination', function
         ->assertOk()
         ->assertSee('Menampilkan 10 dari 11 laporan')
         ->assertSee('?page=2', false)
-        ->assertSee('LP-011')
-        ->assertDontSee('LP-001');
+        ->assertSee('110 karton')
+        ->assertDontSee('111 karton');
 
     $this->get(route('distributor.report-history.index', ['page' => 2]))
         ->assertOk()
-        ->assertSee('LP-001')
-        ->assertDontSee('LP-011');
+        ->assertSee('111 karton')
+        ->assertDontSee('110 karton');
 });
 
-it('menghapus laporan draft dan laporan terkirim milik sendiri', function () {
+it('menghapus laporan terkirim milik sendiri', function () {
     [$distributor, $user, $market, $store] = reportHistoryAccount();
-
-    $draft = Distribution::factory()->draft()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'recipient_store_id' => $store->id,
-        'distribution_date' => now()->startOfMonth()->toDateString(),
-        'cartons' => 50,
-    ]);
 
     $submitted = Distribution::factory()->create([
         'distributor_id' => $distributor->id,
@@ -200,13 +163,9 @@ it('menghapus laporan draft dan laporan terkirim milik sendiri', function () {
     ]);
 
     $this->actingAs($user)
-        ->delete(route('distributor.report-history.destroy', $draft))
+        ->delete(route('distributor.report-history.destroy', $submitted))
         ->assertRedirect(route('distributor.report-history.index'));
 
-    $this->delete(route('distributor.report-history.destroy', $submitted))
-        ->assertRedirect(route('distributor.report-history.index'));
-
-    $this->assertDatabaseMissing('distributions', ['id' => $draft->id]);
     $this->assertDatabaseMissing('distributions', ['id' => $submitted->id]);
 });
 
@@ -244,8 +203,7 @@ it('mengirim notifikasi penghapusan ke admin dan kepala dinas', function () {
     ]);
 
     $expectedMessage = sprintf(
-        'Laporan %s tanggal %s telah dihapus oleh PT Rajawali Nusantara.',
-        $report->code,
+        'Laporan penyaluran tanggal %s telah dihapus oleh PT Rajawali Nusantara.',
         $report->distribution_date->format('d/m/Y'),
     );
 
@@ -279,8 +237,7 @@ it('mengirim notifikasi perubahan ke admin dan kepala dinas saat laporan terkiri
     ]);
 
     $expectedMessage = sprintf(
-        'Laporan %s tanggal %s telah diperbarui oleh PT Rajawali Nusantara.',
-        $report->code,
+        'Laporan penyaluran tanggal %s telah diperbarui oleh PT Rajawali Nusantara.',
         $report->distribution_date->format('d/m/Y'),
     );
 
@@ -289,7 +246,6 @@ it('mengirim notifikasi perubahan ke admin dan kepala dinas saat laporan terkiri
             'distribution_date' => $report->distribution_date->toDateString(),
             'recipient_store_id' => $store->id,
             'cartons' => 90,
-            'action' => 'submit',
         ])
         ->assertRedirect(route('distributor.report-history.index'));
 
@@ -320,7 +276,6 @@ it('tidak mengirim notifikasi saat laporan terkirim diedit tanpa perubahan', fun
             'distribution_date' => $report->distribution_date->toDateString(),
             'recipient_store_id' => $store->id,
             'cartons' => 75,
-            'action' => 'submit',
         ])
         ->assertRedirect(route('distributor.report-history.index'))
         ->assertSessionMissing('success');

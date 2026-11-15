@@ -33,7 +33,6 @@ class ReportHistoryController extends Controller
     {
         abort_unless($distribution->distributor_id === $request->user()->distributor_id, 404);
 
-        $reportCode = $distribution->code;
         $distributionDate = $distribution->distribution_date->format('d/m/Y');
         $distributorName = $request->user()->distributor->name;
 
@@ -47,7 +46,7 @@ class ReportHistoryController extends Controller
         if ($recipients->isNotEmpty()) {
             Notification::send(
                 $recipients,
-                new DistributionReportDeleted($reportCode, $distributionDate, $distributorName),
+                new DistributionReportDeleted($distributionDate, $distributorName),
             );
         }
 

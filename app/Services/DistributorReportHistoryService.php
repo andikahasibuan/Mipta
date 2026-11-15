@@ -34,18 +34,18 @@ class DistributorReportHistoryService
      *
      * @return array{
      *     reports: LengthAwarePaginator,
-     *     filters: array{month: string, status: string, search: string},
+     *     filters: array{month: string, search: string},
      *     months: array<int, array{value: string, label: string}>
      * }
      */
     public function build(Request $request, Distributor $distributor): array
     {
         $month = $this->validMonth($request->string('month')->toString());
-        $status = $this->validStatus($request->string('status')->toString());
         $search = trim($request->string('search')->toString());
 
         $reports = Distribution::query()
             ->where('distributor_id', $distributor->id)
+            ->where('status', DistributionStatus::Submitted->value)
             ->with(['market:id,name', 'store:id,name'])
             ->when($month !== 'all', function ($query) use ($month): void {
                 $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
@@ -55,13 +55,11 @@ class DistributorReportHistoryService
                     $start->copy()->endOfMonth()->toDateString(),
                 ]);
             })
-            ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($search !== '', fn ($query) => $query->whereHas(
                 'store',
                 fn ($storeQuery) => $storeQuery->where('name', 'like', '%'.$search.'%'),
             ))
-            ->orderByDesc('distribution_date')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -69,7 +67,6 @@ class DistributorReportHistoryService
             'reports' => $reports,
             'filters' => [
                 'month' => $month,
-                'status' => $status,
                 'search' => $search,
             ],
             'months' => $this->monthOptions($month),
@@ -90,16 +87,6 @@ class DistributorReportHistoryService
         }
 
         return $month;
-    }
-
-    /**
-     * Status laporan yang valid, atau string kosong untuk semua status.
-     */
-    private function validStatus(string $status): string
-    {
-        return in_array($status, [DistributionStatus::Submitted->value, DistributionStatus::Draft->value], true)
-            ? $status
-            : '';
     }
 
     /**

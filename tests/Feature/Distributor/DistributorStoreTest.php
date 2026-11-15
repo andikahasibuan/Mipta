@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
 use App\Models\RecipientStore;
@@ -56,7 +57,47 @@ it('menampilkan daftar toko milik distributor dengan subjudul', function () {
         ->assertSee('Toko Milik Sendiri')
         ->assertSee('Jln. Pasar Raya No. 1')
         ->assertDontSee('Toko Distributor Lain')
-        ->assertSee(route('distributor.stores.edit', $store), false);
+        ->assertSee(route('distributor.stores.edit', $store), false)
+        ->assertSee(route('distributor.stores.destroy', $store), false);
+});
+
+it('memfilter daftar toko berdasarkan nama, alamat, NIB, dan pasar', function () {
+    [$distributor, $user] = storeDistributorAccount();
+    $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
+    $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
+
+    RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $firstMarket->id,
+        'name' => 'Toko Alpha',
+        'alamat' => 'Jln. Alpha No. 1',
+        'nib' => '1111111111111',
+    ]);
+
+    RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $secondMarket->id,
+        'name' => 'Toko Beta',
+        'alamat' => 'Jln. Beta No. 2',
+        'nib' => '2222222222222',
+    ]);
+
+    $this->actingAs($user);
+
+    $this->get(route('distributor.stores.index', ['q' => 'Alpha']))
+        ->assertOk()
+        ->assertSee('Toko Alpha')
+        ->assertDontSee('Toko Beta');
+
+    $this->get(route('distributor.stores.index', ['q' => '2222222222222']))
+        ->assertOk()
+        ->assertSee('Toko Beta')
+        ->assertDontSee('Toko Alpha');
+
+    $this->get(route('distributor.stores.index', ['market' => $secondMarket->id]))
+        ->assertOk()
+        ->assertSee('Toko Beta')
+        ->assertDontSee('Toko Alpha');
 });
 
 it('menampilkan sepuluh toko per halaman dengan pagination', function () {
@@ -76,13 +117,13 @@ it('menampilkan sepuluh toko per halaman dengan pagination', function () {
         ->assertOk()
         ->assertSee('Menampilkan 10 dari 11 toko')
         ->assertSee('?page=2', false)
-        ->assertSee('Toko 11')
-        ->assertDontSee('Toko 01');
+        ->assertSee('Toko 01')
+        ->assertDontSee('Toko 11');
 
     $this->get(route('distributor.stores.index', ['page' => 2]))
         ->assertOk()
-        ->assertSee('Toko 01')
-        ->assertDontSee('Toko 11');
+        ->assertSee('Toko 11')
+        ->assertDontSee('Toko 01');
 });
 
 it('menampilkan formulir tambah toko penerima', function () {
@@ -184,6 +225,61 @@ it('memperbarui toko milik sendiri', function () {
         'nib' => '9876543210123',
         'is_active' => false,
     ]);
+});
+
+it('menghapus toko milik sendiri yang belum memiliki laporan', function () {
+    [$distributor, $user] = storeDistributorAccount();
+    $store = RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'name' => 'Toko Tanpa Laporan',
+    ]);
+
+    $this->actingAs($user)
+        ->delete(route('distributor.stores.destroy', $store))
+        ->assertRedirect(route('distributor.stores.index'))
+        ->assertSessionHas('success', 'Toko penerima berhasil dihapus.');
+
+    $this->assertDatabaseMissing('recipient_stores', ['id' => $store->id]);
+});
+
+it('menolak menghapus toko yang sudah memiliki laporan penyaluran', function () {
+    [$distributor, $user] = storeDistributorAccount();
+    $market = Market::factory()->create();
+    $store = RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Dengan Laporan',
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'recipient_store_id' => $store->id,
+        'distribution_date' => now()->toDateString(),
+    ]);
+
+    $this->actingAs($user)
+        ->delete(route('distributor.stores.destroy', $store))
+        ->assertRedirect(route('distributor.stores.index'))
+        ->assertSessionHasErrors('delete');
+
+    $this->assertDatabaseHas('recipient_stores', ['id' => $store->id]);
+    $this->assertDatabaseCount('distributions', 1);
+});
+
+it('menolak menghapus toko milik distributor lain', function () {
+    [, $user] = storeDistributorAccount();
+    [, $otherUser] = storeDistributorAccount('PT Distributor Lain');
+    $store = RecipientStore::factory()->create([
+        'distributor_id' => $otherUser->distributor_id,
+        'name' => 'Toko Distributor Lain',
+    ]);
+
+    $this->actingAs($user)
+        ->delete(route('distributor.stores.destroy', $store))
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('recipient_stores', ['id' => $store->id]);
 });
 
 it('menolak mengakses toko milik distributor lain', function () {

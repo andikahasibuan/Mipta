@@ -30,22 +30,26 @@
 
         <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div class="px-5 py-5">
-                <h3 class="text-lg font-semibold text-slate-900">Laporan kondisi pasar terbaru</h3>
+                <h3 class="text-lg font-semibold text-slate-900">Laporan kondisi pasar</h3>
             </div>
 
             <div class="overflow-x-auto border-t border-slate-200">
                 <table class="w-full min-w-[44rem] table-fixed divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                         <tr>
-                            <th scope="col" class="w-[32%] px-5 py-3 font-semibold">Pasar</th>
-                            <th scope="col" class="w-[28%] px-5 py-3 font-semibold">Kontributor</th>
-                            <th scope="col" class="w-[24%] px-5 py-3 font-semibold">Tanggal</th>
-                            <th scope="col" class="w-[16%] px-5 py-3 text-center font-semibold">Kondisi</th>
+                            <th scope="col" class="w-[8%] px-5 py-3 font-semibold">NO</th>
+                            <th scope="col" class="w-[28%] px-5 py-3 font-semibold">Pasar</th>
+                            <th scope="col" class="w-[26%] px-5 py-3 font-semibold">Kontributor</th>
+                            <th scope="col" class="w-[23%] px-5 py-3 font-semibold">Tanggal</th>
+                            <th scope="col" class="w-[15%] px-5 py-3 text-center font-semibold">Kondisi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($reports as $report)
                             <tr>
+                                <td class="px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                                    {{ $loop->iteration }}
+                                </td>
                                 <td class="px-5 py-4 align-middle font-medium text-slate-900">
                                     {{ $contributor->market?->name ?? '—' }}
                                 </td>
@@ -67,7 +71,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-500">
+                                <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-500">
                                     Belum ada laporan kondisi pasar
                                 </td>
                             </tr>

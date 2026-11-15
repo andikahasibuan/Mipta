@@ -21,20 +21,59 @@
             </a>
         </div>
 
+        <form
+            method="GET"
+            action="{{ route('distributor.stores.index') }}"
+            class="mt-4 flex flex-col gap-3 px-5 lg:flex-row lg:items-center"
+        >
+            <div class="relative min-w-0 flex-1">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ $filters['q'] }}"
+                    placeholder="Cari nama, alamat, atau NIB toko..."
+                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                >
+            </div>
+
+            <div class="relative shrink-0">
+                <label for="filter-market" class="sr-only">Pasar</label>
+                <select
+                    id="filter-market"
+                    name="market"
+                    onchange="this.form.submit()"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-11 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                >
+                    <option value="">Semua Pasar</option>
+                    @foreach ($markets as $market)
+                        <option value="{{ $market->id }}" @selected($filters['market'] === $market->id)>
+                            {{ $market->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+        </form>
+
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Alamat</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">NIB</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">Aksi</th>
+                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[27%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">NIB</th>
+                        <th scope="col" class="w-[17%] px-5 py-3 align-middle font-semibold">Pasar</th>
+                        <th scope="col" class="w-[11%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($stores as $store)
                         <tr>
+                            <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-500">
+                                {{ $loop->iteration }}
+                            </td>
                             <td class="px-5 py-3 text-slate-900">
                                 {{ $store->name }}
                             </td>
@@ -48,20 +87,21 @@
                                 {{ $store->market->name }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-3">
-                                <a
-                                    href="{{ route('distributor.stores.edit', $store) }}"
-                                    aria-label="Edit"
-                                    title="Edit"
-                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#018F98] hover:text-[#018F98]"
-                                >
-                                    <x-heroicon-o-pencil-square class="h-4 w-4" />
-                                </a>
+                                <x-ui.row-actions
+                                    :edit="route('distributor.stores.edit', $store)"
+                                    :delete="route('distributor.stores.destroy', $store)"
+                                    confirm="Yakin ingin menghapus data toko ini?"
+                                />
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
-                                Belum ada data toko penerima
+                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
+                                @if ($filters['q'] !== '' || $filters['market'] !== null)
+                                    Tidak ada toko yang sesuai filter
+                                @else
+                                    Belum ada data toko penerima
+                                @endif
                             </td>
                         </tr>
                     @endforelse

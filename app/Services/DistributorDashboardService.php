@@ -35,6 +35,8 @@ class DistributorDashboardService
      * @return array{
      *     distributor: Distributor,
      *     summary: array{month: string, month_label: string, reports: int, cartons: int},
+     *     filters: array{month: string, search: string},
+     *     months: array<int, array{value: string, label: string}>,
      *     reports: LengthAwarePaginator
      * }
      */
@@ -46,22 +48,27 @@ class DistributorDashboardService
             $month = now()->format('Y-m');
         }
 
+        $search = trim($request->string('q')->toString());
+
         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $periodStart = $start->toDateString();
         $periodEnd = $start->copy()->endOfMonth()->toDateString();
 
-        $submittedQuery = fn () => Distribution::query()
+        $baseQuery = Distribution::query()
             ->where('distributor_id', $distributor->id)
             ->where('status', DistributionStatus::Submitted->value)
-            ->whereBetween('distribution_date', [$periodStart, $periodEnd]);
+            ->whereBetween('distribution_date', [$periodStart, $periodEnd])
+            ->when($search !== '', fn ($query) => $query->whereHas(
+                'store',
+                fn ($storeQuery) => $storeQuery->where('name', 'like', "%{$search}%"),
+            ));
 
-        $reports = $submittedQuery()->count();
-        $cartons = (int) $submittedQuery()->sum('cartons');
+        $reports = (clone $baseQuery)->count();
+        $cartons = (int) (clone $baseQuery)->sum('cartons');
 
-        $paginatedReports = $submittedQuery()
+        $paginatedReports = (clone $baseQuery)
             ->with(['market:id,name', 'store:id,name'])
-            ->orderByDesc('distribution_date')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->paginate(5)
             ->withQueryString();
 
@@ -73,6 +80,11 @@ class DistributorDashboardService
                 'reports' => $reports,
                 'cartons' => $cartons,
             ],
+            'filters' => [
+                'month' => $month,
+                'search' => $search,
+            ],
+            'months' => $this->monthOptions($month),
             'reports' => $paginatedReports,
         ];
     }
@@ -85,5 +97,34 @@ class DistributorDashboardService
         $date = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
 
         return self::MONTH_NAMES[$date->month].' '.$date->year;
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function monthOptions(string $selectedMonth): array
+    {
+        $months = [];
+        $cursor = Carbon::now()->startOfMonth();
+
+        for ($index = 0; $index < 12; $index++) {
+            $value = $cursor->format('Y-m');
+
+            $months[] = [
+                'value' => $value,
+                'label' => $this->monthLabel($value),
+            ];
+
+            $cursor = $cursor->subMonthNoOverflow();
+        }
+
+        if (! in_array($selectedMonth, array_column($months, 'value'), true)) {
+            array_unshift($months, [
+                'value' => $selectedMonth,
+                'label' => $this->monthLabel($selectedMonth),
+            ]);
+        }
+
+        return $months;
     }
 }

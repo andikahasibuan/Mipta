@@ -49,6 +49,6 @@ it('memisahkan akun bersama dan kontributor pasar pada menu admin', function () 
 
     $this->get(route('admin.uptd-contributors.index'))
         ->assertOk()
-        ->assertSee('Kontributor UPTD 09')
+        ->assertSee('Kontributor UPTD 01')
         ->assertDontSee('Kontributor UPTD Pasar');
 });

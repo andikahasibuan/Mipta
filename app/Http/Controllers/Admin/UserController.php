@@ -39,8 +39,7 @@ class UserController extends Controller
             ->when($role, fn ($query, Role $role) => $query->where('role', $role->value))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->paginate(5)
             ->withQueryString();
 

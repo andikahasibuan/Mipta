@@ -95,15 +95,19 @@
             <table class="w-full min-w-[48rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[34%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Jumlah Laporan</th>
-                        <th scope="col" class="w-[23%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
-                        <th scope="col" class="w-[23%] px-5 py-3 align-middle font-semibold">Distributor Terlibat</th>
+                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[31%] px-5 py-3 align-middle font-semibold">Pasar</th>
+                        <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Jumlah Laporan</th>
+                        <th scope="col" class="w-[21%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
+                        <th scope="col" class="w-[21%] px-5 py-3 align-middle font-semibold">Distributor Terlibat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($distributionRecap as $row)
                         <tr>
+                            <td class="px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                                {{ $loop->iteration }}
+                            </td>
                             <td class="px-5 py-4 text-left align-middle text-slate-900">
                                 {{ $row->market?->name ?? '—' }}
                             </td>
@@ -119,7 +123,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
                                 Belum ada data penyaluran pada periode ini
                             </td>
                         </tr>
@@ -138,7 +142,7 @@
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
+                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Identitas Kontributor</th>
                         <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Pasar</th>
@@ -150,7 +154,7 @@
                     @forelse ($conditionReports as $report)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
-                                {{ $report->code }}
+                                {{ $loop->iteration }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $report->report_date->format('d/m/Y') }}

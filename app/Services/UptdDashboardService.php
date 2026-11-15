@@ -30,8 +30,7 @@ class UptdDashboardService
 
         $reports = $reportQuery()
             ->with('contributor:id,name')
-            ->orderByDesc('report_date')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->paginate(5)
             ->withQueryString();
 

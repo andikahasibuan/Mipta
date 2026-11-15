@@ -26,11 +26,9 @@ it('menampilkan daftar toko penerima beserta pasarnya', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.recipient-stores.index'))
         ->assertOk()
-        ->assertSeeInOrder(['ID', 'Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Distributor', 'Status', 'Aksi'])
-        ->assertSee('TKS-001')
+        ->assertSeeInOrder(['NO', 'Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Distributor', 'Status', 'Aksi'])
         ->assertSee('Toko Berkah')
         ->assertSee('Pasar Raya Padang')
-        ->assertSee('TKS-002')
         ->assertSee('Nonaktif');
 });
 
@@ -200,11 +198,11 @@ it('menampilkan pagination saat toko lebih dari sepuluh', function () {
         ->assertSee('?page=2', false);
 });
 
-it('mencari toko berdasarkan ID data atau nama', function () {
+it('mencari toko berdasarkan nama atau alamat', function () {
     $admin = User::factory()->create();
 
-    RecipientStore::factory()->create(['name' => 'Toko Berkah']);
-    $secondStore = RecipientStore::factory()->create(['name' => 'Toko Makmur']);
+    RecipientStore::factory()->create(['name' => 'Toko Berkah', 'alamat' => 'Jln. Berkah No. 1']);
+    RecipientStore::factory()->create(['name' => 'Toko Makmur', 'alamat' => 'Jln. Makmur No. 2']);
 
     $this->actingAs($admin)
         ->get(route('admin.recipient-stores.index', ['q' => 'Berkah']))
@@ -213,7 +211,7 @@ it('mencari toko berdasarkan ID data atau nama', function () {
         ->assertDontSee('Toko Makmur');
 
     $this->actingAs($admin)
-        ->get(route('admin.recipient-stores.index', ['q' => $secondStore->code]))
+        ->get(route('admin.recipient-stores.index', ['q' => 'Jln. Makmur']))
         ->assertOk()
         ->assertSee('Toko Makmur')
         ->assertDontSee('Toko Berkah');

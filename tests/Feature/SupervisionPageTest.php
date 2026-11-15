@@ -32,7 +32,6 @@ it('menampilkan laporan kondisi lapangan dari database', function () {
         ->get(route('admin.supervision.index'))
         ->assertOk()
         ->assertSee('Laporan Kondisi Pasar')
-        ->assertSee('KP-001')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Stok Minyakita tersedia, harga sesuai HET')

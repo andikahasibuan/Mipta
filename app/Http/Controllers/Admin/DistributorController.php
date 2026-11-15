@@ -24,18 +24,14 @@ class DistributorController extends Controller
         $status = $request->string('status')->toString();
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
-        $searchId = preg_match('/^DST-(\d+)$/i', $search, $matches) === 1 ? (int) $matches[1] : null;
-
         $distributors = Distributor::query()
             ->with('account:id,name,email,distributor_id')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
-                ->orWhere('wilayah', 'like', "%{$search}%")
-                ->when($searchId !== null, fn ($query) => $query->orWhereKey($searchId))))
+                ->orWhere('wilayah', 'like', "%{$search}%")))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 

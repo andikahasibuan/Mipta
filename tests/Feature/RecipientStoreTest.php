@@ -10,7 +10,6 @@ it('membuat toko penerima beserta pasar dari factory', function () {
     $store = RecipientStore::factory()->create();
 
     expect($store->exists)->toBeTrue()
-        ->and($store->code)->not->toBeEmpty()
         ->and($store->name)->not->toBeEmpty()
         ->and($store->is_active)->toBeTrue()
         ->and($store->market)->toBeInstanceOf(Market::class);

@@ -44,8 +44,6 @@ it('menampilkan riwayat laporan milik kontributor sendiri', function () {
         ->get(route('uptd.reports.index'))
         ->assertOk()
         ->assertSee('Laporan Kondisi Lapangan')
-        ->assertSee('ID Laporan')
-        ->assertSee($report->code)
         ->assertSee('Kontributor UPTD 01')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Deskripsi Kondisi')
@@ -83,29 +81,29 @@ it('memfilter riwayat laporan berdasarkan bulan, kondisi, dan deskripsi', functi
 
     $this->get(route('uptd.reports.index'))
         ->assertOk()
-        ->assertSee($currentReport->code)
-        ->assertDontSee($previousReport->code);
+        ->assertSee('Pasar bersih dan tertib.')
+        ->assertDontSee('Pasar kotor dan rusak.');
 
     $this->get(route('uptd.reports.index', ['month' => $previousMonth->format('Y-m')]))
         ->assertOk()
-        ->assertSee($previousReport->code)
-        ->assertDontSee($currentReport->code);
+        ->assertSee('Pasar kotor dan rusak.')
+        ->assertDontSee('Pasar bersih dan tertib.');
 
     $this->get(route('uptd.reports.index', [
         'month' => now()->format('Y-m'),
         'condition' => FieldCondition::Normal->value,
     ]))
         ->assertOk()
-        ->assertSee($currentReport->code)
-        ->assertDontSee($previousReport->code);
+        ->assertSee('Pasar bersih dan tertib.')
+        ->assertDontSee('Pasar kotor dan rusak.');
 
     $this->get(route('uptd.reports.index', [
         'month' => $previousMonth->format('Y-m'),
         'q' => 'kotor',
     ]))
         ->assertOk()
-        ->assertSee($previousReport->code)
-        ->assertDontSee($currentReport->code);
+        ->assertSee('Pasar kotor dan rusak.')
+        ->assertDontSee('Pasar bersih dan tertib.');
 });
 
 it('menampilkan nilai lama pada formulir edit laporan', function () {
@@ -225,8 +223,6 @@ it('menghapus laporan dan mengirim notifikasi ke admin aktif', function () {
         'description' => 'Laporan yang akan dihapus.',
     ]);
 
-    $reportCode = $report->code;
-
     $this->actingAs($contributor)
         ->delete(route('uptd.reports.destroy', $report))
         ->assertRedirect(route('uptd.reports.index'))
@@ -236,8 +232,7 @@ it('menghapus laporan dan mengirim notifikasi ke admin aktif', function () {
     $this->assertDatabaseCount('notifications', 1);
 
     $expectedMessage = sprintf(
-        'Laporan kondisi lapangan %s tanggal 20/05/2026 di Pasar Raya Padang telah dihapus oleh Kontributor UPTD 01.',
-        $reportCode,
+        'Laporan kondisi lapangan tanggal 20/05/2026 di Pasar Raya Padang telah dihapus oleh Kontributor UPTD 01.',
     );
 
     expect($admin->notifications()->first()?->data['title'])->toBe('Laporan kondisi lapangan dihapus')

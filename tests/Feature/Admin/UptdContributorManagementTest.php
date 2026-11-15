@@ -194,8 +194,8 @@ it('membatasi lima kontributor per halaman', function () {
     $this->actingAs($admin)
         ->get(route('admin.uptd-contributors.index'))
         ->assertOk()
-        ->assertSee('Kontributor 06')
-        ->assertDontSee('Kontributor 01')
+        ->assertSee('Kontributor 01')
+        ->assertDontSee('Kontributor 06')
         ->assertSee('Menampilkan 5 dari 6 kontributor');
 });
 

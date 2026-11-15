@@ -46,7 +46,7 @@
                 id="filter-search"
                 name="search"
                 value="{{ $filters['search'] }}"
-                placeholder="Cari kode, toko, distributor, atau pasar..."
+                placeholder="Cari toko, distributor, atau pasar..."
                 class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
         </div>
@@ -113,7 +113,7 @@
         <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
             <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                 <tr>
-                    <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID</th>
+                    <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">NO</th>
                     <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Tanggal</th>
                     <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Pasar</th>
                     <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
@@ -128,7 +128,7 @@
                 @forelse ($distributions as $distribution)
                     <tr>
                         <td class="whitespace-nowrap px-5 py-4 text-center align-middle font-mono text-xs text-slate-500">
-                            {{ $distribution->code }}
+                            {{ $loop->iteration }}
                         </td>
                         <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                             {{ $distribution->distribution_date->format('d/m/Y') }}

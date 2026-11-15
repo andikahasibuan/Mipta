@@ -1,12 +1,11 @@
 @php
     $isEdit = $report !== null;
-    $isSubmitted = $report?->status === \App\Enums\DistributionStatus::Submitted;
     $selectedStoreId = (int) old('recipient_store_id', $report?->recipient_store_id);
     $selectedStore = $stores->firstWhere('id', $selectedStoreId);
     $formAction = $isEdit
         ? route('distributor.distribution-reports.update', $report)
         : route('distributor.distribution-reports.store');
-    $cancelUrl = $isSubmitted
+    $cancelUrl = $isEdit
         ? route('distributor.report-history.index')
         : route('distributor.dashboard');
 @endphp
@@ -16,15 +15,15 @@
         <div class="min-w-0 lg:col-span-2">
             <div class="flex min-h-[34rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <div class="border-b border-slate-200 px-6 py-4">
-                    <h3 class="text-lg font-semibold text-slate-900">Formulir laporan penyaluran</h3>
+                    <h3 class="text-lg font-semibold text-slate-900">Laporan Penyaluran</h3>
                     <p class="mt-1 text-sm text-slate-500">
                         Lengkapi data sesuai catatan penyaluran. Kolom bertanda * wajib diisi.
                     </p>
                 </div>
 
-                @if ($isSubmitted)
+                @if ($isEdit)
                     <div class="mx-5 mt-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                        Laporan ini sudah terkirim. Perubahan yang disimpan akan langsung memperbarui rekap laporan.
+                        Laporan ini sudah terkirim. Perubahan yang disimpan akan langsung memperbarui laporan.
                     </div>
                 @endif
 
@@ -157,36 +156,13 @@
                         </a>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            @if ($isSubmitted)
-                                <button
-                                    type="submit"
-                                    name="action"
-                                    value="submit"
-                                    @disabled($stores->isEmpty())
-                                    class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    Simpan Perubahan
-                                </button>
-                            @else
-                                <button
-                                    type="submit"
-                                    name="action"
-                                    value="draft"
-                                    @disabled($stores->isEmpty())
-                                    class="cursor-pointer rounded-lg border border-[#018F98] bg-white px-4 py-2.5 text-sm font-semibold text-[#018F98] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    Simpan Draft
-                                </button>
-                                <button
-                                    type="submit"
-                                    name="action"
-                                    value="submit"
-                                    @disabled($stores->isEmpty())
-                                    class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    Kirim Laporan
-                                </button>
-                            @endif
+                            <button
+                                type="submit"
+                                @disabled($stores->isEmpty())
+                                class="cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {{ $isEdit ? 'Simpan Perubahan' : 'Kirim Laporan' }}
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -206,40 +182,8 @@
                     <li>Pastikan toko penerima yang sudah terdaftar.</li>
                     <li>Alamat, NIB, dan pasar akan terisi otomatis.</li>
                     <li>Jumlah penyaluran dicatat dalam karton.</li>
-                    <li>Draft masih dapat diperbarui sebelum dikirim.</li>
                 </ul>
             </div>
-
-            @if ($drafts->isNotEmpty())
-                <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-                    <div class="border-b border-slate-200 px-5 py-4">
-                        <h3 class="text-base font-semibold text-slate-900">Draf Tersimpan</h3>
-                    </div>
-
-                    <ul class="divide-y divide-slate-100">
-                        @foreach ($drafts as $draft)
-                            <li class="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
-                                <div class="min-w-0">
-                                    <p class="text-sm font-medium text-slate-900">
-                                        {{ $draft->store?->name ?? '—' }}
-                                    </p>
-                                    <p class="text-xs text-slate-500">
-                                        {{ $draft->distribution_date->format('d/m/Y') }}
-                                        · {{ number_format($draft->cartons, 0, ',', '.') }} karton
-                                    </p>
-                                </div>
-
-                                <a
-                                    href="{{ route('distributor.distribution-reports.edit', $draft) }}"
-                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#018F98] transition hover:bg-slate-50"
-                                >
-                                    Edit draft
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
         </aside>
     </div>
 </div>

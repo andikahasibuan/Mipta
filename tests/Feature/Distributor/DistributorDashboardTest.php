@@ -37,7 +37,6 @@ it('menampilkan dashboard distributor dengan identitas perusahaan', function () 
         ->assertDontSee('Periode aktif')
         ->assertSee('Total Laporan')
         ->assertSee('Jumlah Penyaluran')
-        ->assertDontSee('Laporan Draf')
         ->assertSee('Laporan Penyaluran')
         ->assertDontSee('MIPTA / DASHBOARD DISTRIBUTOR')
         ->assertDontSee('Buat Laporan')
@@ -66,14 +65,6 @@ it('menghitung ringkasan hanya dari laporan terkirim milik distributor', functio
         'cartons' => 150,
     ]);
 
-    Distribution::factory()->draft()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'recipient_store_id' => $store->id,
-        'distribution_date' => now()->startOfMonth()->toDateString(),
-        'cartons' => 333,
-    ]);
-
     Distribution::factory()->create([
         'distributor_id' => $otherDistributor->id,
         'market_id' => $market->id,
@@ -88,7 +79,6 @@ it('menghitung ringkasan hanya dari laporan terkirim milik distributor', functio
         ->assertSeeInOrder(['Jumlah Penyaluran', '400'])
         ->assertSee('250 karton')
         ->assertSee('150 karton')
-        ->assertDontSee('333 karton')
         ->assertDontSee('777 karton');
 });
 
@@ -111,13 +101,6 @@ it('memfilter ringkasan dan daftar laporan berdasarkan bulan', function () {
         'cartons' => 50,
     ]);
 
-    Distribution::factory()->draft()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'distribution_date' => $previousMonth->toDateString(),
-        'cartons' => 20,
-    ]);
-
     $this->actingAs($user)
         ->get(route('distributor.dashboard'))
         ->assertOk()
@@ -134,6 +117,45 @@ it('memfilter ringkasan dan daftar laporan berdasarkan bulan', function () {
         ->assertDontSee('100 karton');
 });
 
+it('memfilter ringkasan dan daftar laporan berdasarkan nama toko', function () {
+    [$distributor, $user] = distributorAccount();
+    $market = Market::factory()->create();
+    $firstStore = RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Alpha',
+    ]);
+    $secondStore = RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Beta',
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'recipient_store_id' => $firstStore->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 100,
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'recipient_store_id' => $secondStore->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 250,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('distributor.dashboard', ['q' => 'Toko Alpha']))
+        ->assertOk()
+        ->assertSeeInOrder(['Total Laporan', '1'])
+        ->assertSeeInOrder(['Jumlah Penyaluran', '100'])
+        ->assertSee('Toko Alpha')
+        ->assertDontSee('Toko Beta');
+});
+
 it('menampilkan lima laporan terkirim per halaman dengan pagination', function () {
     [$distributor, $user] = distributorAccount();
     $market = Market::factory()->create();
@@ -143,7 +165,7 @@ it('menampilkan lima laporan terkirim per halaman dengan pagination', function (
             'distributor_id' => $distributor->id,
             'market_id' => $market->id,
             'distribution_date' => now()->startOfMonth()->toDateString(),
-            'cartons' => 10,
+            'cartons' => $index,
         ]);
     }
 
@@ -151,39 +173,14 @@ it('menampilkan lima laporan terkirim per halaman dengan pagination', function (
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSee('Menampilkan 5 dari 6 laporan')
-        ->assertSee('LP-006')
-        ->assertDontSee('LP-001')
+        ->assertSee('5 karton')
+        ->assertDontSee('6 karton')
         ->assertSee('?page=2', false);
 
     $this->get(route('distributor.dashboard', ['page' => 2]))
         ->assertOk()
-        ->assertSee('LP-001')
-        ->assertDontSee('LP-006');
-});
-
-it('tidak menampilkan laporan draf pada tabel laporan penyaluran', function () {
-    [$distributor, $user] = distributorAccount();
-    $market = Market::factory()->create();
-
-    Distribution::factory()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'distribution_date' => now()->startOfMonth()->toDateString(),
-        'cartons' => 111,
-    ]);
-
-    Distribution::factory()->draft()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'distribution_date' => now()->startOfMonth()->toDateString(),
-        'cartons' => 222,
-    ]);
-
-    $this->actingAs($user)
-        ->get(route('distributor.dashboard'))
-        ->assertOk()
-        ->assertSee('111 karton')
-        ->assertDontSee('222 karton');
+        ->assertSee('6 karton')
+        ->assertDontSee('5 karton');
 });
 
 it('menampilkan keadaan kosong saat belum ada laporan', function () {
@@ -193,7 +190,6 @@ it('menampilkan keadaan kosong saat belum ada laporan', function () {
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSee('Belum ada laporan penyaluran pada periode ini')
-        ->assertDontSee('Laporan Draf')
         ->assertSeeInOrder(['Total Laporan', '0'])
         ->assertSeeInOrder(['Jumlah Penyaluran', '0']);
 });

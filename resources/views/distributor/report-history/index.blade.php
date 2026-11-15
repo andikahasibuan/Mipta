@@ -9,18 +9,33 @@
         $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
     @endphp
 
-    <form
-        method="GET"
-        action="{{ route('distributor.report-history.index') }}"
-        class="rounded-xl border border-slate-200 bg-white p-3"
-    >
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div>
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div class="px-5 pt-5">
+            <h2 class="text-lg font-semibold text-slate-900">Riwayat Laporan</h2>
+        </div>
+
+        <form
+            method="GET"
+            action="{{ route('distributor.report-history.index') }}"
+            class="mt-4 flex flex-col gap-3 px-5 lg:flex-row lg:items-center"
+        >
+            <div class="relative min-w-0 flex-1">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <input
+                    type="search"
+                    name="search"
+                    value="{{ $filters['search'] }}"
+                    placeholder="Cari nama toko..."
+                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                >
+            </div>
+
+            <div class="relative shrink-0">
                 <label for="filter-month" class="sr-only">Bulan</label>
                 <select
                     id="filter-month"
                     name="month"
-                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-11 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
                     @foreach ($months as $option)
                         <option value="{{ $option['value'] }}" @selected($filters['month'] === $option['value'])>
@@ -28,65 +43,34 @@
                         </option>
                     @endforeach
                 </select>
-            </div>
-
-            <div>
-                <label for="filter-status" class="sr-only">Status laporan</label>
-                <select
-                    id="filter-status"
-                    name="status"
-                    class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
-                >
-                    <option value="">Semua Status</option>
-                    <option value="submitted" @selected($filters['status'] === 'submitted')>Terkirim</option>
-                    <option value="draft" @selected($filters['status'] === 'draft')>Draf</option>
-                </select>
-            </div>
-
-            <div>
-                <label for="filter-search" class="sr-only">Cari nama toko</label>
-                <input
-                    type="search"
-                    id="filter-search"
-                    name="search"
-                    value="{{ $filters['search'] }}"
-                    placeholder="Cari nama toko"
-                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
-                >
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
 
             <button
                 type="submit"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 Terapkan Filter
             </button>
-        </div>
-    </form>
-
-    <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div class="px-5 pt-5">
-            <h2 class="text-lg font-semibold text-slate-900">Riwayat Laporan</h2>
-        </div>
+        </form>
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[9%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
-                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal</th>
-                        <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[17%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[13%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
-                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Status Laporan</th>
-                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Aksi</th>
+                        <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Tanggal</th>
+                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Pasar</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($reports as $report)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
-                                {{ $report->code }}
+                                {{ $loop->iteration }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $report->distribution_date->format('d/m/Y') }}
@@ -99,17 +83,6 @@
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-semibold text-slate-900">
                                 {{ $formatNumber($report->cartons) }} karton
-                            </td>
-                            <td class="whitespace-nowrap px-5 py-4 align-middle">
-                                @if ($report->status === \App\Enums\DistributionStatus::Submitted)
-                                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                        Terkirim
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                                        Draf
-                                    </span>
-                                @endif
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <div class="flex items-center justify-center gap-2">
@@ -143,7 +116,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
                                 Belum ada riwayat laporan penyaluran pada periode ini
                             </td>
                         </tr>

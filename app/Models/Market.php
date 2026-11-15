@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\Role;
 use Database\Factories\MarketFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,14 +14,6 @@ class Market extends Model
 {
     /** @use HasFactory<MarketFactory> */
     use HasFactory;
-
-    /**
-     * ID data pasar yang ditampilkan, mis. PSR-001.
-     */
-    protected function code(): Attribute
-    {
-        return Attribute::get(fn (): string => sprintf('PSR-%03d', $this->id));
-    }
 
     /**
      * Toko penerima yang berada di pasar ini.

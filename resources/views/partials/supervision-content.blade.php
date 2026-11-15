@@ -92,7 +92,7 @@
         <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
             <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                 <tr>
-                    <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
+                    <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">NO</th>
                     <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
                     <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Identitas Kontributor</th>
                     <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Pasar</th>
@@ -104,7 +104,7 @@
                 @forelse ($reports as $report)
                     <tr>
                         <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
-                            {{ $report->code }}
+                            {{ $loop->iteration }}
                         </td>
                         <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                             {{ $report->report_date->format('d/m/Y') }}

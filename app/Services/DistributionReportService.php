@@ -76,8 +76,7 @@ class DistributionReportService
 
         $distributions = $baseQuery
             ->with(['distributor:id,name', 'market:id,name', 'store:id,name,market_id'])
-            ->orderByDesc('distribution_date')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -108,10 +107,6 @@ class DistributionReportService
             $query->whereHas('store', fn (Builder $storeQuery) => $storeQuery->where('name', 'like', "%{$search}%"))
                 ->orWhereHas('distributor', fn (Builder $distributorQuery) => $distributorQuery->where('name', 'like', "%{$search}%"))
                 ->orWhereHas('market', fn (Builder $marketQuery) => $marketQuery->where('name', 'like', "%{$search}%"));
-
-            if (preg_match('/^(?:lp-?)?0*(\d+)$/i', $search, $matches)) {
-                $query->orWhere('id', (int) $matches[1]);
-            }
         });
     }
 

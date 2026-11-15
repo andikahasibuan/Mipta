@@ -34,7 +34,6 @@ it('menampilkan laporan penyaluran dari database', function () {
         ->get(route('admin.distribution.index'))
         ->assertOk()
         ->assertSee('Laporan Penyaluran')
-        ->assertSee('LP-001')
         ->assertDontSee('Tambah Data')
         ->assertSee('PT Sinar Pangan Nusantara')
         ->assertSee('Pasar Raya Padang')
@@ -118,7 +117,7 @@ it('mengabaikan bulan tidak valid dan kembali ke bulan berjalan', function () {
         ->assertSee('value="'.now()->format('Y-m').'" selected', false);
 });
 
-it('mencari laporan penyaluran berdasarkan kode, toko, distributor, dan pasar', function () {
+it('mencari laporan penyaluran berdasarkan toko, distributor, dan pasar', function () {
     $uptd = User::factory()->create(['role' => Role::UptdPasar]);
     $alphaDistributor = Distributor::factory()->create(['name' => 'PT Alpha Niaga']);
     $betaDistributor = Distributor::factory()->create(['name' => 'PT Beta Pangan']);
@@ -136,7 +135,7 @@ it('mencari laporan penyaluran berdasarkan kode, toko, distributor, dan pasar', 
         'cartons' => 111,
     ]);
 
-    $betaDistribution = Distribution::factory()->create([
+    Distribution::factory()->create([
         'distributor_id' => $betaDistributor->id,
         'market_id' => $betaMarket->id,
         'recipient_store_id' => $betaStore->id,
@@ -161,11 +160,6 @@ it('mencari laporan penyaluran berdasarkan kode, toko, distributor, dan pasar', 
         ->assertOk()
         ->assertSee('111 karton')
         ->assertDontSee('222 karton');
-
-    $this->get(route('admin.distribution.index', ['search' => $betaDistribution->code]))
-        ->assertOk()
-        ->assertSee('222 karton')
-        ->assertDontSee('111 karton');
 });
 
 it('menampilkan ringkasan total karton, jumlah toko penerima, dan jumlah laporan sesuai filter', function () {
@@ -216,15 +210,6 @@ it('menampilkan ringkasan total karton, jumlah toko penerima, dan jumlah laporan
         'uptd_user_id' => $uptd->id,
         'distribution_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
         'cartons' => 900,
-    ]);
-
-    Distribution::factory()->draft()->create([
-        'distributor_id' => $secondDistributor->id,
-        'market_id' => $secondStore->market_id,
-        'recipient_store_id' => $secondStore->id,
-        'uptd_user_id' => $uptd->id,
-        'distribution_date' => now()->toDateString(),
-        'cartons' => 9999,
     ]);
 
     $this->actingAs(User::factory()->create());
@@ -290,29 +275,4 @@ it('menghapus laporan penyaluran dari database', function () {
         ->assertRedirect(route('admin.distribution.index'));
 
     $this->assertDatabaseMissing('distributions', ['id' => $distribution->id]);
-});
-
-it('tidak menampilkan laporan draft pada halaman laporan penyaluran admin', function () {
-    $distributor = Distributor::factory()->create();
-    $market = Market::factory()->create();
-
-    Distribution::factory()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'distribution_date' => now()->toDateString(),
-        'cartons' => 111,
-    ]);
-
-    Distribution::factory()->draft()->create([
-        'distributor_id' => $distributor->id,
-        'market_id' => $market->id,
-        'distribution_date' => now()->toDateString(),
-        'cartons' => 4321,
-    ]);
-
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.distribution.index'))
-        ->assertOk()
-        ->assertSee('111 karton')
-        ->assertDontSee('4.321 karton');
 });

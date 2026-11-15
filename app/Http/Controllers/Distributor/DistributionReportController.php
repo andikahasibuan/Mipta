@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class DistributionReportController extends Controller
@@ -28,27 +27,22 @@ class DistributionReportController extends Controller
     }
 
     /**
-     * Simpan laporan penyaluran baru sebagai draft atau terkirim.
+     * Simpan laporan penyaluran baru.
      */
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateReport($request);
         $store = $this->ownedStore($request, (int) $validated['recipient_store_id']);
 
-        $report = Distribution::create([
+        Distribution::create([
             'distributor_id' => $request->user()->distributor_id,
             'market_id' => $store->market_id,
             'uptd_user_id' => null,
             'recipient_store_id' => $store->id,
             'distribution_date' => $validated['distribution_date'],
             'cartons' => $validated['cartons'],
-            'status' => $this->statusFromAction($validated['action']),
+            'status' => DistributionStatus::Submitted,
         ]);
-
-        if ($validated['action'] === 'draft') {
-            return redirect()->route('distributor.distribution-reports.edit', $report)
-                ->with('success', 'Draf laporan berhasil disimpan.');
-        }
 
         return redirect()->route('distributor.dashboard')
             ->with('success', 'Laporan penyaluran berhasil dikirim.');
@@ -65,13 +59,11 @@ class DistributionReportController extends Controller
     }
 
     /**
-     * Perbarui laporan penyaluran yang sudah terkirim atau draft.
+     * Perbarui laporan penyaluran yang sudah terkirim.
      */
     public function update(Request $request, Distribution $distribution): RedirectResponse
     {
         $this->ensureOwned($request, $distribution);
-
-        $wasSubmitted = $distribution->status === DistributionStatus::Submitted;
 
         $validated = $this->validateReport($request);
         $store = $this->ownedStore($request, (int) $validated['recipient_store_id']);
@@ -81,41 +73,23 @@ class DistributionReportController extends Controller
             'recipient_store_id' => $store->id,
             'distribution_date' => $validated['distribution_date'],
             'cartons' => $validated['cartons'],
-            'status' => $wasSubmitted
-                ? DistributionStatus::Submitted
-                : $this->statusFromAction($validated['action']),
         ]);
 
-        $changed = $distribution->isDirty();
-
-        if ($changed) {
+        if ($distribution->isDirty()) {
             $distribution->save();
+            $this->notifyReportUpdated($request, $distribution);
+
+            return redirect()->route('distributor.report-history.index')
+                ->with('success', 'Laporan penyaluran berhasil diperbarui.');
         }
 
-        if ($wasSubmitted) {
-            if ($changed) {
-                $this->notifyReportUpdated($request, $distribution);
-
-                return redirect()->route('distributor.report-history.index')
-                    ->with('success', 'Laporan penyaluran berhasil diperbarui.');
-            }
-
-            return redirect()->route('distributor.report-history.index');
-        }
-
-        if ($validated['action'] === 'draft') {
-            return redirect()->route('distributor.distribution-reports.edit', $distribution)
-                ->with('success', 'Draf laporan berhasil diperbarui.');
-        }
-
-        return redirect()->route('distributor.dashboard')
-            ->with('success', 'Laporan penyaluran berhasil dikirim.');
+        return redirect()->route('distributor.report-history.index');
     }
 
     /**
      * Data pendukung formulir laporan.
      *
-     * @return array{stores: Collection<int, RecipientStore>, report: Distribution|null, drafts: Collection<int, Distribution>}
+     * @return array{stores: Collection<int, RecipientStore>, report: Distribution|null}
      */
     private function formData(Request $request, ?Distribution $report = null): array
     {
@@ -125,27 +99,16 @@ class DistributionReportController extends Controller
             ->orderBy('name')
             ->get();
 
-        $drafts = Distribution::query()
-            ->where('distributor_id', $request->user()->distributor_id)
-            ->where('status', DistributionStatus::Draft->value)
-            ->when($report !== null, fn ($query) => $query->where('id', '!=', $report->id))
-            ->with(['store:id,name'])
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->limit(5)
-            ->get();
-
         return [
             'stores' => $stores,
             'report' => $report,
-            'drafts' => $drafts,
         ];
     }
 
     /**
      * Validasi input laporan penyaluran.
      *
-     * @return array{distribution_date: string, recipient_store_id: int, cartons: int, action: string}
+     * @return array{distribution_date: string, recipient_store_id: int, cartons: int}
      */
     private function validateReport(Request $request): array
     {
@@ -153,7 +116,6 @@ class DistributionReportController extends Controller
             'distribution_date' => ['required', 'date', 'before_or_equal:today'],
             'recipient_store_id' => ['required', 'integer', 'exists:recipient_stores,id'],
             'cartons' => ['required', 'integer', 'min:1'],
-            'action' => ['required', Rule::in(['draft', 'submit'])],
         ]);
     }
 
@@ -201,17 +163,9 @@ class DistributionReportController extends Controller
         Notification::send(
             $recipients,
             new DistributionReportUpdated(
-                $distribution->code,
                 $distribution->distribution_date->format('d/m/Y'),
                 $request->user()->distributor->name,
             ),
         );
-    }
-
-    private function statusFromAction(string $action): DistributionStatus
-    {
-        return $action === 'submit'
-            ? DistributionStatus::Submitted
-            : DistributionStatus::Draft;
     }
 }

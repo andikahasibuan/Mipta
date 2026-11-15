@@ -35,7 +35,7 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari ID, nama, atau alamat toko..."
+                    placeholder="Cari nama atau alamat toko..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
             </div>
@@ -86,7 +86,7 @@
             <table class="w-full min-w-[72rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">ID</th>
+                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Alamat</th>
                         <th scope="col" class="w-[11%] px-5 py-3 align-middle font-semibold">NIB</th>
@@ -100,7 +100,7 @@
                     @forelse ($stores as $store)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
-                                {{ $store->code }}
+                                {{ $loop->iteration }}
                             </td>
                             <td class="px-5 py-3 text-slate-900">
                                 {{ $store->name }}

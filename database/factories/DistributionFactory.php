@@ -31,14 +31,4 @@ class DistributionFactory extends Factory
             'status' => DistributionStatus::Submitted,
         ];
     }
-
-    /**
-     * Indicate that the report is still a draft.
-     */
-    public function draft(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => DistributionStatus::Draft,
-        ]);
-    }
 }

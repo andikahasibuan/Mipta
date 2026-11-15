@@ -42,8 +42,7 @@ class UptdReportHistoryService
                 $start->toDateString(),
                 $start->copy()->endOfMonth()->toDateString(),
             ])
-            ->orderByDesc('report_date')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 

@@ -58,16 +58,18 @@
             <table class="w-full min-w-[44rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Nama Kontributor</th>
-                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Pasar Terkait</th>
-                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Peran</th>
+                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Kontributor</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Pasar Terkait</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Peran</th>
                         <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status Akun</th>
-                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Aksi</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($contributors as $contributor)
                         <tr>
+                            <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">{{ $loop->iteration }}</td>
                             <td class="px-5 py-4 align-middle text-slate-900">{{ $contributor->name }}</td>
                             <td class="px-5 py-4 align-middle">
                                 <span class="text-sm text-slate-600">{{ $contributor->market?->name }}</span>
@@ -95,7 +97,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
                                 @if ($filters['q'] !== '' || $filters['status'])
                                     Tidak ada kontributor UPTD yang sesuai filter
                                 @else

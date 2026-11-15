@@ -10,7 +10,6 @@ class DistributionReportUpdated extends Notification
      * Buat notifikasi perubahan laporan penyaluran.
      */
     public function __construct(
-        public string $reportCode,
         public string $distributionDate,
         public string $distributorName,
     ) {}
@@ -35,12 +34,10 @@ class DistributionReportUpdated extends Notification
         return [
             'title' => 'Laporan penyaluran diperbarui',
             'message' => sprintf(
-                'Laporan %s tanggal %s telah diperbarui oleh %s.',
-                $this->reportCode,
+                'Laporan penyaluran tanggal %s telah diperbarui oleh %s.',
                 $this->distributionDate,
                 $this->distributorName,
             ),
-            'report_code' => $this->reportCode,
             'distribution_date' => $this->distributionDate,
             'distributor_name' => $this->distributorName,
         ];

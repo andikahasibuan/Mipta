@@ -72,7 +72,7 @@
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
+                        <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Identitas Kontributor</th>
                         <th scope="col" class="w-[17%] px-5 py-3 align-middle font-semibold">Pasar</th>
                         <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Deskripsi Kondisi</th>
@@ -84,7 +84,7 @@
                     @forelse ($reports as $report)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
-                                {{ $report->code }}
+                                {{ $loop->iteration }}
                             </td>
                             <td class="break-words px-5 py-4 align-middle text-slate-700">
                                 {{ $report->contributor?->name ?? '—' }}

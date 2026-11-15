@@ -72,8 +72,7 @@ class ReportRecapService
             $conditionReports = FieldDistributionReport::query()
                 ->with(['market:id,name', 'contributor:id,name'])
                 ->whereBetween('report_date', [$startDate, $endDate])
-                ->orderByDesc('report_date')
-                ->orderByDesc('id')
+                ->orderBy('id')
                 ->paginate(5, ['*'], 'kondisi_page')
                 ->withQueryString();
         }

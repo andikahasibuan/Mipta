@@ -32,11 +32,51 @@
             <h3 class="text-lg font-semibold text-slate-900">Laporan Penyaluran</h3>
         </div>
 
+        <form
+            method="GET"
+            action="{{ route('distributor.dashboard') }}"
+            class="mt-4 flex flex-col gap-3 px-5 lg:flex-row lg:items-center"
+        >
+            <div class="relative min-w-0 flex-1">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ $filters['search'] }}"
+                    placeholder="Cari nama toko..."
+                    class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                >
+            </div>
+
+            <div class="relative shrink-0">
+                <label for="filter-month" class="sr-only">Bulan</label>
+                <select
+                    id="filter-month"
+                    name="month"
+                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-11 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                >
+                    @foreach ($months as $option)
+                        <option value="{{ $option['value'] }}" @selected($filters['month'] === $option['value'])>
+                            {{ $option['label'] }}
+                        </option>
+                    @endforeach
+                </select>
+                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+
+            <button
+                type="submit"
+                class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+            >
+                Terapkan Filter
+            </button>
+        </form>
+
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">ID</th>
+                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Tanggal</th>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Pasar</th>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
@@ -47,7 +87,7 @@
                     @forelse ($reports as $report)
                         <tr>
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
-                                {{ $report->code }}
+                                {{ $loop->iteration }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $report->distribution_date->format('d/m/Y') }}

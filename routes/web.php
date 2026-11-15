@@ -145,6 +145,7 @@ Route::prefix('distributor')->name('distributor.')->middleware(['auth', 'role:di
     Route::post('stores', [DistributorStoreController::class, 'store'])->name('stores.store');
     Route::get('stores/{store}/edit', [DistributorStoreController::class, 'edit'])->name('stores.edit');
     Route::put('stores/{store}', [DistributorStoreController::class, 'update'])->name('stores.update');
+    Route::delete('stores/{store}', [DistributorStoreController::class, 'destroy'])->name('stores.destroy');
     Route::get('distribution-reports/create', [DistributorDistributionReportController::class, 'create'])->name('distribution-reports.create');
     Route::post('distribution-reports', [DistributorDistributionReportController::class, 'store'])->name('distribution-reports.store');
     Route::get('distribution-reports/{distribution}/edit', [DistributorDistributionReportController::class, 'edit'])->name('distribution-reports.edit');

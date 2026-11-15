@@ -10,7 +10,6 @@ class FieldDistributionReportDeleted extends Notification
      * Buat notifikasi penghapusan laporan kondisi lapangan.
      */
     public function __construct(
-        public string $reportCode,
         public string $reportDate,
         public string $marketName,
         public string $contributorName,
@@ -36,13 +35,11 @@ class FieldDistributionReportDeleted extends Notification
         return [
             'title' => 'Laporan kondisi lapangan dihapus',
             'message' => sprintf(
-                'Laporan kondisi lapangan %s tanggal %s di %s telah dihapus oleh %s.',
-                $this->reportCode,
+                'Laporan kondisi lapangan tanggal %s di %s telah dihapus oleh %s.',
                 $this->reportDate,
                 $this->marketName,
                 $this->contributorName,
             ),
-            'report_code' => $this->reportCode,
             'report_date' => $this->reportDate,
             'market_name' => $this->marketName,
             'contributor_name' => $this->contributorName,

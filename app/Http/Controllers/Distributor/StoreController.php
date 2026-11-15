@@ -16,16 +16,29 @@ class StoreController extends Controller
      */
     public function index(Request $request): View
     {
+        $search = trim($request->string('q')->toString());
+        $marketId = $request->integer('market');
+        $marketId = $marketId > 0 && Market::whereKey($marketId)->exists() ? $marketId : null;
+
         $stores = RecipientStore::query()
             ->where('distributor_id', $request->user()->distributor_id)
             ->with('market:id,name')
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
+            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('alamat', 'like', "%{$search}%")
+                ->orWhere('nib', 'like', "%{$search}%")))
+            ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 
         return view('distributor.stores.index', [
             'stores' => $stores,
+            'markets' => Market::orderBy('name')->get(['id', 'name']),
+            'filters' => [
+                'q' => $search,
+                'market' => $marketId,
+            ],
         ]);
     }
 
@@ -100,6 +113,25 @@ class StoreController extends Controller
 
         return redirect()->route('distributor.stores.index')
             ->with('success', 'Toko penerima berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus toko penerima milik distributor.
+     */
+    public function destroy(Request $request, RecipientStore $store): RedirectResponse
+    {
+        $this->ensureOwnedBy($request, $store);
+
+        if ($store->distributions()->exists()) {
+            return redirect()->route('distributor.stores.index')->withErrors([
+                'delete' => 'Toko penerima tidak dapat dihapus karena sudah memiliki laporan penyaluran.',
+            ]);
+        }
+
+        $store->delete();
+
+        return redirect()->route('distributor.stores.index')
+            ->with('success', 'Toko penerima berhasil dihapus.');
     }
 
     /**

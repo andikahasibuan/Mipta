@@ -107,7 +107,6 @@ class ReportController extends Controller
             ->get();
 
         $notification = new FieldDistributionReportDeleted(
-            $report->code,
             $report->report_date->format('d/m/Y'),
             $report->market?->name ?? '—',
             $report->contributor?->name ?? $request->user()->name,
