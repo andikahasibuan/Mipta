@@ -47,7 +47,7 @@ it('menampilkan data contoh yang tersedia pada dashboard dan menu pengguna dan d
         ->assertOk()
         ->assertSee('Pasar Raya Padang');
 
-    $this->get(route('admin.users.index'))
+    $this->get(route('admin.users.index', ['role' => 'kepala_dinas']))
         ->assertOk()
         ->assertSee('Dewi Anggraini')
         ->assertDontSee('Andi Pratama')

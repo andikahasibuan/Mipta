@@ -5,7 +5,6 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DistributionController;
 use App\Http\Controllers\Admin\DistributorController;
 use App\Http\Controllers\Admin\MarketController;
-use App\Http\Controllers\Admin\MonitoringController;
 use App\Http\Controllers\Admin\RecipientStoreController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SupervisionController;
@@ -118,7 +117,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('uptd-contributors/{contributor}', [UptdContributorController::class, 'destroy'])->name('uptd-contributors.destroy');
     Route::get('distribution', [DistributionController::class, 'index'])->name('distribution.index');
     Route::delete('distribution/{distribution}', [DistributionController::class, 'destroy'])->name('distribution.destroy');
-    Route::get('monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
     Route::get('supervision', [SupervisionController::class, 'index'])->name('supervision.index');
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 });

@@ -3,7 +3,7 @@
 @section('title', 'Distributor')
 
 @section('content')
-    <x-ui.master-tabs active="distributors">
+    <x-ui.user-tabs active="distributor">
         <a
             href="{{ route('admin.distributors.create') }}"
             class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
@@ -11,7 +11,7 @@
             <x-heroicon-o-plus class="h-4 w-4" />
             Tambah data
         </a>
-    </x-ui.master-tabs>
+    </x-ui.user-tabs>
 
     <x-ui.flash-messages />
 
@@ -56,7 +56,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="px-5 py-3 font-semibold">ID</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Nama Distributor</th>

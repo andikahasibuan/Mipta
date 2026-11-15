@@ -52,7 +52,6 @@ dataset('admin pages', [
     'stores' => ['admin.recipient-stores.index'],
     'uptd' => ['admin.uptd-contributors.index'],
     'distribution' => ['admin.distribution.index'],
-    'monitoring' => ['admin.monitoring.index'],
     'supervision' => ['admin.supervision.index'],
     'reports' => ['admin.reports.index'],
 ]);

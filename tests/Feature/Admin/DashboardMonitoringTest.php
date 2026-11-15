@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Models\Distribution;
 use App\Models\Distributor;
+use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,7 +36,7 @@ it('menampilkan kartu statistik dari database', function () {
         ->assertDontSee('karton pada');
 });
 
-it('menghitung total laporan dan penyaluran dari data penyaluran', function () {
+it('menghitung total laporan dari penyaluran dan kondisi pasar', function () {
     $firstDistributor = Distributor::factory()->create(['name' => 'PT Alpha Niaga']);
     $secondDistributor = Distributor::factory()->create(['name' => 'PT Beta Pangan']);
     $firstMarket = Market::factory()->create();
@@ -66,14 +67,87 @@ it('menghitung total laporan dan penyaluran dari data penyaluran', function () {
         'cartons' => 100,
     ]);
 
+    FieldDistributionReport::factory()->create([
+        'market_id' => $firstMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $secondMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $firstMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'report_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
+    ]);
+
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Total Laporan', '2'])
+        ->assertSeeInOrder(['Total Laporan', '4'])
         ->assertSeeInOrder(['Total Penyaluran', '430'])
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['distribution_reports'] === 2
+            && $summary['condition_reports'] === 2
+            && $summary['reports'] === 4)
         ->assertDontSee('dari bulan lalu')
         ->assertSeeInOrder(['PT Alpha Niaga', '250'])
         ->assertSeeInOrder(['PT Beta Pangan', '180']);
+});
+
+it('memfilter total laporan kondisi pasar berdasarkan pasar tetapi tidak distributor', function () {
+    $selectedMarket = Market::factory()->create();
+    $otherMarket = Market::factory()->create();
+    $selectedDistributor = Distributor::factory()->create();
+    $otherDistributor = Distributor::factory()->create();
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $selectedDistributor->id,
+        'market_id' => $selectedMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 100,
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $otherDistributor->id,
+        'market_id' => $otherMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->startOfMonth()->toDateString(),
+        'cartons' => 50,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $selectedMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $otherMarket->id,
+        'uptd_user_id' => $uptd->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+    ]);
+
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.dashboard', ['market' => $selectedMarket->id]))
+        ->assertOk()
+        ->assertSeeInOrder(['Total Laporan', '2'])
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['distribution_reports'] === 1
+            && $summary['condition_reports'] === 1
+            && $summary['reports'] === 2);
+
+    $this->get(route('admin.dashboard', ['distributor' => $selectedDistributor->id]))
+        ->assertOk()
+        ->assertSeeInOrder(['Total Laporan', '3'])
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['distribution_reports'] === 1
+            && $summary['condition_reports'] === 2
+            && $summary['reports'] === 3);
 });
 
 it('memfilter total penyaluran berdasarkan pasar yang dipilih', function () {

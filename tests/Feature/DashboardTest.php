@@ -14,10 +14,10 @@ it('menampilkan dashboard admin dengan sidebar MIPTA', function () {
         ->assertSee('MIPTA')
         ->assertSeeInOrder([
             'Dashboard',
-            'Data Pengguna',
+            'Pengguna',
+            'Data Master',
             'Penyaluran',
             'Kondisi Pasar',
-            'Monitoring',
             'Rekap Laporan',
             'Logout',
         ]);

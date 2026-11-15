@@ -17,7 +17,10 @@ it('menampilkan tombol untuk menyembunyikan sidebar', function () {
         ->assertSee('aria-controls="app-sidebar"', false)
         ->assertSee('aria-expanded="true"', false)
         ->assertSee('aria-label="Sembunyikan menu"', false)
-        ->assertSee('id="app-sidebar"', false);
+        ->assertSee('data-sidebar-icon-collapse', false)
+        ->assertSee('data-sidebar-icon-expand', false)
+        ->assertSee('id="app-sidebar"', false)
+        ->assertSee('id="app-content"', false);
 });
 
 it('menandai label menu agar dapat disembunyikan saat sidebar ciut', function () {
@@ -32,7 +35,7 @@ it('menandai label menu agar dapat disembunyikan saat sidebar ciut', function ()
     preg_match('/<aside[^>]*id="app-sidebar".*?<\/aside>/s', $html, $matches);
     $sidebar = $matches[0] ?? '';
 
-    foreach (['Dashboard', 'Data Pengguna', 'Penyaluran', 'Kondisi Pasar', 'Monitoring', 'Rekap Laporan', 'Logout'] as $label) {
+    foreach (['Dashboard', 'Pengguna', 'Data Master', 'Penyaluran', 'Kondisi Pasar', 'Rekap Laporan', 'Logout'] as $label) {
         expect($sidebar)->toMatch('/data-sidebar-label[^>]*>\s*'.preg_quote($label, '/').'\s*</');
     }
 });

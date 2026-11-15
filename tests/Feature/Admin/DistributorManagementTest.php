@@ -260,27 +260,35 @@ it('menghapus akun perusahaan saat distributor dihapus', function () {
     $this->assertDatabaseMissing('distributors', ['id' => $distributor->id]);
 });
 
-it('menampilkan lima tab pengguna dan data master tanpa tab ringkasan', function () {
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.distributors.index'))
-        ->assertOk()
-        ->assertSeeInOrder(['Pengguna', 'Distributor', 'Pasar', 'Toko Penerima', 'Kontributor UPTD'])
-        ->assertDontSee('Ringkasan')
-        ->assertSee('href="'.route('admin.users.index').'"', false)
-        ->assertSee('href="'.route('admin.markets.index').'"', false)
-        ->assertSee('href="'.route('admin.recipient-stores.index').'"', false)
-        ->assertSee('href="'.route('admin.uptd-contributors.index').'"', false);
-});
-
-it('menyorot tab aktif pada navigasi pengguna dan data master', function () {
+it('menampilkan empat tab pengguna tanpa tab data master', function () {
     $response = $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.index'));
 
-    preg_match('/<nav[^>]*aria-label="Navigasi Pengguna dan Data Master".*?<\/nav>/s', $response->getContent(), $matches);
+    $response->assertOk()->assertDontSee('Ringkasan');
+
+    preg_match('/<nav[^>]*aria-label="Navigasi Pengguna".*?<\/nav>/s', $response->getContent(), $matches);
+    $tabs = $matches[0] ?? '';
+
+    foreach (['Admin', 'Kepala Dinas', 'Distributor', 'UPTD'] as $label) {
+        expect($tabs)->toContain($label);
+    }
+
+    expect($tabs)->toContain(route('admin.distributors.index'));
+
+    expect($tabs)->not->toContain(route('admin.markets.index'));
+    expect($tabs)->not->toContain(route('admin.recipient-stores.index'));
+    expect($tabs)->not->toContain(route('admin.uptd-contributors.index'));
+});
+
+it('menyorot tab aktif pada navigasi pengguna', function () {
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.distributors.index'));
+
+    preg_match('/<nav[^>]*aria-label="Navigasi Pengguna".*?<\/nav>/s', $response->getContent(), $matches);
     $tabs = $matches[0] ?? '';
 
     expect(substr_count($tabs, 'aria-current="page"'))->toBe(1)
-        ->and($tabs)->toContain('aria-current="page"');
+        ->and($tabs)->toMatch('/aria-current="page"[^>]*>\s*Distributor\s*<\/a>/s');
 });
 
 it('mencari distributor berdasarkan nama atau wilayah', function () {

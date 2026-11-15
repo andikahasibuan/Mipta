@@ -94,15 +94,22 @@ it('menampilkan keadaan kosong saat belum ada kontributor UPTD', function () {
         ->assertSee('Belum ada data kontributor UPTD');
 });
 
-it('menampilkan navigasi tab hingga kontributor UPTD', function () {
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.uptd-contributors.index'))
-        ->assertOk()
-        ->assertSee('href="'.route('admin.users.index').'"', false)
-        ->assertSee('href="'.route('admin.distributors.index').'"', false)
-        ->assertSee('href="'.route('admin.markets.index').'"', false)
-        ->assertSee('href="'.route('admin.recipient-stores.index').'"', false)
-        ->assertSee('href="'.route('admin.uptd-contributors.index').'"', false);
+it('menampilkan navigasi tab data master hingga kontributor UPTD', function () {
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.uptd-contributors.index'));
+
+    $response->assertOk();
+
+    preg_match('/<nav[^>]*aria-label="Navigasi Data Master".*?<\/nav>/s', $response->getContent(), $matches);
+    $tabs = $matches[0] ?? '';
+
+    expect($tabs)
+        ->toContain(route('admin.markets.index'))
+        ->toContain(route('admin.recipient-stores.index'))
+        ->toContain(route('admin.uptd-contributors.index'));
+
+    expect($tabs)->not->toContain(route('admin.users.index'));
+    expect($tabs)->not->toContain(route('admin.distributors.index'));
 });
 
 it('mencari kontributor berdasarkan nama atau username', function () {

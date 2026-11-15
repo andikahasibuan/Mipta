@@ -17,20 +17,20 @@ it('menampilkan tombol tambah data yang mengarah ke halaman tambah', function ()
         ->assertDontSee('Ekspor Excel');
 });
 
-it('menampilkan judul pengguna dan data master di setiap tab', function () {
+it('menampilkan judul halaman pengguna dan data master di setiap tab', function () {
     $admin = User::factory()->create();
 
     collect([
-        'admin.users.index',
-        'admin.distributors.index',
-        'admin.markets.index',
-        'admin.recipient-stores.index',
-        'admin.uptd-contributors.index',
-    ])->each(function (string $route) use ($admin): void {
+        'admin.users.index' => 'Data Pengguna',
+        'admin.distributors.index' => 'Distributor',
+        'admin.markets.index' => 'Pasar',
+        'admin.recipient-stores.index' => 'Toko Penerima',
+        'admin.uptd-contributors.index' => 'Kontributor UPTD',
+    ])->each(function (string $title, string $route) use ($admin): void {
         $this->actingAs($admin)
             ->get(route($route))
             ->assertOk()
-            ->assertSee('Data Pengguna')
+            ->assertSee('<title>'.e($title).'</title>', false)
             ->assertDontSee('aria-label="Breadcrumb"', false);
     });
 });
@@ -60,10 +60,19 @@ it('menampilkan tabel data pengguna dari database', function () {
         ->assertSee('Data pengguna')
         ->assertSee('Admin MIPTA')
         ->assertSee('admin.mipta')
-        ->assertSee('kepala.dinas')
-        ->assertSeeInOrder(['Kontributor UPTD Bersama', 'kontributor.01', 'UPTD', 'Nonaktif'])
-        ->assertSee('Menampilkan 3 dari 3 pengguna')
+        ->assertDontSee('kepala.dinas')
+        ->assertDontSee('kontributor.01')
+        ->assertSee('Menampilkan 1 dari 1 pengguna')
         ->assertDontSee('Total Pengguna');
+
+    $this->get(route('admin.users.index', ['role' => 'kepala_dinas']))
+        ->assertOk()
+        ->assertSee('kepala.dinas')
+        ->assertDontSee('admin.mipta');
+
+    $this->get(route('admin.users.index', ['role' => 'uptd_pasar']))
+        ->assertOk()
+        ->assertSeeInOrder(['Kontributor UPTD Bersama', 'kontributor.01', 'UPTD', 'Nonaktif']);
 });
 
 it('mencari pengguna berdasarkan nama, username, atau email', function () {
@@ -120,29 +129,40 @@ it('menyembunyikan semua akun distributor dari daftar pengguna', function () {
         ->assertDontSee('value="'.Role::Distributor->value.'"', false);
 });
 
-it('hanya menampilkan admin, kepala dinas, dan akun bersama UPTD di tab pengguna', function () {
-    $admin = User::factory()->create(['name' => 'Admin MIPTA']);
+it('memisahkan admin, kepala dinas, dan akun bersama UPTD pada tab pengguna', function () {
+    $login = User::factory()->create(['name' => 'Pengelola']);
+    User::factory()->create(['name' => 'Admin MIPTA']);
     User::factory()->create([
-        'name' => 'Kepala Dinas',
+        'name' => 'Pejabat Dinas',
         'role' => Role::KepalaDinas,
     ]);
     User::factory()->create([
-        'name' => 'UPTD Bersama',
+        'name' => 'Petugas Bersama',
         'role' => Role::UptdPasar,
     ]);
     User::factory()->create([
-        'name' => 'Kontributor Pasar',
+        'name' => 'Petugas Pasar',
         'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
-    $this->actingAs($admin)
+    $this->actingAs($login)
         ->get(route('admin.users.index'))
         ->assertOk()
         ->assertSee('Admin MIPTA')
-        ->assertSee('Kepala Dinas')
-        ->assertSee('UPTD Bersama')
-        ->assertDontSee('Kontributor Pasar');
+        ->assertDontSee('Pejabat Dinas')
+        ->assertDontSee('Petugas Bersama')
+        ->assertDontSee('Petugas Pasar');
+
+    $this->get(route('admin.users.index', ['role' => 'kepala_dinas']))
+        ->assertOk()
+        ->assertSee('Pejabat Dinas')
+        ->assertDontSee('Admin MIPTA');
+
+    $this->get(route('admin.users.index', ['role' => 'uptd_pasar']))
+        ->assertOk()
+        ->assertSee('Petugas Bersama')
+        ->assertDontSee('Petugas Pasar');
 });
 
 it('memfilter pengguna berdasarkan peran dan status', function () {
@@ -167,7 +187,7 @@ it('memfilter pengguna berdasarkan peran dan status', function () {
         ->assertDontSee('UPTD Nonaktif');
 
     $this->actingAs($admin)
-        ->get(route('admin.users.index', ['status' => 'nonaktif']))
+        ->get(route('admin.users.index', ['role' => 'uptd_pasar', 'status' => 'nonaktif']))
         ->assertOk()
         ->assertSee('UPTD Nonaktif')
         ->assertDontSee('Kepala Terverifikasi')

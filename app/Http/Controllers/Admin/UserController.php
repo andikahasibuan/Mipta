@@ -13,17 +13,17 @@ use Illuminate\Validation\Rule;
 class UserController extends Controller
 {
     /**
-     * Tampilkan halaman pengguna dan data master.
+     * Tampilkan halaman pengguna sesuai tab peran yang dipilih.
      */
     public function index(Request $request): View
     {
         $search = trim($request->string('q')->toString());
-        $role = Role::tryFrom($request->string('role')->toString());
+        $role = Role::tryFrom($request->string('role')->toString()) ?? Role::Admin;
         $status = $request->string('status')->toString();
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
-        if ($role === Role::Distributor) {
-            $role = null;
+        if (! in_array($role, [Role::Admin, Role::KepalaDinas, Role::UptdPasar], true)) {
+            $role = Role::Admin;
         }
 
         $users = User::query()
@@ -46,10 +46,9 @@ class UserController extends Controller
 
         return view('admin.users.index', [
             'users' => $users,
-            'roles' => $this->assignableRoles(),
             'filters' => [
                 'q' => $search,
-                'role' => $role?->value,
+                'role' => $role->value,
                 'status' => $status,
             ],
         ]);

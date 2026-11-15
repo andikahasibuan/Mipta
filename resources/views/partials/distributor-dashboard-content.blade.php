@@ -18,12 +18,12 @@
 
         <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
-            <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['reports']) }}</p>
+            <p class="text-4xl font-bold text-[#018F98]">{{ $formatNumber($summary['reports']) }}</p>
         </div>
 
         <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Jumlah Penyaluran</p>
-            <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['cartons']) }}</p>
+            <p class="text-4xl font-bold text-[#018F98]">{{ $formatNumber($summary['cartons']) }}</p>
         </div>
     </div>
 
@@ -34,7 +34,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">ID</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Tanggal</th>

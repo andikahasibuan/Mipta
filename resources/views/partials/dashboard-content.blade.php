@@ -11,18 +11,18 @@
             Hai, {{ auth()->user()->name }}
         </h2>
         <p class="mt-1 max-w-3xl text-sm text-[#E6F7F8]">
-            Pantau laporan penyaluran dan kondisi pasar Minyakita pada periode ini.
+            Selamat Datang di MIPTA Monitoring MinyaKita
         </p>
     </div>
 
     <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
         <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Laporan</p>
-        <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['reports']) }}</p>
+        <p class="text-4xl font-bold text-[#018F98]">{{ $formatNumber($summary['reports']) }}</p>
     </div>
 
     <div class="flex h-28 flex-col justify-center gap-1 rounded-xl border border-slate-200 bg-white p-4">
         <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Total Penyaluran</p>
-        <p class="text-4xl font-bold text-[#08858c]">{{ $formatNumber($summary['cartons']) }}</p>
+        <p class="text-4xl font-bold text-[#018F98]">{{ $formatNumber($summary['cartons']) }}</p>
     </div>
 </div>
 

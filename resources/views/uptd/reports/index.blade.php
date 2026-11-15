@@ -70,7 +70,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
                         <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Identitas Kontributor</th>
@@ -86,14 +86,14 @@
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
                                 {{ $report->code }}
                             </td>
-                            <td class="px-5 py-4 align-middle text-slate-700">
+                            <td class="break-words px-5 py-4 align-middle text-slate-700">
                                 {{ $report->contributor?->name ?? '—' }}
                             </td>
-                            <td class="px-5 py-4 align-middle text-slate-700">
+                            <td class="break-words px-5 py-4 align-middle text-slate-700">
                                 {{ $report->market?->name ?? '—' }}
                             </td>
-                            <td class="px-5 py-4 text-left align-middle text-slate-600" title="{{ $report->description }}">
-                                {{ \Illuminate\Support\Str::limit($report->description, 70) }}
+                            <td class="break-words px-5 py-4 text-left align-middle text-slate-600" title="{{ $report->description }}">
+                                {{ \Illuminate\Support\Str::limit($report->description, 120) }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <span @class([

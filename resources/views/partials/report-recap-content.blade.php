@@ -93,7 +93,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[48rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[34%] px-5 py-3 align-middle font-semibold">Pasar</th>
                         <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Jumlah Laporan</th>
@@ -136,7 +136,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
@@ -155,13 +155,13 @@
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $report->report_date->format('d/m/Y') }}
                             </td>
-                            <td class="px-5 py-4 align-middle text-slate-900">
+                            <td class="break-words px-5 py-4 align-middle text-slate-900">
                                 {{ $report->contributor?->name ?? '—' }}
                             </td>
-                            <td class="px-5 py-4 align-middle text-slate-700">
+                            <td class="break-words px-5 py-4 align-middle text-slate-700">
                                 {{ $report->market?->name ?? '—' }}
                             </td>
-                            <td class="px-5 py-4 text-left align-middle text-slate-700">
+                            <td class="break-words px-5 py-4 text-left align-middle text-slate-700">
                                 {{ $report->description }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">

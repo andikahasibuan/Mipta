@@ -4,12 +4,43 @@
 
 <x-ui.flash-messages />
 
-<form
-    method="GET"
-    action="{{ route($area.'.supervision.index') }}"
-    class="rounded-xl border border-slate-200 bg-white p-3"
->
-    <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Jumlah Laporan</p>
+            <p class="mt-1 text-3xl font-bold text-[#018F98]">{{ $formatNumber($summary['reports']) }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ $month_label }}</p>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Sudah Melapor</p>
+            <p class="mt-1 text-3xl font-bold text-[#018F98]">{{ $formatNumber($summary['reported_markets']) }}</p>
+            <p class="mt-1 text-xs text-slate-500">
+                {{ $formatNumber($summary['reported_markets']) }} dari {{ $formatNumber($summary['total_markets']) }} pasar
+            </p>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-amber-200 bg-amber-100 p-5">
+        <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-700">Perlu Perhatian</p>
+            <p class="mt-1 text-3xl font-bold text-amber-900">{{ $formatNumber($summary['needs_attention_markets']) }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div class="px-5 pt-5">
+        <h2 class="text-lg font-semibold text-slate-900">Laporan Kondisi Pasar</h2>
+    </div>
+
+    <form
+        method="GET"
+        action="{{ route($area.'.supervision.index') }}"
+        class="mt-4 flex flex-col gap-3 px-5 lg:flex-row lg:items-center"
+    >
         <div class="relative min-w-0 flex-1">
             <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             <input
@@ -17,7 +48,7 @@
                 name="q"
                 value="{{ $filters['q'] }}"
                 placeholder="Cari kontributor atau pasar..."
-                class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
         </div>
 
@@ -28,7 +59,7 @@
                 id="filter-month"
                 name="month"
                 value="{{ $filters['month'] }}"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
         </div>
 
@@ -37,7 +68,7 @@
             <select
                 id="filter-condition"
                 name="condition"
-                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-11 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 <option value="">Semua Kondisi</option>
                 @foreach ($conditions as $condition)
@@ -46,26 +77,20 @@
                     </option>
                 @endforeach
             </select>
-            <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         </div>
 
         <button
             type="submit"
-            class="shrink-0 cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+            class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
         >
             Terapkan Filter
         </button>
-    </div>
-</form>
-
-<div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div class="px-5 pt-5">
-        <h2 class="text-lg font-semibold text-slate-900">Laporan Kondisi Pasar</h2>
-    </div>
+    </form>
 
     <div class="mt-4 overflow-x-auto">
         <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
-            <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+            <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                 <tr>
                     <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
                     <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
@@ -84,13 +109,13 @@
                         <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                             {{ $report->report_date->format('d/m/Y') }}
                         </td>
-                        <td class="px-5 py-4 align-middle text-slate-900">
+                        <td class="break-words px-5 py-4 align-middle text-slate-900">
                             {{ $report->contributor?->name ?? '—' }}
                         </td>
-                        <td class="px-5 py-4 align-middle text-slate-700">
+                        <td class="break-words px-5 py-4 align-middle text-slate-700">
                             {{ $report->market?->name ?? '—' }}
                         </td>
-                        <td class="px-5 py-4 text-left align-middle text-slate-700">
+                        <td class="break-words px-5 py-4 text-left align-middle text-slate-700">
                             {{ $report->description }}
                         </td>
                         <td class="whitespace-nowrap px-5 py-4 align-middle">

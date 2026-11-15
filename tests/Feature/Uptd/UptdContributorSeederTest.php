@@ -36,13 +36,13 @@ it('membuat akun bersama dan sembilan kontributor dengan password berbeda', func
     }
 });
 
-it('memisahkan akun bersama dan kontributor pasar pada tab admin', function () {
+it('memisahkan akun bersama dan kontributor pasar pada menu admin', function () {
     $this->seed(UptdContributorSeeder::class);
 
     $admin = User::factory()->create();
 
     $this->actingAs($admin)
-        ->get(route('admin.users.index'))
+        ->get(route('admin.users.index', ['role' => 'uptd_pasar']))
         ->assertOk()
         ->assertSee('Kontributor UPTD Pasar')
         ->assertDontSee('Kontributor UPTD 01');

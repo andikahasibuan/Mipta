@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DistributionStatus;
 use App\Models\Distribution;
 use App\Models\Distributor;
+use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -74,8 +75,13 @@ class DashboardMonitoringService
         }
 
         $cartonsByDistributor = $distributions->groupBy('distributor_id')->map->sum('cartons');
-        $totalReports = $distributions->count();
-        $totalCartons = $distributions->sum('cartons');
+        $distributionReports = $distributions->count();
+        $conditionReports = FieldDistributionReport::query()
+            ->whereBetween('report_date', [$periodStart, $periodEnd])
+            ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
+            ->count();
+        $totalReports = $distributionReports + $conditionReports;
+        $totalCartons = (int) $distributions->sum('cartons');
 
         $breakdown = Distributor::query()
             ->when($distributorId, fn ($query, int $id) => $query->whereKey($id))
@@ -92,6 +98,8 @@ class DashboardMonitoringService
                 'month' => $month,
                 'month_label' => $this->monthLabel($month),
                 'cartons' => $totalCartons,
+                'distribution_reports' => $distributionReports,
+                'condition_reports' => $conditionReports,
                 'reports' => $totalReports,
             ],
             'chart' => [

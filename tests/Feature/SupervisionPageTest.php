@@ -96,6 +96,140 @@ it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () 
         ->assertDontSee('Stok aman');
 });
 
+it('menampilkan ringkasan total, pasar sudah melapor, dan perlu perhatian', function () {
+    $contributor = User::factory()->create(['role' => Role::UptdPasar]);
+    $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
+    $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
+    $thirdMarket = Market::factory()->create(['name' => 'Pasar Gamma']);
+    $fourthMarket = Market::factory()->create(['name' => 'Pasar Delta']);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $firstMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::PerluPerhatian,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $firstMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->addDay()->toDateString(),
+        'condition' => FieldCondition::Normal,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $secondMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::Normal,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $secondMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->addDay()->toDateString(),
+        'condition' => FieldCondition::PerluPerhatian,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $thirdMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::Normal,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $thirdMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::PerluPerhatian,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $fourthMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::PerluPerhatian,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.supervision.index'))
+        ->assertOk()
+        ->assertSee('Jumlah Laporan')
+        ->assertSee('Pasar Sudah Melapor')
+        ->assertSee('Perlu Perhatian')
+        ->assertSee('3 dari '.Market::count().' pasar')
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 6
+            && $summary['reported_markets'] === 3
+            && $summary['total_markets'] === Market::count()
+            && $summary['needs_attention_markets'] === 2);
+});
+
+it('membatasi card total dan pasar dengan filter tetapi tidak card perlu perhatian', function () {
+    $contributor = User::factory()->create(['role' => Role::UptdPasar]);
+    $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
+    $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
+    $previousMarket = Market::factory()->create(['name' => 'Pasar Gamma']);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $firstMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::Normal,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $secondMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::PerluPerhatian,
+    ]);
+
+    FieldDistributionReport::factory()->create([
+        'market_id' => $previousMarket->id,
+        'uptd_user_id' => $contributor->id,
+        'report_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
+        'condition' => FieldCondition::PerluPerhatian,
+    ]);
+
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.supervision.index', ['q' => 'Pasar Alpha']))
+        ->assertOk()
+        ->assertSee('1 dari '.Market::count().' pasar')
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 1
+            && $summary['reported_markets'] === 1
+            && $summary['needs_attention_markets'] === 1);
+
+    $this->get(route('admin.supervision.index', ['condition' => FieldCondition::Normal->value]))
+        ->assertOk()
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 1
+            && $summary['reported_markets'] === 1
+            && $summary['needs_attention_markets'] === 1);
+
+    $this->get(route('admin.supervision.index', ['month' => now()->subMonthNoOverflow()->format('Y-m')]))
+        ->assertOk()
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 1
+            && $summary['reported_markets'] === 1
+            && $summary['needs_attention_markets'] === 1);
+});
+
+it('menampilkan bulan terpilih pada subtitle card jumlah laporan', function () {
+    $this->travelTo('2026-11-15');
+
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.supervision.index'))
+        ->assertOk()
+        ->assertSee('<p class="mt-1 text-xs text-slate-500">November 2026</p>', false)
+        ->assertViewHas('month_label', 'November 2026');
+
+    $this->get(route('admin.supervision.index', ['month' => '2026-10']))
+        ->assertOk()
+        ->assertSee('<p class="mt-1 text-xs text-slate-500">Oktober 2026</p>', false)
+        ->assertViewHas('month_label', 'Oktober 2026');
+});
+
 it('menampilkan keadaan kosong saat belum ada laporan kondisi lapangan', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.supervision.index'))

@@ -23,7 +23,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                         <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Alamat</th>

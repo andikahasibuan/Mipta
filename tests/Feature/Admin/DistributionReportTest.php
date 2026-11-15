@@ -109,6 +109,156 @@ it('memfilter laporan penyaluran berdasarkan distributor, pasar, dan bulan', fun
         ->assertDontSee('100 karton');
 });
 
+it('mengabaikan bulan tidak valid dan kembali ke bulan berjalan', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.distribution.index', ['month' => 'bukan-bulan']))
+        ->assertOk()
+        ->assertViewHas('filters', fn (array $filters): bool => $filters['month'] === now()->format('Y-m'))
+        ->assertSee('value="'.now()->format('Y-m').'" selected', false);
+});
+
+it('mencari laporan penyaluran berdasarkan kode, toko, distributor, dan pasar', function () {
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $alphaDistributor = Distributor::factory()->create(['name' => 'PT Alpha Niaga']);
+    $betaDistributor = Distributor::factory()->create(['name' => 'PT Beta Pangan']);
+    $alphaMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
+    $betaMarket = Market::factory()->create(['name' => 'Pasar Beta']);
+    $alphaStore = RecipientStore::factory()->create(['name' => 'Toko Alpha', 'market_id' => $alphaMarket->id]);
+    $betaStore = RecipientStore::factory()->create(['name' => 'Toko Beta', 'market_id' => $betaMarket->id]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $alphaDistributor->id,
+        'market_id' => $alphaMarket->id,
+        'recipient_store_id' => $alphaStore->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 111,
+    ]);
+
+    $betaDistribution = Distribution::factory()->create([
+        'distributor_id' => $betaDistributor->id,
+        'market_id' => $betaMarket->id,
+        'recipient_store_id' => $betaStore->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 222,
+    ]);
+
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.distribution.index', ['search' => 'Toko Alpha']))
+        ->assertOk()
+        ->assertSee('111 karton')
+        ->assertDontSee('222 karton');
+
+    $this->get(route('admin.distribution.index', ['search' => 'PT Beta Pangan']))
+        ->assertOk()
+        ->assertSee('222 karton')
+        ->assertDontSee('111 karton');
+
+    $this->get(route('admin.distribution.index', ['search' => 'Pasar Alpha']))
+        ->assertOk()
+        ->assertSee('111 karton')
+        ->assertDontSee('222 karton');
+
+    $this->get(route('admin.distribution.index', ['search' => $betaDistribution->code]))
+        ->assertOk()
+        ->assertSee('222 karton')
+        ->assertDontSee('111 karton');
+});
+
+it('menampilkan ringkasan total karton, jumlah toko penerima, dan jumlah laporan sesuai filter', function () {
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $firstDistributor = Distributor::factory()->create(['name' => 'PT Alpha Niaga']);
+    $secondDistributor = Distributor::factory()->create(['name' => 'PT Beta Pangan']);
+    $firstStore = RecipientStore::factory()->create(['name' => 'Toko Alpha']);
+    $secondStore = RecipientStore::factory()->create(['name' => 'Toko Beta']);
+
+    Distribution::factory()->create([
+        'distributor_id' => $firstDistributor->id,
+        'market_id' => $firstStore->market_id,
+        'recipient_store_id' => $firstStore->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 120,
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $secondDistributor->id,
+        'market_id' => $firstStore->market_id,
+        'recipient_store_id' => $firstStore->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 130,
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $secondDistributor->id,
+        'market_id' => $secondStore->market_id,
+        'recipient_store_id' => $secondStore->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 250,
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $secondDistributor->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 50,
+    ]);
+
+    Distribution::factory()->create([
+        'distributor_id' => $secondDistributor->id,
+        'market_id' => $secondStore->market_id,
+        'recipient_store_id' => $secondStore->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
+        'cartons' => 900,
+    ]);
+
+    Distribution::factory()->draft()->create([
+        'distributor_id' => $secondDistributor->id,
+        'market_id' => $secondStore->market_id,
+        'recipient_store_id' => $secondStore->id,
+        'uptd_user_id' => $uptd->id,
+        'distribution_date' => now()->toDateString(),
+        'cartons' => 9999,
+    ]);
+
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSeeInOrder(['Jumlah Laporan', 'Total Penyaluran', 'Jumlah Toko Penerima'])
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 4
+            && $summary['cartons'] === 550
+            && $summary['recipient_stores'] === 2);
+
+    $this->get(route('admin.distribution.index', ['distributor' => $firstDistributor->id]))
+        ->assertOk()
+        ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 1
+            && $summary['cartons'] === 120
+            && $summary['recipient_stores'] === 1);
+});
+
+it('menampilkan bulan terpilih pada subtitle card jumlah laporan', function () {
+    $this->travelTo('2026-11-15');
+
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSee('<p class="mt-1 text-xs text-slate-500">November 2026</p>', false)
+        ->assertViewHas('month_label', 'November 2026');
+
+    $this->get(route('admin.distribution.index', ['month' => '2026-10']))
+        ->assertOk()
+        ->assertSee('<p class="mt-1 text-xs text-slate-500">Oktober 2026</p>', false)
+        ->assertViewHas('month_label', 'Oktober 2026');
+});
+
 it('menampilkan keadaan kosong saat belum ada laporan penyaluran', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))

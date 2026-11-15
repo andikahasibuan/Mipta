@@ -71,7 +71,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[9%] px-5 py-3 align-middle font-semibold">ID Laporan</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal</th>

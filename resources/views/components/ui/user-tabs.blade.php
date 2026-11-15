@@ -1,20 +1,19 @@
-@props(['active' => 'users'])
+@props(['active' => 'admin'])
 
 @php
     $tabs = [
-        ['key' => 'users', 'label' => 'Pengguna', 'route' => 'admin.users.index'],
-        ['key' => 'distributors', 'label' => 'Distributor', 'route' => 'admin.distributors.index'],
-        ['key' => 'markets', 'label' => 'Pasar', 'route' => 'admin.markets.index'],
-        ['key' => 'stores', 'label' => 'Toko Penerima', 'route' => 'admin.recipient-stores.index'],
-        ['key' => 'uptd', 'label' => 'Kontributor UPTD', 'route' => 'admin.uptd-contributors.index'],
+        ['key' => 'admin', 'label' => 'Admin', 'route' => 'admin.users.index', 'params' => ['role' => 'admin']],
+        ['key' => 'kepala-dinas', 'label' => 'Kepala Dinas', 'route' => 'admin.users.index', 'params' => ['role' => 'kepala_dinas']],
+        ['key' => 'distributor', 'label' => 'Distributor', 'route' => 'admin.distributors.index', 'params' => []],
+        ['key' => 'uptd', 'label' => 'UPTD', 'route' => 'admin.users.index', 'params' => ['role' => 'uptd_pasar']],
     ];
 @endphp
 
 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <nav class="flex flex-wrap items-center gap-2" aria-label="Navigasi Pengguna dan Data Master">
+    <nav class="flex flex-wrap items-center gap-2" aria-label="Navigasi Pengguna">
         @foreach ($tabs as $tab)
             <a
-                href="{{ route($tab['route']) }}"
+                href="{{ route($tab['route'], $tab['params']) }}"
                 @if ($active === $tab['key']) aria-current="page" @endif
                 @class([
                     'rounded-md border px-4 py-2 text-sm transition',

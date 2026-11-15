@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 
 dataset('uptd pages', [
     'dashboard' => ['uptd.dashboard', 'Dashboard', 'Dashboard'],
-    'input laporan' => ['uptd.reports.create', 'Input Laporan', 'Kondisi Pasar'],
+    'input laporan' => ['uptd.reports.create', 'Input Laporan', 'Laporan'],
     'riwayat laporan' => ['uptd.reports.index', 'Riwayat Laporan', 'Riwayat'],
 ]);
 
@@ -44,7 +44,7 @@ it('menampilkan seluruh menu sidebar kontributor UPTD', function () {
         ->assertOk()
         ->assertSeeInOrder([
             'Dashboard',
-            'Kondisi Pasar',
+            'Laporan',
             'Riwayat',
             'Ganti Kontributor',
             'Logout',

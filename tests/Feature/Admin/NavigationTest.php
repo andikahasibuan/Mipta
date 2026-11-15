@@ -8,9 +8,8 @@ uses(RefreshDatabase::class);
 
 dataset('admin pages', [
     'dashboard' => ['admin.dashboard', 'Dashboard', 'Dashboard'],
-    'users' => ['admin.users.index', 'Data Pengguna', 'Data Pengguna'],
+    'users' => ['admin.users.index', 'Pengguna', 'Data Pengguna'],
     'distribution' => ['admin.distribution.index', 'Penyaluran', 'Penyaluran'],
-    'monitoring' => ['admin.monitoring.index', 'Monitoring', 'Monitoring'],
     'supervision' => ['admin.supervision.index', 'Kondisi Pasar', 'Kondisi Pasar'],
     'reports' => ['admin.reports.index', 'Rekap Laporan', 'Rekap Laporan'],
 ]);
@@ -41,35 +40,36 @@ it('menolak pengguna dengan peran selain admin', function (string $routeName) {
         ->assertForbidden();
 })->with('admin pages');
 
-dataset('master tabs', [
-    'users' => ['admin.users.index', 'Pengguna', 'Data pengguna'],
-    'distributors' => ['admin.distributors.index', 'Distributor', 'Data distributor'],
-    'markets' => ['admin.markets.index', 'Pasar', 'Data pasar'],
-    'stores' => ['admin.recipient-stores.index', 'Toko Penerima', 'Data toko penerima'],
-    'uptd' => ['admin.uptd-contributors.index', 'Kontributor UPTD', 'Data kontributor UPTD'],
-]);
-
 it('menampilkan ikon pada setiap menu sidebar', function () {
     $response = $this->actingAs(User::factory()->create())->get(route('admin.dashboard'));
 
     $response->assertOk();
 
-    foreach (['squares-2x2', 'users', 'document-text', 'chart-bar', 'shield-check', 'arrow-down-tray'] as $icon) {
+    foreach (['squares-2x2', 'users', 'table-cells', 'document-text', 'shield-check', 'arrow-down-tray'] as $icon) {
         $response->assertSee('data-icon="'.$icon.'"', false);
     }
 });
 
-it('menjaga konsistensi tab aktif dan sorotan sidebar pada seluruh tab pengguna dan data master', function (string $routeName, string $tabLabel, string $panelHeading) {
-    $response = $this->actingAs(User::factory()->create())->get(route($routeName));
+dataset('user tab pages', [
+    'admin' => ['admin.users.index', [], 'Admin'],
+    'kepala dinas' => ['admin.users.index', ['role' => 'kepala_dinas'], 'Kepala Dinas'],
+    'uptd' => ['admin.users.index', ['role' => 'uptd_pasar'], 'UPTD'],
+    'distributor' => ['admin.distributors.index', [], 'Distributor'],
+]);
 
-    $response->assertOk()
-        ->assertSee($panelHeading)
-        ->assertSeeInOrder(['Pengguna', 'Distributor', 'Pasar', 'Toko Penerima', 'Kontributor UPTD']);
+it('menjaga konsistensi tab pengguna dan sorotan sidebar', function (string $routeName, array $query, string $tabLabel) {
+    $response = $this->actingAs(User::factory()->create())->get(route($routeName, $query));
+
+    $response->assertOk();
 
     $html = $response->getContent();
 
-    preg_match('/<nav[^>]*aria-label="Navigasi Pengguna dan Data Master".*?<\/nav>/s', $html, $tabMatches);
+    preg_match('/<nav[^>]*aria-label="Navigasi Pengguna".*?<\/nav>/s', $html, $tabMatches);
     $tabsNav = $tabMatches[0] ?? '';
+
+    foreach (['Admin', 'Kepala Dinas', 'Distributor', 'UPTD'] as $label) {
+        expect($tabsNav)->toContain($label);
+    }
 
     expect(substr_count($tabsNav, 'aria-current="page"'))->toBe(1)
         ->and($tabsNav)->toMatch('/aria-current="page"[^>]*>\s*'.preg_quote($tabLabel, '/').'\s*<\/a>/s');
@@ -78,5 +78,35 @@ it('menjaga konsistensi tab aktif dan sorotan sidebar pada seluruh tab pengguna 
     $sidebar = $sidebarMatches[0] ?? '';
 
     expect(substr_count($sidebar, 'aria-current="page"'))->toBe(1)
-        ->and($sidebar)->toContain('Data Pengguna');
-})->with('master tabs');
+        ->and($sidebar)->toContain('Pengguna');
+})->with('user tab pages');
+
+dataset('master data tab pages', [
+    'pasar' => ['admin.markets.index', 'Pasar'],
+    'toko penerima' => ['admin.recipient-stores.index', 'Toko Penerima'],
+    'kontributor uptd' => ['admin.uptd-contributors.index', 'Kontributor UPTD'],
+]);
+
+it('menjaga konsistensi tab data master dan sorotan sidebar', function (string $routeName, string $tabLabel) {
+    $response = $this->actingAs(User::factory()->create())->get(route($routeName));
+
+    $response->assertOk();
+
+    $html = $response->getContent();
+
+    preg_match('/<nav[^>]*aria-label="Navigasi Data Master".*?<\/nav>/s', $html, $tabMatches);
+    $tabsNav = $tabMatches[0] ?? '';
+
+    foreach (['Pasar', 'Toko Penerima', 'Kontributor UPTD'] as $label) {
+        expect($tabsNav)->toContain($label);
+    }
+
+    expect(substr_count($tabsNav, 'aria-current="page"'))->toBe(1)
+        ->and($tabsNav)->toMatch('/aria-current="page"[^>]*>\s*'.preg_quote($tabLabel, '/').'\s*<\/a>/s');
+
+    preg_match('/<nav[^>]*aria-label="Menu utama".*?<\/nav>/s', $html, $sidebarMatches);
+    $sidebar = $sidebarMatches[0] ?? '';
+
+    expect(substr_count($sidebar, 'aria-current="page"'))->toBe(1)
+        ->and($sidebar)->toContain('Data Master');
+})->with('master data tab pages');

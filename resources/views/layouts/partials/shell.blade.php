@@ -21,7 +21,7 @@
             <main class="flex min-h-0 min-w-0 flex-1 flex-col">
                 @include('layouts.partials.header', ['activeMenuLabel' => $activeMenuLabel])
 
-                <div class="flex-1 overflow-y-auto no-scrollbar bg-slate-50 p-6 lg:p-8">
+                <div id="app-content" class="flex-1 overflow-y-auto bg-slate-50 p-6 lg:p-8">
                     @yield('content')
                 </div>
             </main>

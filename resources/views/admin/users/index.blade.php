@@ -3,7 +3,15 @@
 @section('title', 'Data Pengguna')
 
 @section('content')
-    <x-ui.master-tabs active="users">
+    @php
+        $activeTab = match ($filters['role']) {
+            'kepala_dinas' => 'kepala-dinas',
+            'uptd_pasar' => 'uptd',
+            default => 'admin',
+        };
+    @endphp
+
+    <x-ui.user-tabs :active="$activeTab">
         <a
             href="{{ route('admin.users.create') }}"
             class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
@@ -11,7 +19,7 @@
             <x-heroicon-o-plus class="h-4 w-4" />
             Tambah data
         </a>
-    </x-ui.master-tabs>
+    </x-ui.user-tabs>
 
     <x-ui.flash-messages />
 
@@ -35,23 +43,9 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari pengguna & data master..."
+                    placeholder="Cari pengguna..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
-            </div>
-
-            <div class="relative shrink-0">
-                <select
-                    name="role"
-                    onchange="this.form.submit()"
-                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white py-2.5 pl-3.5 pr-10 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
-                >
-                    <option value="">Semua peran</option>
-                    @foreach ($roles as $role)
-                        <option value="{{ $role->value }}" @selected($filters['role'] === $role->value)>{{ $role->managementLabel() }}</option>
-                    @endforeach
-                </select>
-                <x-heroicon-o-chevron-down class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
 
             <div class="relative shrink-0">
@@ -70,7 +64,7 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[50rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-[#E0F2F3] text-center text-[11px] uppercase tracking-widest text-[#018F98]">
+                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Nama / Identitas</th>
                         <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Nama Akun</th>
@@ -110,7 +104,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
-                                @if ($filters['q'] !== '' || $filters['role'] || $filters['status'])
+                                @if ($filters['q'] !== '' || $filters['status'])
                                     Tidak ada pengguna yang sesuai filter
                                 @else
                                     Belum ada data pengguna

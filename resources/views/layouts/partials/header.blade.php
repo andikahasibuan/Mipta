@@ -1,22 +1,21 @@
 <header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-4 lg:px-8">
-    <div class="flex min-w-0 items-center gap-3">
-        <button
-            type="button"
-            data-sidebar-toggle
-            aria-controls="app-sidebar"
-            aria-expanded="true"
-            aria-label="Sembunyikan menu"
-            title="Sembunyikan menu"
-            class="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white text-[#018F98] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50"
-        >
-            <x-heroicon-o-bars-3 class="h-5 w-5" />
-        </button>
+    <button
+        type="button"
+        data-sidebar-toggle
+        aria-controls="app-sidebar"
+        aria-expanded="true"
+        aria-label="Sembunyikan menu"
+        title="Sembunyikan menu"
+        class="absolute left-0 top-full z-20 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-[#018F98] shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50"
+    >
+        <x-heroicon-o-arrow-left data-sidebar-icon-collapse class="h-4 w-4" />
+        <x-heroicon-o-arrow-right data-sidebar-icon-expand class="hidden h-4 w-4" />
+    </button>
 
-        <div class="min-w-0">
-            <h1 class="truncate text-2xl font-semibold text-slate-900">
-                {{ $activeMenuLabel }}
-            </h1>
-        </div>
+    <div class="min-w-0">
+        <h1 class="truncate text-2xl font-semibold text-slate-900">
+            {{ $activeMenuLabel }}
+        </h1>
     </div>
 
     @auth

@@ -49,13 +49,22 @@ it('menolak nama pasar dan lokasi yang mengandung karakter khusus', function () 
     $this->assertDatabaseCount('markets', 0);
 });
 
-it('menampilkan navigasi tab pengguna, distributor, dan pasar', function () {
-    $this->actingAs(User::factory()->create())
-        ->get(route('admin.markets.index'))
-        ->assertOk()
-        ->assertSee('href="'.route('admin.users.index').'"', false)
-        ->assertSee('href="'.route('admin.distributors.index').'"', false)
-        ->assertSee('href="'.route('admin.markets.index').'"', false);
+it('menampilkan navigasi tab data master', function () {
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.markets.index'));
+
+    $response->assertOk();
+
+    preg_match('/<nav[^>]*aria-label="Navigasi Data Master".*?<\/nav>/s', $response->getContent(), $matches);
+    $tabs = $matches[0] ?? '';
+
+    expect($tabs)
+        ->toContain(route('admin.markets.index'))
+        ->toContain(route('admin.recipient-stores.index'))
+        ->toContain(route('admin.uptd-contributors.index'));
+
+    expect($tabs)->not->toContain(route('admin.users.index'));
+    expect($tabs)->not->toContain(route('admin.distributors.index'));
 });
 
 it('menampilkan pagination saat pasar lebih dari sepuluh', function () {
