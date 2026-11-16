@@ -40,19 +40,14 @@
 
         <div>
             <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
-            <input
+            <x-ui.password-input
                 id="password"
                 name="password"
-                type="password"
                 placeholder="Masukkan kata sandi"
                 required
                 autocomplete="current-password"
-                @class([
-                    'mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.12)] focus:outline-none focus:ring-2',
-                    'border-slate-300 focus:border-[#018F98] focus:ring-[#B3E5E8]' => ! $errors->has('password'),
-                    'border-red-400 focus:border-red-500 focus:ring-red-200' => $errors->has('password'),
-                ])
-            >
+                class="mt-1 block w-full rounded-md border px-3 py-2 pr-10 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.12)] focus:outline-none focus:ring-2 {{ $errors->has('password') ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : 'border-slate-300 focus:border-[#018F98] focus:ring-[#B3E5E8]' }}"
+            />
             @error('password')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror

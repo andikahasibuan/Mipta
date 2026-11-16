@@ -26,9 +26,10 @@ class StoreController extends Controller
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('alamat', 'like', "%{$search}%")
-                ->orWhere('nib', 'like', "%{$search}%")))
+                ->orWhere('nib', 'like', "%{$search}%")
+                ->orWhereHas('market', fn ($marketQuery) => $marketQuery->where('name', 'like', "%{$search}%"))))
             ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
-            ->orderBy('id')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -60,7 +61,7 @@ class StoreController extends Controller
         $validated = $request->validate([
             'market_id' => ['required', 'integer', 'exists:markets,id'],
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ]+$/'],
-            'alamat' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
+            'alamat' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
             'nib' => ['required', 'digits:13'],
         ], $this->storeValidationMessages());
 
@@ -68,7 +69,7 @@ class StoreController extends Controller
             'distributor_id' => $request->user()->distributor_id,
             'market_id' => $validated['market_id'],
             'name' => $validated['name'],
-            'alamat' => $validated['alamat'],
+            'alamat' => $validated['alamat'] ?? null,
             'nib' => $validated['nib'] ?? null,
             'is_active' => true,
         ]);
@@ -100,14 +101,14 @@ class StoreController extends Controller
         $validated = $request->validate([
             'market_id' => ['required', 'integer', 'exists:markets,id'],
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ]+$/'],
-            'alamat' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
+            'alamat' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
             'nib' => ['required', 'digits:13'],
         ], $this->storeValidationMessages());
 
         $store->update([
             'market_id' => $validated['market_id'],
             'name' => $validated['name'],
-            'alamat' => $validated['alamat'],
+            'alamat' => $validated['alamat'] ?? null,
             'nib' => $validated['nib'] ?? null,
         ]);
 
@@ -132,7 +133,7 @@ class StoreController extends Controller
     {
         return [
             'name.regex' => 'Nama toko hanya boleh berisi huruf, angka, dan spasi.',
-            'alamat.regex' => 'Alamat toko hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-).',
+            'alamat.regex' => 'Detail alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-).',
             'nib.digits' => 'NIB harus terdiri dari tepat 13 angka.',
         ];
     }

@@ -7,6 +7,7 @@ use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
 use App\Models\RecipientStore;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Database\Seeders\DemoDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,6 +23,7 @@ it('membuat data contoh tanpa akun dan data distributor', function () {
         ->and(MarketMonitoring::count())->toBe(4)
         ->and(Distribution::count())->toBe(0)
         ->and(FieldDistributionReport::count())->toBe(2)
+        ->and(UptdContributor::count())->toBe(2)
         ->and(User::count())->toBe(2)
         ->and(User::where('role', Role::Distributor)->count())->toBe(0)
         ->and(User::where('role', Role::UptdPasar)->count())->toBe(1)
@@ -55,7 +57,7 @@ it('menampilkan data contoh yang tersedia pada dashboard dan menu pengguna dan d
 
     $this->get(route('admin.uptd-contributors.index'))
         ->assertOk()
-        ->assertSee('Andi Pratama')
+        ->assertSee('Kontributor Pasar Raya Padang')
         ->assertSee('Pasar Raya Padang');
 
     $this->get(route('admin.recipient-stores.index'))

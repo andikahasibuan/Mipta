@@ -86,13 +86,13 @@
                             <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
-                            <td class="break-words px-5 py-4 align-middle text-slate-700">
+                            <td class="break-words px-5 py-4 align-middle capitalize text-slate-700">
                                 {{ $report->contributor?->name ?? '—' }}
                             </td>
-                            <td class="break-words px-5 py-4 align-middle text-slate-700">
+                            <td class="break-words px-5 py-4 align-middle capitalize text-slate-700">
                                 {{ $report->market?->name ?? '—' }}
                             </td>
-                            <td class="break-words px-5 py-4 text-left align-middle text-slate-600">
+                            <td class="break-words px-5 py-4 text-left align-middle capitalize text-slate-600">
                                 {{ \Illuminate\Support\Str::limit($report->description, 120, '') }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">

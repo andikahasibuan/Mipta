@@ -50,11 +50,12 @@ it('menampilkan daftar toko milik distributor dengan subjudul', function () {
         ->assertSee('Data Toko')
         ->assertSee('Tambah data')
         ->assertSee(route('distributor.stores.create'), false)
-        ->assertSeeInOrder(['Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Aksi'])
+        ->assertSeeInOrder(['Nama Toko', 'Alamat', 'NIB', 'Aksi'])
+        ->assertDontSee('>Pasar</th>', false)
         ->assertDontSee('ID Data')
         ->assertDontSee('Status')
         ->assertSee('Toko Milik Sendiri')
-        ->assertSee('Jln. Pasar Raya No. 1')
+        ->assertSee('Pasar Raya Padang, Jln. Pasar Raya No. 1')
         ->assertDontSee('Toko Distributor Lain')
         ->assertSee(route('distributor.stores.edit', $store), false)
         ->assertDontSee('aria-label="Hapus"', false);
@@ -93,6 +94,11 @@ it('memfilter daftar toko berdasarkan nama, alamat, NIB, dan pasar', function ()
         ->assertSee('Toko Beta')
         ->assertDontSee('Toko Alpha');
 
+    $this->get(route('distributor.stores.index', ['q' => 'Pasar Beta']))
+        ->assertOk()
+        ->assertSee('Toko Beta')
+        ->assertDontSee('Toko Alpha');
+
     $this->get(route('distributor.stores.index', ['market' => $secondMarket->id]))
         ->assertOk()
         ->assertSee('Toko Beta')
@@ -116,13 +122,13 @@ it('menampilkan sepuluh toko per halaman dengan pagination', function () {
         ->assertOk()
         ->assertSee('Menampilkan 10 dari 11 toko')
         ->assertSee('?page=2', false)
-        ->assertSee('Toko 01')
-        ->assertDontSee('Toko 11');
+        ->assertSeeInOrder(['Toko 11', 'Toko 10', 'Toko 09'])
+        ->assertDontSee('Toko 01');
 
     $this->get(route('distributor.stores.index', ['page' => 2]))
         ->assertOk()
-        ->assertSee('Toko 11')
-        ->assertDontSee('Toko 01');
+        ->assertSee('Toko 01')
+        ->assertDontSee('Toko 11');
 });
 
 it('menampilkan formulir tambah toko penerima', function () {
@@ -134,7 +140,10 @@ it('menampilkan formulir tambah toko penerima', function () {
         ->assertSee('Tambah toko penerima')
         ->assertSee('Pasar')
         ->assertSee('Nama Toko')
-        ->assertSee('Alamat')
+        ->assertSee('Alamat (opsional)')
+        ->assertSee('Tambahkan detail alamat bila diperlukan.')
+        ->assertDontSee('Nama pasar otomatis menjadi alamat.')
+        ->assertDontSee('Contoh: Jln. Merdeka No. 1, Gang Mawar')
         ->assertSee('NIB')
         ->assertDontSee('Status aktif')
         ->assertSee('action="'.route('distributor.stores.store').'"', false);
@@ -163,17 +172,40 @@ it('menyimpan toko baru untuk distributor yang login', function () {
     ]);
 });
 
-it('mewajibkan pasar, nama, alamat, dan NIB saat menyimpan toko', function () {
+it('mewajibkan pasar, nama, dan NIB saat menyimpan toko', function () {
     [, $user] = storeDistributorAccount();
 
     $this->actingAs($user)
         ->post(route('distributor.stores.store'), [
             'market_id' => '',
             'name' => '',
-            'alamat' => '',
             'nib' => '',
         ])
-        ->assertSessionHasErrors(['market_id', 'name', 'alamat', 'nib']);
+        ->assertSessionHasErrors(['market_id', 'name', 'nib']);
+});
+
+it('menyimpan toko tanpa detail alamat', function () {
+    [$distributor, $user] = storeDistributorAccount();
+    $market = Market::factory()->create(['name' => 'Pasar Tanpa Detail']);
+
+    $this->actingAs($user)
+        ->post(route('distributor.stores.store'), [
+            'market_id' => $market->id,
+            'name' => 'Toko Tanpa Detail',
+            'nib' => '1234567890123',
+        ])
+        ->assertRedirect(route('distributor.stores.index'));
+
+    $this->assertDatabaseHas('recipient_stores', [
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Toko Tanpa Detail',
+        'alamat' => null,
+    ]);
+
+    $this->get(route('distributor.stores.index'))
+        ->assertOk()
+        ->assertSee('Pasar Tanpa Detail');
 });
 
 it('memvalidasi format nama, alamat, dan NIB toko distributor', function () {

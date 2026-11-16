@@ -60,7 +60,7 @@
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 font-semibold">NO</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Nama Pasar</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Lokasi</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Alamat</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Status</th>
                         <th scope="col" class="px-5 py-3 font-semibold">Aksi</th>
                     </tr>
@@ -71,10 +71,10 @@
                             <td class="whitespace-nowrap px-3 py-3 font-mono text-xs text-slate-600">
                                 {{ $loop->iteration }}
                             </td>
-                            <td class="px-5 py-3 text-slate-900">
+                            <td class="px-5 py-3 text-left capitalize text-slate-900">
                                 {{ $market->name }}
                             </td>
-                            <td class="px-5 py-3 text-slate-700">
+                            <td class="px-5 py-3 text-left capitalize text-slate-700">
                                 {{ $market->lokasi }}
                             </td>
                             <td class="px-5 py-3">

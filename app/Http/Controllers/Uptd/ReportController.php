@@ -6,6 +6,7 @@ use App\Enums\FieldCondition;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\FieldDistributionReport;
+use App\Models\UptdContributor;
 use App\Models\User;
 use App\Notifications\FieldDistributionReportDeleted;
 use App\Services\UptdReportHistoryService;
@@ -48,7 +49,7 @@ class ReportController extends Controller
 
         FieldDistributionReport::create([
             'market_id' => $contributor->market_id,
-            'uptd_user_id' => $contributor->id,
+            'uptd_contributor_id' => $contributor->id,
             'report_date' => $validated['report_date'],
             'condition' => $validated['condition'],
             'description' => $validated['description'],
@@ -144,19 +145,19 @@ class ReportController extends Controller
     /**
      * Pastikan laporan milik kontributor yang sedang dipilih.
      */
-    private function ensureOwnedBy(User $contributor, FieldDistributionReport $report): void
+    private function ensureOwnedBy(UptdContributor $contributor, FieldDistributionReport $report): void
     {
-        abort_unless($report->uptd_user_id === $contributor->id, 404);
+        abort_unless($report->uptd_contributor_id === $contributor->id, 404);
     }
 
     /**
      * Ambil kontributor aktif yang dipilih pada session.
      */
-    private function contributor(Request $request): User
+    private function contributor(Request $request): UptdContributor
     {
         $contributor = $request->attributes->get('uptd_contributor');
 
-        abort_unless($contributor instanceof User, 403);
+        abort_unless($contributor instanceof UptdContributor, 403);
 
         return $contributor;
     }

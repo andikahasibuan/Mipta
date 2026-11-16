@@ -17,9 +17,8 @@ function profileDistributorAccount(string $name = 'PT Andalas Niaga Utama', stri
 {
     $distributor = Distributor::factory()->create([
         'name' => $name,
-        'wilayah' => 'Padang',
         'penanggung_jawab' => 'Pengelola Distributor',
-        'telepon' => '0751-000000',
+        'telepon' => '0751000000',
         'alamat_kantor' => 'Kota Padang, Sumatera Barat',
         'is_active' => true,
     ]);
@@ -45,21 +44,22 @@ it('menampilkan informasi profil distributor sesuai desain', function () {
         ->assertSee('Profil')
         ->assertSee('Informasi Akun')
         ->assertSee('Data identitas yang terhubung dengan akun anda')
-        ->assertSeeInOrder(['Nama akun', 'andalas.niaga'])
-        ->assertSeeInOrder(['Nama distributor', $distributor->name])
-        ->assertSeeInOrder(['Email perusahaan', $user->email])
-        ->assertSeeInOrder(['Nama penanggung jawab', 'Pengelola Distributor'])
-        ->assertSeeInOrder(['Nomor Telepon', '0751-000000'])
+        ->assertSeeInOrder(['distributor', $distributor->name])
+        ->assertSeeInOrder(['Username', 'andalas.niaga'])
+        ->assertSeeInOrder(['penanggung jawab', 'Pengelola Distributor'])
+        ->assertSeeInOrder(['Nomor Telepon', '0751000000'])
+        ->assertSeeInOrder(['Email', $user->email])
         ->assertSeeInOrder(['Alamat kantor', 'Kota Padang, Sumatera Barat'])
+        ->assertSeeInOrder(['penanggung jawab', 'Nomor Telepon', 'Email', 'Alamat kantor'])
         ->assertSee('Distributor MinyaKita')
         ->assertDontSee('Aktif')
         ->assertSee('Keamanan akun')
         ->assertSee('Kata sandi')
         ->assertSee('Ubah')
-        ->assertSee('aria-label="Edit Nama penanggung jawab"', false)
+        ->assertSee('aria-label="Edit Email"', false)
+        ->assertSee('aria-label="Edit penanggung jawab"', false)
         ->assertSee('aria-label="Edit Nomor Telepon"', false)
         ->assertSee('aria-label="Edit Alamat kantor"', false)
-        ->assertDontSee('aria-label="Edit Email perusahaan"', false)
         ->assertSee('id="password-modal"', false)
         ->assertSee('action="'.route('distributor.profile.password.update').'"', false)
         ->assertDontSee('Ubah profil');
@@ -76,19 +76,46 @@ it('menampilkan penanda alamat kantor belum diisi pada profil', function () {
         ->assertSeeInOrder(['Alamat kantor', 'Belum diisi']);
 });
 
-it('tidak mengizinkan distributor mengubah email melalui permintaan profil', function () {
-    [$distributor, $user] = profileDistributorAccount();
-    $emailBefore = $user->email;
+it('memperbarui email distributor melalui form profil', function () {
+    [, $user] = profileDistributorAccount();
 
     $this->actingAs($user)
         ->from(route('distributor.profile.edit'))
         ->put(route('distributor.profile.update'), [
-            'penanggung_jawab' => 'Pengelola Distributor',
             'email' => 'email.baru@example.com',
         ])
         ->assertRedirect(route('distributor.profile.edit'));
 
-    expect($user->fresh()->email)->toBe($emailBefore);
+    expect($user->fresh()->email)->toBe('email.baru@example.com');
+});
+
+it('mengosongkan email dan menampilkan penanda belum diisi', function () {
+    [, $user] = profileDistributorAccount();
+
+    $this->actingAs($user)
+        ->from(route('distributor.profile.edit'))
+        ->put(route('distributor.profile.update'), [
+            'email' => '',
+        ])
+        ->assertRedirect(route('distributor.profile.edit'));
+
+    expect($user->fresh()->email)->toBeNull();
+
+    $this->get(route('distributor.profile.edit'))
+        ->assertOk()
+        ->assertSeeInOrder(['Email', 'Belum diisi']);
+});
+
+it('menolak email distributor yang sudah digunakan akun lain', function () {
+    [, $user] = profileDistributorAccount();
+    User::factory()->create(['email' => 'dipakai@example.com']);
+
+    $this->actingAs($user)
+        ->from(route('distributor.profile.edit'))
+        ->put(route('distributor.profile.update'), [
+            'email' => 'dipakai@example.com',
+        ])
+        ->assertSessionHasErrors('email');
 });
 
 it('memperbarui informasi kontak distributor melalui form inline', function () {
@@ -97,7 +124,7 @@ it('memperbarui informasi kontak distributor melalui form inline', function () {
     $this->actingAs($user)
         ->from(route('distributor.profile.edit'))
         ->put(route('distributor.profile.update'), [
-            'penanggung_jawab' => 'Budi Santoso',
+            'penanggung_jawab' => 'budi santoso',
         ])
         ->assertRedirect(route('distributor.profile.edit'))
         ->assertSessionHas('success', 'Informasi distributor berhasil diperbarui.');
@@ -110,7 +137,7 @@ it('memperbarui informasi kontak distributor melalui form inline', function () {
 
     $this->from(route('distributor.profile.edit'))
         ->put(route('distributor.profile.update'), [
-            'alamat_kantor' => 'Jln. Sudirman No. 10, Padang',
+            'alamat_kantor' => 'jln. sudirman no. 10, padang',
         ])
         ->assertRedirect(route('distributor.profile.edit'));
 
@@ -147,6 +174,25 @@ it('memvalidasi panjang informasi kontak distributor', function () {
             'alamat_kantor' => str_repeat('b', 256),
         ])
         ->assertSessionHasErrors(['penanggung_jawab', 'telepon', 'alamat_kantor']);
+});
+
+it('membatasi nomor telepon maksimal 13 digit', function () {
+    [$distributor, $user] = profileDistributorAccount();
+
+    $this->actingAs($user)
+        ->from(route('distributor.profile.edit'))
+        ->put(route('distributor.profile.update'), [
+            'telepon' => '12345678901234',
+        ])
+        ->assertSessionHasErrors('telepon');
+
+    $this->from(route('distributor.profile.edit'))
+        ->put(route('distributor.profile.update'), [
+            'telepon' => '1234567890123',
+        ])
+        ->assertRedirect(route('distributor.profile.edit'));
+
+    expect($distributor->fresh()->telepon)->toBe('1234567890123');
 });
 
 it('menolak informasi kontak distributor yang mengandung karakter khusus', function () {

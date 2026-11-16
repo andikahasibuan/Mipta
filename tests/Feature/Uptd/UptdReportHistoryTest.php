@@ -4,17 +4,22 @@ use App\Enums\FieldCondition;
 use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+/**
+ * Siapkan pasar dan kontributor aktif untuk pengujian riwayat laporan.
+ *
+ * @return array{0: UptdContributor, 1: Market}
+ */
 function uptdHistoryAccount(): array
 {
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
-    $contributor = User::factory()->create([
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
-        'role' => Role::UptdPasar,
         'market_id' => $market->id,
     ]);
 
@@ -23,24 +28,22 @@ function uptdHistoryAccount(): array
 
 it('menampilkan riwayat laporan milik kontributor sendiri', function () {
     [$contributor, $market] = uptdHistoryAccount();
-    $otherContributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $otherContributor = UptdContributor::factory()->create();
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'description' => 'Kondisi pasar tertib dan penyaluran lancar.',
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $otherContributor->id,
+        'uptd_contributor_id' => $otherContributor->id,
         'description' => 'Laporan milik kontributor lain.',
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.reports.index'))
         ->assertOk()
         ->assertSee('Laporan Kondisi Lapangan')
@@ -62,7 +65,7 @@ it('memfilter riwayat laporan berdasarkan bulan, kondisi, dan deskripsi', functi
 
     $currentReport = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->toDateString(),
         'condition' => FieldCondition::Normal,
         'description' => 'Pasar bersih dan tertib.',
@@ -71,13 +74,14 @@ it('memfilter riwayat laporan berdasarkan bulan, kondisi, dan deskripsi', functi
     $previousMonth = now()->subMonthNoOverflow();
     $previousReport = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => $previousMonth->copy()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::PerluPerhatian,
         'description' => 'Pasar kotor dan rusak.',
     ]);
 
-    $this->actingAs($contributor);
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor));
 
     $this->get(route('uptd.reports.index'))
         ->assertOk()
@@ -111,13 +115,14 @@ it('menampilkan nilai lama pada formulir edit laporan', function () {
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => '2026-05-20',
         'condition' => FieldCondition::PerluPerhatian,
         'description' => 'Kondisi pasar perlu perbaikan.',
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.reports.edit', $report))
         ->assertOk()
         ->assertSee('value="2026-05-20"', false)
@@ -131,12 +136,13 @@ it('memperbarui laporan kondisi lapangan milik kontributor', function () {
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'condition' => FieldCondition::Normal,
         'description' => 'Kondisi lama.',
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->put(route('uptd.reports.update', $report), [
             'report_date' => now()->toDateString(),
             'condition' => FieldCondition::PerluPerhatian->value,
@@ -150,7 +156,7 @@ it('memperbarui laporan kondisi lapangan milik kontributor', function () {
     expect($report->condition)->toBe(FieldCondition::PerluPerhatian)
         ->and($report->description)->toBe('Kondisi diperbarui.')
         ->and($report->market_id)->toBe($market->id)
-        ->and($report->uptd_user_id)->toBe($contributor->id);
+        ->and($report->uptd_contributor_id)->toBe($contributor->id);
 });
 
 it('menolak pembaruan laporan kondisi lapangan yang tidak valid', function (array $overrides, string $field) {
@@ -158,7 +164,7 @@ it('menolak pembaruan laporan kondisi lapangan yang tidak valid', function (arra
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'description' => 'Kondisi awal.',
     ]);
 
@@ -168,7 +174,8 @@ it('menolak pembaruan laporan kondisi lapangan yang tidak valid', function (arra
         'description' => 'Kondisi aman.',
     ], $overrides);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->put(route('uptd.reports.update', $report), $payload)
         ->assertSessionHasErrors($field);
 
@@ -185,11 +192,12 @@ it('membatasi deskripsi laporan maksimal 120 karakter', function () {
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'description' => 'Kondisi awal.',
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->put(route('uptd.reports.update', $report), [
             'report_date' => now()->toDateString(),
             'condition' => FieldCondition::Normal->value,
@@ -210,21 +218,17 @@ it('membatasi deskripsi laporan maksimal 120 karakter', function () {
 
 it('menolak mengedit atau memperbarui laporan milik kontributor lain', function () {
     [, $market] = uptdHistoryAccount();
-    $otherContributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $otherContributor = UptdContributor::factory()->create();
+    $intruder = UptdContributor::factory()->create();
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $otherContributor->id,
+        'uptd_contributor_id' => $otherContributor->id,
         'description' => 'Laporan kontributor lain.',
     ]);
 
-    $this->actingAs(User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]))
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($intruder))
         ->get(route('uptd.reports.edit', $report))
         ->assertNotFound();
 
@@ -239,19 +243,21 @@ it('menolak mengedit atau memperbarui laporan milik kontributor lain', function 
 
 it('menghapus laporan dan mengirim notifikasi ke admin aktif', function () {
     [$contributor, $market] = uptdHistoryAccount();
+    $shared = sharedUptdAccount();
     $admin = User::factory()->create(['role' => Role::Admin, 'is_active' => true]);
     $inactiveAdmin = User::factory()->create(['role' => Role::Admin, 'is_active' => false]);
     $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => '2026-05-20',
         'condition' => FieldCondition::PerluPerhatian,
         'description' => 'Laporan yang akan dihapus.',
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs($shared)
+        ->withSession(uptdContributorSession($contributor))
         ->delete(route('uptd.reports.destroy', $report))
         ->assertRedirect(route('uptd.reports.index'))
         ->assertSessionHas('success', 'Laporan kondisi lapangan berhasil dihapus.');
@@ -267,25 +273,21 @@ it('menghapus laporan dan mengirim notifikasi ke admin aktif', function () {
         ->and($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
         ->and($inactiveAdmin->notifications()->count())->toBe(0)
         ->and($kepalaDinas->notifications()->count())->toBe(0)
-        ->and($contributor->notifications()->count())->toBe(0);
+        ->and($shared->notifications()->count())->toBe(0);
 });
 
 it('menolak menghapus laporan milik kontributor lain', function () {
     [, $market] = uptdHistoryAccount();
-    $otherContributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $otherContributor = UptdContributor::factory()->create();
+    $intruder = UptdContributor::factory()->create();
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $otherContributor->id,
+        'uptd_contributor_id' => $otherContributor->id,
     ]);
 
-    $this->actingAs(User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]))
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($intruder))
         ->delete(route('uptd.reports.destroy', $report))
         ->assertNotFound();
 

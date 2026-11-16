@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Uptd;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\UptdContributor;
 use App\Services\UptdDashboardService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -21,11 +21,11 @@ class DashboardController extends Controller
     /**
      * Ambil kontributor aktif yang dipilih pada session.
      */
-    private function contributor(Request $request): User
+    private function contributor(Request $request): UptdContributor
     {
         $contributor = $request->attributes->get('uptd_contributor');
 
-        abort_unless($contributor instanceof User, 403);
+        abort_unless($contributor instanceof UptdContributor, 403);
 
         return $contributor;
     }

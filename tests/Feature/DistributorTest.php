@@ -9,7 +9,6 @@ it('membuat distributor aktif dari factory', function () {
     $distributor = Distributor::factory()->create();
 
     expect($distributor->exists)->toBeTrue()
-        ->and($distributor->wilayah)->not->toBeEmpty()
         ->and($distributor->name)->not->toBeEmpty()
         ->and($distributor->is_active)->toBeTrue();
 });

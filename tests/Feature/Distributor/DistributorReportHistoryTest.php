@@ -27,6 +27,8 @@ function reportHistoryAccount(string $name = 'PT Riwayat Penyaluran'): array
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
         'name' => 'Toko Riwayat',
+        'alamat' => 'Jln. Riwayat No. 2',
+        'nib' => '9876543210987',
     ]);
 
     return [$distributor, $user, $market, $store];
@@ -42,7 +44,6 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
         'recipient_store_id' => $store->id,
         'distribution_date' => now()->startOfMonth()->toDateString(),
         'cartons' => 120,
-        'notes' => 'Pengiriman lengkap.',
     ]);
 
     Distribution::factory()->create([
@@ -52,18 +53,20 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
         'cartons' => 999,
     ]);
 
-    $this->actingAs($user)
+    $response = $this->actingAs($user)
         ->get(route('distributor.report-history.index'))
         ->assertOk()
-        ->assertSeeInOrder(['NO', 'Tanggal', 'Nama Toko', 'Pasar', 'Jumlah Karton', 'Keterangan', 'Aksi'])
+        ->assertSeeInOrder(['NO', 'Tanggal Penyaluran', 'Nama Toko', 'Jumlah Disalurkan (Karton)', 'Alamat', 'Nomor NIB', 'Aksi'])
+        ->assertDontSee('>Pasar</th>', false)
+        ->assertDontSee('>Keterangan</th>', false)
         ->assertSee('Toko Riwayat')
-        ->assertSee('Pasar Riwayat')
-        ->assertSee('120 karton')
-        ->assertSee('Pengiriman lengkap.')
-        ->assertDontSee('999 karton')
+        ->assertSee('Pasar Riwayat, Jln. Riwayat No. 2')
+        ->assertSee('9876543210987')
         ->assertSee(route('distributor.report-history.destroy', $report), false)
         ->assertSee(route('distributor.distribution-reports.edit', $report), false)
         ->assertSee('value="'.now()->format('Y-m').'" selected', false);
+
+    expect($response->viewData('reports')->pluck('cartons')->all())->toBe([120]);
 });
 
 it('memfilter riwayat laporan berdasarkan bulan dan nama toko', function () {
@@ -102,28 +105,27 @@ it('memfilter riwayat laporan berdasarkan bulan dan nama toko', function () {
         'cartons' => 444,
     ]);
 
-    $this->get(route('distributor.report-history.index'))
-        ->assertOk()
-        ->assertSee('111 karton')
-        ->assertSee('444 karton')
-        ->assertDontSee('333 karton');
+    $currentMonth = $this->get(route('distributor.report-history.index'))
+        ->assertOk();
 
-    $this->get(route('distributor.report-history.index', ['month' => 'all']))
+    expect($currentMonth->viewData('reports')->pluck('cartons')->all())->toBe([444, 111]);
+
+    $allMonths = $this->get(route('distributor.report-history.index', ['month' => 'all']))
         ->assertOk()
-        ->assertSee('333 karton')
         ->assertSee('value="all" selected', false);
 
-    $this->get(route('distributor.report-history.index', [
-        'month' => $previousMonth->format('Y-m'),
-    ]))
-        ->assertOk()
-        ->assertSee('333 karton')
-        ->assertDontSee('111 karton');
+    expect($allMonths->viewData('reports')->pluck('cartons')->all())->toBe([444, 111, 333]);
 
-    $this->get(route('distributor.report-history.index', ['search' => 'Berbeda']))
-        ->assertOk()
-        ->assertSee('444 karton')
-        ->assertDontSee('111 karton');
+    $previousPeriod = $this->get(route('distributor.report-history.index', [
+        'month' => $previousMonth->format('Y-m'),
+    ]))->assertOk();
+
+    expect($previousPeriod->viewData('reports')->pluck('cartons')->all())->toBe([333]);
+
+    $searchResult = $this->get(route('distributor.report-history.index', ['search' => 'Berbeda']))
+        ->assertOk();
+
+    expect($searchResult->viewData('reports')->pluck('cartons')->all())->toBe([444]);
 });
 
 it('menampilkan sepuluh riwayat laporan per halaman dengan pagination', function () {
@@ -139,18 +141,20 @@ it('menampilkan sepuluh riwayat laporan per halaman dengan pagination', function
         ]);
     }
 
-    $this->actingAs($user)
+    $firstPage = $this->actingAs($user)
         ->get(route('distributor.report-history.index'))
         ->assertOk()
         ->assertSee('Menampilkan 10 dari 11 laporan')
-        ->assertSee('?page=2', false)
-        ->assertSee('110 karton')
-        ->assertDontSee('111 karton');
+        ->assertSee('?page=2', false);
 
-    $this->get(route('distributor.report-history.index', ['page' => 2]))
+    expect($firstPage->viewData('reports')->pluck('cartons')->all())
+        ->toBe([111, 110, 109, 108, 107, 106, 105, 104, 103, 102]);
+
+    $secondPage = $this->get(route('distributor.report-history.index', ['page' => 2]))
         ->assertOk()
-        ->assertSee('111 karton')
-        ->assertDontSee('110 karton');
+        ->assertSee('Menampilkan 1 dari 11 laporan');
+
+    expect($secondPage->viewData('reports')->pluck('cartons')->all())->toBe([101]);
 });
 
 it('menghapus laporan terkirim milik sendiri', function () {

@@ -2,25 +2,24 @@
 
 use App\Enums\Role;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('hanya menampilkan kontributor UPTD yang terkait ke pasar', function () {
+it('hanya menampilkan profil kontributor UPTD yang terkait ke pasar', function () {
     $admin = User::factory()->create(['name' => 'Admin MIPTA']);
 
-    User::factory()->create([
+    UptdContributor::factory()->create([
         'name' => 'Kontributor Satu',
         'username' => 'kontributor.01',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
-    User::factory()->inactive()->create([
+    UptdContributor::factory()->inactive()->create([
         'name' => 'Kontributor Dua',
         'username' => 'kontributor.02',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
@@ -39,7 +38,7 @@ it('hanya menampilkan kontributor UPTD yang terkait ke pasar', function () {
     $this->actingAs($admin)
         ->get(route('admin.uptd-contributors.index'))
         ->assertOk()
-        ->assertSeeInOrder(['Nama Kontributor', 'Pasar Terkait', 'Peran', 'Status Akun'])
+        ->assertSeeInOrder(['Nama', 'Pasar Terkait', 'Username', 'Status'])
         ->assertSee('Kontributor Satu')
         ->assertSee('Kontributor Dua')
         ->assertSee('Nonaktif')
@@ -48,7 +47,25 @@ it('hanya menampilkan kontributor UPTD yang terkait ke pasar', function () {
         ->assertSee('Menampilkan 2 dari 2 kontributor');
 });
 
-it('menyimpan kontributor UPTD dengan nama akun generik dan username bernomor', function () {
+it('menyimpan username kontributor UPTD dalam huruf kecil', function () {
+    $admin = User::factory()->create();
+    $market = Market::factory()->create();
+
+    $this->actingAs($admin)
+        ->post(route('admin.uptd-contributors.store'), [
+            'name' => 'Kontributor Kapital',
+            'username' => 'Kontributor.Kapital',
+            'market_id' => $market->id,
+            'is_active' => '1',
+        ])
+        ->assertRedirect(route('admin.uptd-contributors.index'));
+
+    $this->assertDatabaseHas('uptd_contributors', [
+        'username' => 'kontributor.kapital',
+    ]);
+});
+
+it('menyimpan profil kontributor UPTD dengan nama dan username', function () {
     $admin = User::factory()->create();
     $market = Market::factory()->create();
 
@@ -61,11 +78,9 @@ it('menyimpan kontributor UPTD dengan nama akun generik dan username bernomor', 
         ])
         ->assertRedirect(route('admin.uptd-contributors.index'));
 
-    $this->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('uptd_contributors', [
         'name' => 'Kontributor UPTD 01',
         'username' => 'kontributor.uptd.01',
-        'email' => null,
-        'role' => Role::UptdPasar->value,
         'market_id' => $market->id,
     ]);
 });
@@ -74,9 +89,8 @@ it('menampilkan pasar terkait pada kolom kontributor', function () {
     $admin = User::factory()->create();
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
 
-    User::factory()->create([
+    UptdContributor::factory()->create([
         'name' => 'Kontributor Satu',
-        'role' => Role::UptdPasar,
         'market_id' => $market->id,
     ]);
 
@@ -114,17 +128,15 @@ it('menampilkan navigasi tab data master hingga kontributor UPTD', function () {
 it('mencari kontributor berdasarkan nama atau username', function () {
     $admin = User::factory()->create(['name' => 'Admin MIPTA']);
 
-    User::factory()->create([
+    UptdContributor::factory()->create([
         'name' => 'Kontributor Pasar Raya',
         'username' => 'kontributor.raya',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
-    User::factory()->create([
+    UptdContributor::factory()->create([
         'name' => 'Kontributor Lubuk',
         'username' => 'kontributor.lubuk',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
@@ -144,15 +156,13 @@ it('mencari kontributor berdasarkan nama atau username', function () {
 it('memfilter kontributor berdasarkan status', function () {
     $admin = User::factory()->create();
 
-    User::factory()->create([
+    UptdContributor::factory()->create([
         'name' => 'Kontributor Aktif',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
-    User::factory()->inactive()->create([
+    UptdContributor::factory()->inactive()->create([
         'name' => 'Kontributor Nonaktif',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
@@ -180,22 +190,32 @@ it('menampilkan tombol tambah data pada tab kontributor', function () {
         ->assertSee(route('admin.uptd-contributors.create'), false);
 });
 
-it('membatasi lima kontributor per halaman', function () {
+it('menampilkan sepuluh kontributor per halaman', function () {
     $admin = User::factory()->create(['name' => 'Admin MIPTA']);
 
-    collect(range(1, 6))->each(fn (int $number): User => User::factory()->create([
-        'name' => 'Kontributor 0'.$number,
-        'username' => 'kontributor.0'.$number,
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]));
+    collect(range(1, 11))->each(function (int $number): void {
+        $suffix = str_pad((string) $number, 2, '0', STR_PAD_LEFT);
+
+        UptdContributor::factory()->create([
+            'name' => 'Kontributor '.$suffix,
+            'username' => 'kontributor.'.$suffix,
+            'market_id' => Market::factory(),
+        ]);
+    });
 
     $this->actingAs($admin)
         ->get(route('admin.uptd-contributors.index'))
         ->assertOk()
+        ->assertSee('Menampilkan 10 dari 11 kontributor')
+        ->assertSee('?page=2', false)
+        ->assertSeeInOrder(['Kontributor 11', 'Kontributor 10', 'Kontributor 09'])
+        ->assertDontSee('Kontributor 01');
+
+    $this->get(route('admin.uptd-contributors.index', ['page' => 2]))
+        ->assertOk()
+        ->assertSee('Menampilkan 1 dari 11 kontributor')
         ->assertSee('Kontributor 01')
-        ->assertDontSee('Kontributor 06')
-        ->assertSee('Menampilkan 5 dari 6 kontributor');
+        ->assertDontSee('Kontributor 11');
 });
 
 it('membatasi halaman kontributor hanya untuk admin', function () {
@@ -238,8 +258,7 @@ it('menampilkan pesan untuk menambah pasar baru saat semua pasar sudah memiliki 
     $admin = User::factory()->create();
     $market = Market::factory()->create();
 
-    User::factory()->create([
-        'role' => Role::UptdPasar,
+    UptdContributor::factory()->create([
         'market_id' => $market->id,
     ]);
 
@@ -256,8 +275,7 @@ it('hanya menampilkan pasar yang belum memiliki kontributor pada form tambah', f
     Market::factory()->create(['name' => 'Pasar Baru']);
     $usedMarket = Market::factory()->create(['name' => 'Pasar Terpakai']);
 
-    User::factory()->create([
-        'role' => Role::UptdPasar,
+    UptdContributor::factory()->create([
         'market_id' => $usedMarket->id,
     ]);
 
@@ -274,8 +292,7 @@ it('menolak pasar yang sudah memiliki kontributor UPTD', function () {
     $admin = User::factory()->create();
     $market = Market::factory()->create();
 
-    User::factory()->create([
-        'role' => Role::UptdPasar,
+    UptdContributor::factory()->create([
         'market_id' => $market->id,
     ]);
 
@@ -291,7 +308,7 @@ it('menolak pasar yang sudah memiliki kontributor UPTD', function () {
     expect(session('errors')->first('market_id'))
         ->toContain('Pasar ini sudah memiliki kontributor UPTD.');
 
-    $this->assertDatabaseMissing('users', ['username' => 'kontributor.baru']);
+    $this->assertDatabaseMissing('uptd_contributors', ['username' => 'kontributor.baru']);
 });
 
 it('mempertahankan pasar saat ini dan hanya menampilkan pasar kosong pada form edit', function () {
@@ -300,13 +317,11 @@ it('mempertahankan pasar saat ini dan hanya menampilkan pasar kosong pada form e
     $availableMarket = Market::factory()->create(['name' => 'Pasar Kosong']);
     $usedMarket = Market::factory()->create(['name' => 'Pasar Terpakai Lain']);
 
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
+    $contributor = UptdContributor::factory()->create([
         'market_id' => $currentMarket->id,
     ]);
 
-    User::factory()->create([
-        'role' => Role::UptdPasar,
+    UptdContributor::factory()->create([
         'market_id' => $usedMarket->id,
     ]);
 
@@ -325,13 +340,11 @@ it('menolak memindahkan kontributor ke pasar yang sudah memiliki kontributor lai
     $currentMarket = Market::factory()->create();
     $usedMarket = Market::factory()->create();
 
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
+    $contributor = UptdContributor::factory()->create([
         'market_id' => $currentMarket->id,
     ]);
 
-    User::factory()->create([
-        'role' => Role::UptdPasar,
+    UptdContributor::factory()->create([
         'market_id' => $usedMarket->id,
     ]);
 

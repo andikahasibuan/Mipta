@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -36,7 +37,89 @@ it('menampilkan halaman edit pengguna', function () {
 
     $this->get(route('admin.users.edit', $user))
         ->assertOk()
-        ->assertSee('Rina Marlina');
+        ->assertSee('Rina Marlina')
+        ->assertSee('data-password-toggle="password"', false);
+});
+
+it('menampilkan tombol tampilkan password pada form tambah pengguna', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.users.create'))
+        ->assertOk()
+        ->assertSee('data-password-toggle="password"', false);
+});
+
+it('membuat pengguna tanpa email', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('admin.users.store'), [
+        'name' => 'Tanpa Email',
+        'username' => 'tanpa.email',
+        'password' => 'password123',
+        'role' => Role::KepalaDinas->value,
+        'is_active' => '1',
+    ])->assertRedirect(route('admin.users.index'));
+
+    $this->assertDatabaseHas('users', [
+        'username' => 'tanpa.email',
+        'email' => null,
+        'role' => Role::KepalaDinas->value,
+    ]);
+});
+
+it('mengosongkan email pengguna saat edit', function () {
+    $this->actingAs(User::factory()->create());
+    $user = User::factory()->create();
+
+    $this->put(route('admin.users.update', $user), [
+        'name' => $user->name,
+        'username' => $user->username,
+        'email' => '',
+        'role' => $user->role->value,
+        'is_active' => '1',
+    ])->assertRedirect(route('admin.users.index'));
+
+    expect($user->fresh()->email)->toBeNull();
+});
+
+it('menyimpan username pengguna dalam huruf kecil', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('admin.users.store'), [
+        'name' => 'Username Kapital',
+        'username' => 'Admin.Baru',
+        'password' => 'password123',
+        'role' => Role::Admin->value,
+    ])->assertRedirect(route('admin.users.index'));
+
+    $this->assertDatabaseHas('users', ['username' => 'admin.baru']);
+});
+
+it('menolak username dengan spasi atau karakter khusus', function (string $username) {
+    $this->actingAs(User::factory()->create());
+
+    $this->post(route('admin.users.store'), [
+        'name' => 'Username Tidak Valid',
+        'username' => $username,
+        'password' => 'password123',
+        'role' => Role::Admin->value,
+    ])->assertSessionHasErrors('username');
+
+    $this->assertDatabaseMissing('users', ['username' => $username]);
+})->with([
+    'spasi' => ['user name'],
+    'karakter khusus' => ['user!name'],
+]);
+
+it('menolak username yang sudah digunakan', function () {
+    $this->actingAs(User::factory()->create());
+    User::factory()->create(['username' => 'sudah.dipakai']);
+
+    $this->post(route('admin.users.store'), [
+        'name' => 'Username Duplikat',
+        'username' => 'sudah.dipakai',
+        'password' => 'password123',
+        'role' => Role::Admin->value,
+    ])->assertSessionHasErrors('username');
 });
 
 it('memperbarui pengguna dan menyimpannya ke database', function () {
@@ -96,6 +179,7 @@ it('menghapus pengguna dari database', function () {
 
 it('menolak menghapus akun yang sedang digunakan untuk login', function () {
     $admin = User::factory()->create();
+    User::factory()->create(['role' => Role::Admin]);
     $this->actingAs($admin);
 
     $this->from(route('admin.users.index'))
@@ -106,31 +190,27 @@ it('menolak menghapus akun yang sedang digunakan untuk login', function () {
     $this->assertDatabaseHas('users', ['id' => $admin->id]);
 });
 
-it('menyimpan kontributor UPTD dengan peran UPTD Pasar', function () {
+it('menyimpan profil kontributor UPTD dengan peran UPTD Pasar', function () {
     $this->actingAs(User::factory()->create());
     $market = Market::factory()->create();
 
     $this->post(route('admin.uptd-contributors.store'), [
         'name' => 'Dewi Anggraini',
         'username' => 'dewi.anggraini',
-        'password' => 'password123',
         'market_id' => $market->id,
         'is_active' => '1',
     ])->assertRedirect(route('admin.uptd-contributors.index'));
 
-    $this->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('uptd_contributors', [
         'username' => 'dewi.anggraini',
-        'email' => null,
-        'role' => Role::UptdPasar->value,
         'market_id' => $market->id,
     ]);
 });
 
-it('memperbarui kontributor UPTD dan menyimpannya ke database', function () {
+it('memperbarui profil kontributor UPTD dan menyimpannya ke database', function () {
     $this->actingAs(User::factory()->create());
     $market = Market::factory()->create();
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Nama Lama',
         'market_id' => $market->id,
     ]);
@@ -141,25 +221,23 @@ it('memperbarui kontributor UPTD dan menyimpannya ke database', function () {
         'market_id' => $market->id,
     ])->assertRedirect(route('admin.uptd-contributors.index'));
 
-    $this->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('uptd_contributors', [
         'id' => $contributor->id,
         'name' => 'Nama Baru',
-        'role' => Role::UptdPasar->value,
         'market_id' => $market->id,
     ]);
 });
 
-it('menghapus kontributor UPTD dari database', function () {
+it('menghapus profil kontributor UPTD dari database', function () {
     $this->actingAs(User::factory()->create());
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
+    $contributor = UptdContributor::factory()->create([
         'market_id' => Market::factory(),
     ]);
 
     $this->delete(route('admin.uptd-contributors.destroy', $contributor))
         ->assertRedirect(route('admin.uptd-contributors.index'));
 
-    $this->assertDatabaseMissing('users', ['id' => $contributor->id]);
+    $this->assertDatabaseMissing('uptd_contributors', ['id' => $contributor->id]);
 });
 
 it('menolak mengelola kontributor pasar lewat tab pengguna', function () {
@@ -308,6 +386,7 @@ it('mengizinkan mengubah pengguna lain menjadi UPTD saat akun bersama sudah ada'
 
 it('mencegah admin mengubah peran atau menonaktifkan akunnya sendiri', function () {
     $admin = User::factory()->create(['role' => Role::Admin]);
+    User::factory()->create(['role' => Role::Admin]);
 
     $this->actingAs($admin)
         ->put(route('admin.users.update', $admin), [

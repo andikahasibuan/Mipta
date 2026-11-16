@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\FieldDistributionReport;
 use App\Models\RecipientStore;
-use App\Models\User;
+use App\Models\UptdContributor;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UptdDashboardService
@@ -13,12 +13,12 @@ class UptdDashboardService
      * Bangun data dashboard untuk kontributor UPTD Pasar yang sedang login.
      *
      * @return array{
-     *     contributor: User,
+     *     contributor: UptdContributor,
      *     summary: array{reports: int, stores: int},
      *     reports: LengthAwarePaginator
      * }
      */
-    public function build(User $contributor): array
+    public function build(UptdContributor $contributor): array
     {
         $contributor->loadMissing('market');
 
@@ -26,11 +26,12 @@ class UptdDashboardService
 
         $reportQuery = fn () => FieldDistributionReport::query()
             ->where('market_id', $marketId)
-            ->where('uptd_user_id', $contributor->id);
+            ->where('uptd_contributor_id', $contributor->id);
 
         $reports = $reportQuery()
             ->with('contributor:id,name')
-            ->orderBy('id')
+            ->orderByDesc('report_date')
+            ->orderByDesc('id')
             ->paginate(5)
             ->withQueryString();
 

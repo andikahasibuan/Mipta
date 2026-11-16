@@ -1,9 +1,9 @@
 <?php
 
 use App\Enums\FieldCondition;
-use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -14,15 +14,14 @@ it('mengarahkan tamu dari halaman pengawasan ke halaman login', function () {
 });
 
 it('menampilkan laporan kondisi lapangan dari database', function () {
-    $contributor = User::factory()->create([
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Andi Pratama',
-        'role' => Role::UptdPasar,
     ]);
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->toDateString(),
         'description' => 'Stok Minyakita tersedia, harga sesuai HET',
         'condition' => FieldCondition::Normal,
@@ -31,7 +30,7 @@ it('menampilkan laporan kondisi lapangan dari database', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.supervision.index'))
         ->assertOk()
-        ->assertSee('Laporan Kondisi Pasar')
+        ->assertSee('Laporan Pengawasan')
         ->assertSee('Keterangan')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
@@ -41,14 +40,14 @@ it('menampilkan laporan kondisi lapangan dari database', function () {
 });
 
 it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () {
-    $firstContributor = User::factory()->create(['name' => 'Andi Pratama', 'role' => Role::UptdPasar]);
-    $secondContributor = User::factory()->create(['name' => 'Rina Marlina', 'role' => Role::UptdPasar]);
+    $firstContributor = UptdContributor::factory()->create(['name' => 'Andi Pratama']);
+    $secondContributor = UptdContributor::factory()->create(['name' => 'Rina Marlina']);
     $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
     $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $firstContributor->id,
+        'uptd_contributor_id' => $firstContributor->id,
         'report_date' => now()->toDateString(),
         'description' => 'Stok aman',
         'condition' => FieldCondition::Normal,
@@ -56,7 +55,7 @@ it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () 
 
     FieldDistributionReport::factory()->create([
         'market_id' => $secondMarket->id,
-        'uptd_user_id' => $secondContributor->id,
+        'uptd_contributor_id' => $secondContributor->id,
         'report_date' => now()->toDateString(),
         'description' => 'Stok menipis',
         'condition' => FieldCondition::PerluPerhatian,
@@ -64,7 +63,7 @@ it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () 
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $firstContributor->id,
+        'uptd_contributor_id' => $firstContributor->id,
         'report_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
         'description' => 'Laporan bulan lalu',
         'condition' => FieldCondition::Normal,
@@ -97,7 +96,7 @@ it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () 
 });
 
 it('menampilkan ringkasan total, pasar sudah melapor, dan perlu perhatian', function () {
-    $contributor = User::factory()->create(['role' => Role::UptdPasar]);
+    $contributor = UptdContributor::factory()->create();
     $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
     $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
     $thirdMarket = Market::factory()->create(['name' => 'Pasar Gamma']);
@@ -105,49 +104,49 @@ it('menampilkan ringkasan total, pasar sudah melapor, dan perlu perhatian', func
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::PerluPerhatian,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->addDay()->toDateString(),
         'condition' => FieldCondition::Normal,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $secondMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::Normal,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $secondMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->addDay()->toDateString(),
         'condition' => FieldCondition::PerluPerhatian,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $thirdMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::Normal,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $thirdMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::PerluPerhatian,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $fourthMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::PerluPerhatian,
     ]);
@@ -165,28 +164,28 @@ it('menampilkan ringkasan total, pasar sudah melapor, dan perlu perhatian', func
 });
 
 it('membatasi card total dan pasar dengan filter tetapi tidak card perlu perhatian', function () {
-    $contributor = User::factory()->create(['role' => Role::UptdPasar]);
+    $contributor = UptdContributor::factory()->create();
     $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
     $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
     $previousMarket = Market::factory()->create(['name' => 'Pasar Gamma']);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::Normal,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $secondMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::PerluPerhatian,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $previousMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
         'condition' => FieldCondition::PerluPerhatian,
     ]);

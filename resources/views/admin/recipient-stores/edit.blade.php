@@ -65,17 +65,17 @@
                 </div>
 
                 <div>
-                    <label for="alamat" class="block text-sm font-medium text-slate-700">Alamat <span class="text-red-500">*</span></label>
+                    <label for="alamat" class="block text-sm font-medium text-slate-700">Alamat (opsional)</label>
                     <input
                         id="alamat"
                         name="alamat"
                         type="text"
                         value="{{ old('alamat', $store->alamat) }}"
-                        required
                         pattern="[A-Za-z0-9 .,/-]+"
-                        title="Alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-)."
+                        title="Detail alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-)."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
+                    <p class="mt-1 text-xs text-slate-500">Tambahkan detail alamat bila diperlukan.</p>
                     @error('alamat')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror

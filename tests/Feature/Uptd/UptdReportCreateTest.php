@@ -4,6 +4,7 @@ use App\Enums\FieldCondition;
 use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -11,13 +12,13 @@ uses(RefreshDatabase::class);
 
 it('menampilkan formulir laporan kondisi lapangan', function () {
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
-    $contributor = User::factory()->create([
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
-        'role' => Role::UptdPasar,
         'market_id' => $market->id,
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.reports.create'))
         ->assertOk()
         ->assertSee('Input Laporan')
@@ -32,12 +33,10 @@ it('menampilkan formulir laporan kondisi lapangan', function () {
 
 it('menyimpan laporan kondisi lapangan milik kontributor yang login', function () {
     $market = Market::factory()->create();
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->post(route('uptd.reports.store'), [
             'report_date' => '2026-05-20',
             'condition' => FieldCondition::Normal->value,
@@ -49,13 +48,12 @@ it('menyimpan laporan kondisi lapangan milik kontributor yang login', function (
     $report = FieldDistributionReport::query()->firstOrFail();
 
     expect($report->market_id)->toBe($market->id)
-        ->and($report->uptd_user_id)->toBe($contributor->id)
+        ->and($report->uptd_contributor_id)->toBe($contributor->id)
         ->and($report->report_date->toDateString())->toBe('2026-05-20')
         ->and($report->condition)->toBe(FieldCondition::Normal)
         ->and($report->description)->toBe('Kondisi pasar normal dan penyaluran lancar.');
 
-    $this->actingAs($contributor)
-        ->get(route('uptd.dashboard'))
+    $this->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSee('Laporan kondisi lapangan berhasil disimpan.')
         ->assertSee('20 Mei 2026');
@@ -63,10 +61,7 @@ it('menyimpan laporan kondisi lapangan milik kontributor yang login', function (
 
 it('menolak laporan kondisi lapangan yang tidak valid', function (array $overrides, string $field) {
     $market = Market::factory()->create();
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 
     $payload = array_merge([
         'report_date' => now()->toDateString(),
@@ -74,7 +69,8 @@ it('menolak laporan kondisi lapangan yang tidak valid', function (array $overrid
         'description' => 'Kondisi pasar normal.',
     ], $overrides);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->post(route('uptd.reports.store'), $payload)
         ->assertSessionHasErrors($field);
 
@@ -97,7 +93,7 @@ it('menolak peran selain kontributor UPTD saat menyimpan laporan', function () {
         ->assertForbidden();
 });
 
-it('mengarahkan kontributor UPTD tanpa pasar saat menyimpan laporan ke pemilihan identitas', function () {
+it('mengarahkan akun bersama UPTD tanpa identitas terpilih saat menyimpan laporan ke pemilihan identitas', function () {
     $this->actingAs(User::factory()->create(['role' => Role::UptdPasar]))
         ->post(route('uptd.reports.store'), [])
         ->assertRedirect(route('uptd.contributors.index'));

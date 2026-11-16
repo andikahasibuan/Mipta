@@ -67,10 +67,10 @@
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
-                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama / Identitas</th>
-                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Akun</th>
+                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Username</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Peran</th>
-                        <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status Akun</th>
+                        <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status</th>
                         <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
@@ -78,8 +78,8 @@
                     @forelse ($users as $user)
                         <tr>
                             <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">{{ $loop->iteration }}</td>
-                            <td class="px-5 py-4 align-middle text-slate-900">{{ $user->name }}</td>
-                            <td class="px-5 py-4 align-middle">
+                            <td class="px-5 py-4 text-left align-middle capitalize text-slate-900">{{ $user->name }}</td>
+                            <td class="px-5 py-4 text-left align-middle">
                                 <span class="text-sm text-slate-600">{{ $user->username ?? '—' }}</span>
                             </td>
                             <td class="px-5 py-4 align-middle">

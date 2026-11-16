@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Enums\FieldCondition;
 use App\Models\FieldDistributionReport;
-use App\Models\User;
+use App\Models\UptdContributor;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -20,7 +20,7 @@ class UptdReportHistoryService
      *     conditions: array<int, FieldCondition>
      * }
      */
-    public function paginate(Request $request, User $contributor): array
+    public function paginate(Request $request, UptdContributor $contributor): array
     {
         $search = trim($request->string('q')->toString());
         $month = $request->string('month')->toString();
@@ -34,7 +34,7 @@ class UptdReportHistoryService
         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
 
         $reports = FieldDistributionReport::query()
-            ->where('uptd_user_id', $contributor->id)
+            ->where('uptd_contributor_id', $contributor->id)
             ->with(['market:id,name', 'contributor:id,name'])
             ->when($search !== '', fn ($query) => $query->where('description', 'like', "%{$search}%"))
             ->when($condition, fn ($query, FieldCondition $condition) => $query->where('condition', $condition->value))
@@ -42,7 +42,8 @@ class UptdReportHistoryService
                 $start->toDateString(),
                 $start->copy()->endOfMonth()->toDateString(),
             ])
-            ->orderBy('id')
+            ->orderByDesc('report_date')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 

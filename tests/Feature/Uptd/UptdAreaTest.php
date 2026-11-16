@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -14,12 +15,11 @@ dataset('uptd pages', [
 ]);
 
 it('menampilkan halaman kontributor UPTD dengan menu yang sesuai aktif', function (string $routeName, string $title, string $sidebarLabel) {
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => Market::factory()]);
 
-    $response = $this->actingAs($contributor)->get(route($routeName));
+    $response = $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
+        ->get(route($routeName));
 
     $response->assertOk()
         ->assertSee('<title>'.e($title).'</title>', false);
@@ -34,12 +34,10 @@ it('menampilkan halaman kontributor UPTD dengan menu yang sesuai aktif', functio
 })->with('uptd pages');
 
 it('menampilkan seluruh menu sidebar kontributor UPTD', function () {
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => Market::factory()]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSeeInOrder([
@@ -61,8 +59,8 @@ it('menolak peran selain kontributor UPTD dari halaman UPTD', function (string $
         ->assertForbidden();
 })->with('uptd pages');
 
-it('mengarahkan kontributor UPTD tanpa pasar dari halaman UPTD ke pemilihan identitas', function (string $routeName) {
-    $shared = User::factory()->create(['role' => Role::UptdPasar]);
+it('mengarahkan akun bersama UPTD tanpa identitas terpilih dari halaman UPTD ke pemilihan identitas', function (string $routeName) {
+    $shared = sharedUptdAccount();
 
     $this->actingAs($shared)
         ->get(route($routeName))
@@ -71,7 +69,7 @@ it('mengarahkan kontributor UPTD tanpa pasar dari halaman UPTD ke pemilihan iden
     $this->assertAuthenticatedAs($shared);
 })->with('uptd pages');
 
-it('mengarahkan kontributor UPTD dari halaman utama ke dashboard UPTD', function () {
+it('mengarahkan akun UPTD yang tidak terkait ke dashboard dari halaman utama', function () {
     $contributor = User::factory()->create([
         'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
@@ -83,7 +81,7 @@ it('mengarahkan kontributor UPTD dari halaman utama ke dashboard UPTD', function
 });
 
 it('mengarahkan akun bersama UPTD dari halaman utama ke pemilihan identitas', function () {
-    $shared = User::factory()->create(['role' => Role::UptdPasar]);
+    $shared = sharedUptdAccount();
 
     $this->actingAs($shared)
         ->get('/')
@@ -93,12 +91,10 @@ it('mengarahkan akun bersama UPTD dari halaman utama ke pemilihan identitas', fu
 });
 
 it('menautkan menu ganti kontributor ke halaman pemilihan identitas', function () {
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => Market::factory()]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSee('href="'.route('uptd.contributors.index').'"', false);

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['market_id', 'uptd_user_id', 'report_date', 'description', 'condition'])]
+#[Fillable(['market_id', 'uptd_contributor_id', 'report_date', 'description', 'condition'])]
 class FieldDistributionReport extends Model
 {
     /** @use HasFactory<FieldDistributionReportFactory> */
@@ -28,7 +28,7 @@ class FieldDistributionReport extends Model
      */
     public function contributor(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'uptd_user_id');
+        return $this->belongsTo(UptdContributor::class, 'uptd_contributor_id');
     }
 
     /**

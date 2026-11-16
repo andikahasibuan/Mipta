@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -18,10 +19,8 @@ it('menolak peran selain kontributor UPTD dari halaman pemilihan identitas', fun
 });
 
 it('menampilkan sembilan identitas kontributor UPTD yang aktif', function () {
-    $shared = User::factory()->create([
-        'name' => 'Akun Bersama UPTD',
-        'role' => Role::UptdPasar,
-    ]);
+    $shared = sharedUptdAccount();
+    $shared->update(['name' => 'Akun Bersama UPTD']);
 
     $marketNames = [
         'Pasar Raya Padang',
@@ -35,27 +34,24 @@ it('menampilkan sembilan identitas kontributor UPTD yang aktif', function () {
         'Pasar Siteba',
     ];
 
-    $contributors = collect($marketNames)->map(function (string $marketName, int $index): User {
+    $contributors = collect($marketNames)->map(function (string $marketName, int $index): UptdContributor {
         $number = str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
         $market = Market::factory()->create(['name' => $marketName]);
 
-        return User::factory()->create([
+        return UptdContributor::factory()->create([
             'name' => 'Kontributor UPTD '.$number,
             'username' => 'kontributor.uptd.'.$number,
-            'role' => Role::UptdPasar,
             'market_id' => $market->id,
         ]);
     });
 
-    User::factory()->inactive()->create([
+    UptdContributor::factory()->inactive()->create([
         'name' => 'Kontributor Nonaktif',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
 
-    User::factory()->create([
+    UptdContributor::factory()->create([
         'name' => 'Kontributor Pasar Nonaktif',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory()->create(['is_active' => false]),
     ]);
 
@@ -73,11 +69,10 @@ it('menampilkan sembilan identitas kontributor UPTD yang aktif', function () {
 });
 
 it('menyimpan identitas terpilih dan langsung membuka dashboard tanpa login kedua', function () {
-    $shared = User::factory()->create(['role' => Role::UptdPasar]);
-    $contributor = User::factory()->create([
+    $shared = sharedUptdAccount();
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 04',
         'username' => 'kontributor.uptd.04',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory()->create(['name' => 'Pasar Nanggalo']),
     ]);
 
@@ -100,7 +95,7 @@ it('menyimpan identitas terpilih dan langsung membuka dashboard tanpa login kedu
 });
 
 it('menolak pemilihan identitas yang tidak valid', function (mixed $value, string $message) {
-    $shared = User::factory()->create(['role' => Role::UptdPasar]);
+    $shared = sharedUptdAccount();
 
     $response = $this->actingAs($shared)->post(
         route('uptd.contributors.select'),
@@ -117,11 +112,11 @@ it('menolak pemilihan identitas yang tidak valid', function (mixed $value, strin
 ]);
 
 it('menolak identitas yang bukan kontributor UPTD pasar', function () {
-    $shared = User::factory()->create(['role' => Role::UptdPasar]);
-    $otherShared = User::factory()->create(['role' => Role::UptdPasar]);
+    $shared = sharedUptdAccount();
+    $user = User::factory()->create();
 
     $response = $this->actingAs($shared)
-        ->post(route('uptd.contributors.select'), ['contributor_id' => $otherShared->id]);
+        ->post(route('uptd.contributors.select'), ['contributor_id' => $user->id]);
 
     $response->assertSessionHasErrors('contributor_id')
         ->assertSessionMissing('uptd_selected_contributor');
@@ -133,9 +128,8 @@ it('menolak identitas yang bukan kontributor UPTD pasar', function () {
 });
 
 it('menolak identitas kontributor yang nonaktif', function () {
-    $shared = User::factory()->create(['role' => Role::UptdPasar]);
-    $inactiveContributor = User::factory()->inactive()->create([
-        'role' => Role::UptdPasar,
+    $shared = sharedUptdAccount();
+    $inactiveContributor = UptdContributor::factory()->inactive()->create([
         'market_id' => Market::factory(),
     ]);
 
@@ -152,15 +146,13 @@ it('menolak identitas kontributor yang nonaktif', function () {
 });
 
 it('mengizinkan akun bersama berganti identitas tanpa login ulang', function () {
-    $shared = User::factory()->create(['role' => Role::UptdPasar]);
-    $firstContributor = User::factory()->create([
+    $shared = sharedUptdAccount();
+    $firstContributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory()->create(['name' => 'Pasar Raya Padang']),
     ]);
-    $secondContributor = User::factory()->create([
+    $secondContributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 02',
-        'role' => Role::UptdPasar,
         'market_id' => Market::factory()->create(['name' => 'Pasar Alai']),
     ]);
 
@@ -176,26 +168,23 @@ it('mengizinkan akun bersama berganti identitas tanpa login ulang', function () 
     $this->assertAuthenticatedAs($shared);
 });
 
-it('mengarahkan kontributor pasar langsung ke dashboard dari halaman pemilihan', function () {
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]);
+it('mengizinkan akun bersama membuka halaman pemilihan walau sudah memilih identitas', function () {
+    $shared = sharedUptdAccount();
+    $contributor = UptdContributor::factory()->create(['market_id' => Market::factory()]);
 
-    $this->actingAs($contributor)
+    $this->actingAs($shared)
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.contributors.index'))
-        ->assertRedirect(route('uptd.dashboard'));
+        ->assertOk()
+        ->assertSee('Pilih identitas kontributor');
 });
 
-it('menolak kontributor pasar memilih identitas lain secara langsung', function () {
+it('menolak akun UPTD yang terkait pasar memilih identitas lain secara langsung', function () {
     $contributor = User::factory()->create([
         'role' => Role::UptdPasar,
         'market_id' => Market::factory(),
     ]);
-    $otherContributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]);
+    $otherContributor = UptdContributor::factory()->create(['market_id' => Market::factory()]);
 
     $this->actingAs($contributor)
         ->post(route('uptd.contributors.select'), ['contributor_id' => $otherContributor->id])

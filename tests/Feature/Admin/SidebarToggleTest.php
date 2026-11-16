@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\Role;
-use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -35,7 +35,7 @@ it('menandai label menu agar dapat disembunyikan saat sidebar ciut', function ()
     preg_match('/<aside[^>]*id="app-sidebar".*?<\/aside>/s', $html, $matches);
     $sidebar = $matches[0] ?? '';
 
-    foreach (['Dashboard', 'Pengguna', 'Data Master', 'Penyaluran', 'Kondisi Pasar', 'Rekap Laporan', 'Logout'] as $label) {
+    foreach (['Dashboard', 'Pengguna', 'Data Master', 'Penyaluran', 'Pengawasan', 'Logout'] as $label) {
         expect($sidebar)->toMatch('/data-sidebar-label[^>]*>\s*'.preg_quote($label, '/').'\s*</');
     }
 });
@@ -64,12 +64,11 @@ it('menampilkan pusat bantuan untuk distributor, kepala dinas, dan uptd', functi
         ->assertOk()
         ->assertSee('Pusat Bantuan');
 
-    $uptd = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]);
+    $shared = User::factory()->create(['role' => Role::UptdPasar]);
+    $contributor = UptdContributor::factory()->create();
 
-    $this->actingAs($uptd)
+    $this->actingAs($shared)
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSee('Pusat Bantuan');

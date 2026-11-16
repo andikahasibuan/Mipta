@@ -7,8 +7,10 @@ use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\MarketMonitoring;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DemoDataSeeder extends Seeder
 {
@@ -44,6 +46,7 @@ class DemoDataSeeder extends Seeder
                 'username' => 'demo.uptd',
                 'email' => null,
                 'role' => Role::UptdPasar,
+                'market_id' => null,
             ],
             [
                 'name' => 'Dewi Anggraini',
@@ -61,13 +64,26 @@ class DemoDataSeeder extends Seeder
                     'email' => $user['email'],
                     'password' => 'password',
                     'role' => $user['role'],
+                    'market_id' => $user['market_id'] ?? null,
                     'is_active' => true,
                 ],
             );
         }
 
         $uptdUser = User::where('username', 'demo.uptd')->firstOrFail();
-        $uptdUser->update(['market_id' => Market::where('name', 'Pasar Raya Padang')->value('id')]);
+        $contributors = [];
+
+        foreach (Market::whereIn('name', ['Pasar Raya Padang', 'Pasar Bandar Buat'])->get() as $market) {
+            $contributors[$market->name] = UptdContributor::updateOrCreate(
+                ['market_id' => $market->id],
+                [
+                    'name' => 'Kontributor '.$market->name,
+                    'username' => 'demo.uptd.'.Str::slug($market->name),
+                    'is_active' => true,
+                ],
+            );
+        }
+
         $currentMonthStart = now()->startOfMonth();
         $previousMonthStart = now()->subMonthNoOverflow()->startOfMonth();
 
@@ -97,7 +113,7 @@ class DemoDataSeeder extends Seeder
                     'report_date' => now()->toDateString(),
                 ],
                 [
-                    'uptd_user_id' => $uptdUser->id,
+                    'uptd_contributor_id' => $contributors[$marketName]->id,
                     'description' => $description,
                     'condition' => $condition->value,
                 ],

@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\Role;
-use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -19,17 +19,18 @@ it('menampilkan profil pengguna yang sedang login di topbar', function () {
         ->assertSee('action="'.route('logout').'"', false);
 });
 
-it('menampilkan username di dropdown profil untuk kontributor tanpa email', function () {
-    $contributor = User::factory()->create([
+it('menampilkan username di dropdown profil untuk akun bersama UPTD tanpa email', function () {
+    $shared = User::factory()->create([
         'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
         'email' => null,
     ]);
+    $contributor = UptdContributor::factory()->create();
 
-    $this->actingAs($contributor)
+    $this->actingAs($shared)
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Masuk sebagai', $contributor->username, 'Keluar']);
+        ->assertSeeInOrder(['Masuk sebagai', $shared->username, 'Keluar']);
 });
 
 it('mengambil inisial dari dua kata pertama nama', function (string $name, string $initials) {
@@ -77,12 +78,11 @@ it('menyembunyikan ikon notifikasi dari distributor dan kontributor uptd', funct
         ->assertDontSee('aria-label="Notifikasi"', false)
         ->assertDontSee('Belum ada notifikasi');
 
-    $uptd = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
-    ]);
+    $shared = User::factory()->create(['role' => Role::UptdPasar]);
+    $contributor = UptdContributor::factory()->create();
 
-    $this->actingAs($uptd)
+    $this->actingAs($shared)
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertDontSee('aria-label="Notifikasi"', false)

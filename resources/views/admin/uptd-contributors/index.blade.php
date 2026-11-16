@@ -21,7 +21,7 @@
 
     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="px-5 pt-5">
-            <h2 class="text-lg font-semibold text-slate-900">Data kontributor UPTD</h2>
+            <h2 class="text-lg font-semibold text-slate-900">Profil kontributor</h2>
         </div>
 
         <form
@@ -59,10 +59,10 @@
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
-                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Kontributor</th>
+                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama</th>
                         <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Pasar Terkait</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Peran</th>
-                        <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status Akun</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Username</th>
+                        <th scope="col" class="w-[15%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Status</th>
                         <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
@@ -70,14 +70,12 @@
                     @forelse ($contributors as $contributor)
                         <tr>
                             <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">{{ $loop->iteration }}</td>
-                            <td class="px-5 py-4 align-middle text-slate-900">{{ $contributor->name }}</td>
-                            <td class="px-5 py-4 align-middle">
-                                <span class="text-sm text-slate-600">{{ $contributor->market?->name }}</span>
+                            <td class="px-5 py-4 text-left align-middle capitalize text-slate-900">{{ $contributor->name }}</td>
+                            <td class="px-5 py-4 text-left align-middle">
+                                <span class="text-sm capitalize text-slate-600">{{ $contributor->market?->name }}</span>
                             </td>
-                            <td class="px-5 py-4 align-middle">
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                                    {{ $contributor->role->label() }}
-                                </span>
+                            <td class="px-5 py-4 text-left align-middle">
+                                <span class="font-mono text-xs text-slate-600">{{ $contributor->username }}</span>
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <span @class([

@@ -50,10 +50,10 @@
                                 <td class="px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                     {{ $loop->iteration }}
                                 </td>
-                                <td class="px-5 py-4 align-middle font-medium text-slate-900">
+                                <td class="px-5 py-4 align-middle font-medium capitalize text-slate-900">
                                     {{ $contributor->market?->name ?? '—' }}
                                 </td>
-                                <td class="px-5 py-4 align-middle text-slate-600">
+                                <td class="px-5 py-4 align-middle capitalize text-slate-600">
                                     {{ $report->contributor?->name ?? $contributor->name }}
                                 </td>
                                 <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">

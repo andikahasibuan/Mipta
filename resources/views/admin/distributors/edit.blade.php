@@ -14,7 +14,7 @@
 
             <div class="space-y-4 px-5 py-5">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-slate-700">Nama Perusahaan Distributor</label>
+                    <label for="name" class="block text-sm font-medium text-slate-700">Distributor</label>
                     <input
                         id="name"
                         name="name"
@@ -22,7 +22,6 @@
                         value="{{ old('name', $distributor->name) }}"
                         required
                         pattern="[A-Za-z0-9 .'-]+"
-                        title="Nama perusahaan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('name')
@@ -31,7 +30,25 @@
                 </div>
 
                 <div>
-                    <label for="penanggung_jawab" class="block text-sm font-medium text-slate-700">Nama Penanggung Jawab</label>
+                    <label for="username" class="block text-sm font-medium text-slate-700">Username</label>
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        value="{{ old('username', $account?->username) }}"
+                        required
+                        pattern="[A-Za-z0-9._-]+"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                    >
+                    @error('username')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="penanggung_jawab" class="block text-sm font-medium text-slate-700">Penanggung Jawab</label>
                     <input
                         id="penanggung_jawab"
                         name="penanggung_jawab"
@@ -39,7 +56,6 @@
                         value="{{ old('penanggung_jawab', $distributor->penanggung_jawab) }}"
                         required
                         pattern="[A-Za-z .'-]+"
-                        title="Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('penanggung_jawab')
@@ -48,7 +64,7 @@
                 </div>
 
                 <div>
-                    <label for="telepon" class="block text-sm font-medium text-slate-700">No. Handphone Penanggung Jawab</label>
+                    <label for="telepon" class="block text-sm font-medium text-slate-700">No HP Penanggung Jawab</label>
                     <input
                         id="telepon"
                         name="telepon"
@@ -57,9 +73,8 @@
                         required
                         inputmode="numeric"
                         minlength="10"
-                        maxlength="15"
-                        pattern="[0-9]{10,15}"
-                        title="No. handphone hanya boleh berisi angka (10 sampai 15 digit)."
+                        maxlength="13"
+                        pattern="[0-9]{10,13}"
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('telepon')
@@ -68,13 +83,12 @@
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-700">Email Perusahaan</label>
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email (opsional)</label>
                     <input
                         id="email"
                         name="email"
                         type="email"
                         value="{{ old('email', $account?->email) }}"
-                        required
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('email')
@@ -83,13 +97,33 @@
                 </div>
 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <label for="alamat_kantor" class="block text-sm font-medium text-slate-700">Alamat (opsional)</label>
                     <input
-                        id="password"
-                        name="password"
-                        type="password"
+                        id="alamat_kantor"
+                        name="alamat_kantor"
+                        type="text"
+                        value="{{ old('alamat_kantor', $distributor->alamat_kantor) }}"
+                        pattern="[A-Za-z0-9 .,/'-]+"
+                        title="Alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/'-)."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
+                    @error('alamat_kantor')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+     
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <x-ui.password-input
+                        id="password"
+                        name="password"
+                        minlength="8"
+                        autocomplete="new-password"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                    />
+                    <p class="mt-1 text-xs text-slate-500">Kosongkan jika tidak ingin mengubah password.</p>
                     @error('password')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror

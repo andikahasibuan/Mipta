@@ -1,5 +1,8 @@
 @php
     $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
+    $titleOrDash = fn (?string $value): string => filled($value)
+        ? \Illuminate\Support\Str::title($value)
+        : '—';
 @endphp
 
 <div class="min-w-0">
@@ -9,7 +12,7 @@
                 Periode {{ $summary['month_label'] }}
             </p>
             <h2 class="mt-1 text-xl font-semibold sm:text-2xl">
-                Hai, {{ $distributor->name }}
+                {{ $distributor->name }}
             </h2>
             <p class="mt-1 max-w-3xl text-sm text-[#E6F7F8]">
                 Pastikan setiap penyaluran Minyakita tercatat sesuai toko penerima.
@@ -74,37 +77,41 @@
 
         <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
+                <thead class="bg-slate-200 text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Tanggal</th>
-                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 text-center align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Tanggal Penyaluran</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 text-center align-middle font-semibold">Jumlah Disalurkan (Karton)</th>
+                        <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 text-center align-middle font-semibold">Nomor NIB</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-center">
+                <tbody class="divide-y divide-slate-100">
                     @forelse ($reports as $report)
                         <tr>
-                            <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
+                            <td class="whitespace-nowrap px-3 py-4 text-center align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $report->distribution_date->format('d/m/Y') }}
                             </td>
-                            <td class="px-5 py-4 align-middle text-slate-700">
-                                {{ $report->market->name }}
+                            <td class="break-words px-5 py-4 align-middle text-slate-900">
+                                {{ $titleOrDash($report->store?->name) }}
                             </td>
-                            <td class="px-5 py-4 align-middle text-slate-700">
-                                {{ $report->store?->name ?? '—' }}
+                            <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
+                                {{ $formatNumber($report->cartons) }}
                             </td>
-                            <td class="whitespace-nowrap px-5 py-4 align-middle font-semibold text-slate-900">
-                                {{ $formatNumber($report->cartons) }} karton
+                            <td class="break-words px-5 py-4 align-middle text-slate-700">
+                                {{ $titleOrDash($report->store?->alamat_lengkap) }}
+                            </td>
+                            <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
+                                {{ $report->store?->nib ?: '—' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
                                 Belum ada laporan penyaluran pada periode ini
                             </td>
                         </tr>

@@ -29,7 +29,7 @@
 
 <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
     <div class="px-5 pt-5">
-        <h2 class="text-lg font-semibold text-slate-900">Laporan Kondisi Pasar</h2>
+        <h2 class="text-lg font-semibold text-slate-900">Laporan Pengawasan</h2>
     </div>
 
     <form
@@ -102,16 +102,16 @@
                         <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                             {{ $loop->iteration }}
                         </td>
-                        <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
+                        <td class="whitespace-nowrap px-5 py-4 text-left align-middle text-slate-600">
                             {{ $report->report_date->format('d/m/Y') }}
                         </td>
-                        <td class="break-words px-5 py-4 align-middle text-slate-900">
+                        <td class="break-words px-5 py-4 text-left align-middle capitalize text-slate-900">
                             {{ $report->contributor?->name ?? '—' }}
                         </td>
-                        <td class="break-words px-5 py-4 align-middle text-slate-700">
+                        <td class="break-words px-5 py-4 text-left align-middle capitalize text-slate-700">
                             {{ $report->market?->name ?? '—' }}
                         </td>
-                        <td class="break-words px-5 py-4 text-left align-middle text-slate-700">
+                        <td class="break-words px-5 py-4 text-left align-middle capitalize text-slate-700">
                             {{ \Illuminate\Support\Str::limit($report->description, 120, '') }}
                         </td>
                         <td class="whitespace-nowrap px-5 py-4 align-middle">

@@ -3,10 +3,9 @@
 namespace Database\Factories;
 
 use App\Enums\FieldCondition;
-use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
-use App\Models\User;
+use App\Models\UptdContributor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +22,7 @@ class FieldDistributionReportFactory extends Factory
     {
         return [
             'market_id' => Market::factory(),
-            'uptd_user_id' => User::factory()->state(['role' => Role::UptdPasar]),
+            'uptd_contributor_id' => UptdContributor::factory(),
             'report_date' => now()->toDateString(),
             'description' => fake()->sentence(),
             'condition' => fake()->randomElement(FieldCondition::cases()),

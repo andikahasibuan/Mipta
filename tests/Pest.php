@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\Role;
+use App\Models\UptdContributor;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +50,22 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Buat akun bersama UPTD untuk pengujian area UPTD.
+ */
+function sharedUptdAccount(): User
+{
+    return User::factory()->create(['role' => Role::UptdPasar]);
+}
+
+/**
+ * Data session untuk kontributor UPTD yang dipilih.
+ *
+ * @return array<string, array{id: int}>
+ */
+function uptdContributorSession(UptdContributor $contributor): array
+{
+    return ['uptd_selected_contributor' => ['id' => $contributor->id]];
 }

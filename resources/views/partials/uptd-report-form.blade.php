@@ -12,7 +12,7 @@
     <div class="min-w-0 lg:col-span-2">
         <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div class="border-b border-slate-200 px-6 py-4">
-                <h3 class="text-lg font-semibold text-slate-900">Formulir kondisi lapangan</h3>
+                <h3 class="text-lg font-semibold text-slate-900">Formulir Pengawasan</h3>
                 <p class="mt-1 text-sm text-slate-500">
                     Identitas dan pasar terhubung otomatis dari sesi kontributor aktif.
                 </p>

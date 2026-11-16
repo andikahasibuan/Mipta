@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Role;
 use Database\Factories\MarketFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,11 +23,11 @@ class Market extends Model
     }
 
     /**
-     * Akun kontributor UPTD yang terkait ke pasar ini.
+     * Profil kontributor UPTD yang terkait ke pasar ini.
      */
     public function uptdContributors(): HasMany
     {
-        return $this->hasMany(User::class)->where('role', Role::UptdPasar->value);
+        return $this->hasMany(UptdContributor::class);
     }
 
     /**

@@ -88,7 +88,7 @@
                     {{ auth()->user()->initials() }}
                 </span>
                 <span class="hidden min-w-0 text-left sm:block">
-                    <span class="block max-w-[9rem] truncate text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</span>
+                    <span class="block max-w-[9rem] truncate text-sm font-semibold text-slate-900">{{ auth()->user()->username }}</span>
                     <span class="block max-w-[9rem] truncate text-xs text-slate-500">{{ auth()->user()->role->label() }}</span>
                 </span>
                 <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -106,7 +106,7 @@
                         type="submit"
                         class="w-full cursor-pointer rounded-md bg-[#018F98] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#018F98]/90"
                     >
-                        Keluar
+                        Logout
                     </button>
                 </form>
             </div>

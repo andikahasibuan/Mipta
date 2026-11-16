@@ -10,8 +10,7 @@ dataset('admin pages', [
     'dashboard' => ['admin.dashboard', 'Dashboard', 'Dashboard'],
     'users' => ['admin.users.index', 'Pengguna', 'Data Pengguna'],
     'distribution' => ['admin.distribution.index', 'Penyaluran', 'Penyaluran'],
-    'supervision' => ['admin.supervision.index', 'Kondisi Pasar', 'Kondisi Pasar'],
-    'reports' => ['admin.reports.index', 'Rekap Laporan', 'Rekap Laporan'],
+    'supervision' => ['admin.supervision.index', 'Pengawasan', 'Pengawasan'],
 ]);
 
 it('menampilkan halaman admin dengan menu yang sesuai aktif', function (string $routeName, string $label, string $title) {
@@ -45,7 +44,7 @@ it('menampilkan ikon pada setiap menu sidebar', function () {
 
     $response->assertOk();
 
-    foreach (['squares-2x2', 'users', 'table-cells', 'document-text', 'shield-check', 'arrow-down-tray'] as $icon) {
+    foreach (['squares-2x2', 'users', 'table-cells', 'document-text', 'shield-check'] as $icon) {
         $response->assertSee('data-icon="'.$icon.'"', false);
     }
 });

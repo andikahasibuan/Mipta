@@ -2,27 +2,26 @@
 
 use App\Enums\FieldCondition;
 use App\Enums\Role;
-use App\Models\Distribution;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 dataset('kepala dinas pages', [
-    'dashboard' => ['kepala-dinas.dashboard', 'Dashboard'],
-    'distribution' => ['kepala-dinas.distribution.index', 'Penyaluran'],
-    'supervision' => ['kepala-dinas.supervision.index', 'Kondisi Pasar'],
-    'reports' => ['kepala-dinas.reports.index', 'Rekap Laporan'],
+    'dashboard' => ['kepala-dinas.dashboard', 'Dashboard', 'Dashboard'],
+    'distribution' => ['kepala-dinas.distribution.index', 'Penyaluran', 'Penyaluran'],
+    'supervision' => ['kepala-dinas.supervision.index', 'Pengawasan', 'Pengawasan'],
 ]);
 
-it('menampilkan halaman kepala dinas dengan menu yang sesuai aktif', function (string $routeName, string $label) {
+it('menampilkan halaman kepala dinas dengan menu yang sesuai aktif', function (string $routeName, string $label, string $title) {
     $response = $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route($routeName));
 
     $response->assertOk()
-        ->assertSee('<title>'.e($label).'</title>', false);
+        ->assertSee('<title>'.e($title).'</title>', false);
 
     $html = $response->getContent();
 
@@ -52,7 +51,6 @@ dataset('admin pages', [
     'uptd' => ['admin.uptd-contributors.index'],
     'distribution' => ['admin.distribution.index'],
     'supervision' => ['admin.supervision.index'],
-    'reports' => ['admin.reports.index'],
 ]);
 
 it('menolak kepala dinas dari seluruh halaman admin', function (string $routeName) {
@@ -84,22 +82,21 @@ it('menampilkan tabel laporan penyaluran tanpa aksi hapus untuk kepala dinas', f
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.distribution.index'))
         ->assertOk()
-        ->assertSeeInOrder(['NO', 'Tanggal', 'Distributor', 'Pasar', 'Toko', 'Jumlah Karton', 'Keterangan'])
+        ->assertSeeInOrder(['NO', 'Tanggal Penyaluran', 'Nama Toko', 'Jumlah Disalurkan (Karton)', 'Alamat', 'Nomor NIB'])
         ->assertSee('action="'.route('kepala-dinas.distribution.index').'"', false)
         ->assertDontSee('aria-label="Hapus"', false)
         ->assertDontSee('Aksi');
 });
 
 it('menampilkan laporan kondisi lapangan untuk kepala dinas', function () {
-    $contributor = User::factory()->create([
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Andi Pratama',
-        'role' => Role::UptdPasar,
     ]);
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->toDateString(),
         'description' => 'Stok Minyakita tersedia, harga sesuai HET',
         'condition' => FieldCondition::Normal,
@@ -108,8 +105,8 @@ it('menampilkan laporan kondisi lapangan untuk kepala dinas', function () {
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.supervision.index'))
         ->assertOk()
-        ->assertSee('Kondisi Pasar')
-        ->assertSee('Laporan Kondisi Pasar')
+        ->assertSee('Pengawasan')
+        ->assertSee('Laporan Pengawasan')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Stok Minyakita tersedia, harga sesuai HET')
@@ -117,14 +114,14 @@ it('menampilkan laporan kondisi lapangan untuk kepala dinas', function () {
 });
 
 it('memfilter laporan kondisi lapangan untuk kepala dinas', function () {
-    $firstContributor = User::factory()->create(['name' => 'Andi Pratama', 'role' => Role::UptdPasar]);
-    $secondContributor = User::factory()->create(['name' => 'Rina Marlina', 'role' => Role::UptdPasar]);
+    $firstContributor = UptdContributor::factory()->create(['name' => 'Andi Pratama']);
+    $secondContributor = UptdContributor::factory()->create(['name' => 'Rina Marlina']);
     $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
     $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $firstContributor->id,
+        'uptd_contributor_id' => $firstContributor->id,
         'report_date' => now()->toDateString(),
         'description' => 'Stok aman',
         'condition' => FieldCondition::Normal,
@@ -132,7 +129,7 @@ it('memfilter laporan kondisi lapangan untuk kepala dinas', function () {
 
     FieldDistributionReport::factory()->create([
         'market_id' => $secondMarket->id,
-        'uptd_user_id' => $secondContributor->id,
+        'uptd_contributor_id' => $secondContributor->id,
         'report_date' => now()->toDateString(),
         'description' => 'Stok menipis',
         'condition' => FieldCondition::PerluPerhatian,
@@ -152,57 +149,9 @@ it('menampilkan keadaan kosong laporan kondisi lapangan untuk kepala dinas', fun
         ->assertSee('Belum ada laporan kondisi lapangan');
 });
 
-it('menampilkan rekapitulasi laporan untuk kepala dinas', function () {
-    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
-    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
-
-    Distribution::factory()->create([
-        'market_id' => $market->id,
-        'uptd_user_id' => $uptd->id,
-        'distribution_date' => now()->toDateString(),
-        'cartons' => 120,
-    ]);
-
-    $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
-        ->get(route('kepala-dinas.reports.index'))
-        ->assertOk()
-        ->assertSee('Rekap Laporan')
-        ->assertSee('Laporan Penyaluran')
-        ->assertDontSee('Jumlah Penyaluran')
-        ->assertSee('Rekap Laporan Penyaluran')
-        ->assertSee('Pasar Raya Padang')
-        ->assertSee('action="'.route('kepala-dinas.reports.index').'"', false)
-        ->assertSee(route('kepala-dinas.reports.index', [
-            'start_date' => now()->startOfMonth()->toDateString(),
-            'end_date' => now()->endOfMonth()->toDateString(),
-            'tab' => 'kondisi',
-        ]));
-});
-
-it('menampilkan rekap kondisi pasar pada tab kedua untuk kepala dinas', function () {
-    $uptd = User::factory()->create(['name' => 'Andi Pratama', 'role' => Role::UptdPasar]);
-    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
-
-    FieldDistributionReport::factory()->create([
-        'market_id' => $market->id,
-        'uptd_user_id' => $uptd->id,
-        'report_date' => now()->toDateString(),
-        'description' => 'Stok Minyakita menipis di beberapa kios',
-        'condition' => FieldCondition::PerluPerhatian,
-    ]);
-
-    $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
-        ->get(route('kepala-dinas.reports.index', ['tab' => 'kondisi']))
-        ->assertOk()
-        ->assertSee('Rekap Laporan Kondisi Pasar')
-        ->assertSee('Pasar Raya Padang')
-        ->assertSee('Stok Minyakita menipis di beberapa kios')
-        ->assertSee('Perlu Perhatian');
-});
-
-it('menampilkan dua tombol ekspor nonaktif untuk kepala dinas', function () {
+it('menampilkan dua tombol ekspor nonaktif pada laporan penyaluran kepala dinas', function () {
     $response = $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
-        ->get(route('kepala-dinas.reports.index'));
+        ->get(route('kepala-dinas.distribution.index'));
 
     $response->assertOk()
         ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])

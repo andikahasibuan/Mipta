@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -27,15 +29,28 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'penanggung_jawab' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'telepon' => ['nullable', 'string', 'regex:/^[0-9]{10,15}$/'],
+            'telepon' => ['nullable', 'string', 'regex:/^[0-9]{10,13}$/'],
             'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($request->user()->id)],
         ], [
             'penanggung_jawab.regex' => 'Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
-            'telepon.regex' => 'Nomor telepon hanya boleh berisi angka (10 sampai 15 digit).',
+            'telepon.regex' => 'Nomor telepon hanya boleh berisi angka (10 sampai 13 digit).',
             'alamat_kantor.regex' => 'Alamat kantor hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah digunakan akun lain.',
         ]);
 
-        $request->user()->distributor->update($validated);
+        $request->user()->distributor->update(Arr::only($validated, [
+            'penanggung_jawab',
+            'telepon',
+            'alamat_kantor',
+        ]));
+
+        if ($request->has('email')) {
+            $request->user()->update([
+                'email' => $validated['email'] ?? null,
+            ]);
+        }
 
         return back()->with('success', 'Informasi distributor berhasil diperbarui.');
     }

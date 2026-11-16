@@ -14,46 +14,107 @@ it('mengarahkan tamu dari laporan penyaluran ke halaman login', function () {
     $this->get(route('admin.distribution.index'))->assertRedirect(route('login'));
 });
 
-it('menampilkan laporan penyaluran dari database', function () {
+it('menampilkan laporan penyaluran dari database dengan kolom data toko', function () {
     $uptd = User::factory()->create([
         'name' => 'Andi Pratama',
         'role' => Role::UptdPasar,
     ]);
     $distributor = Distributor::factory()->create(['name' => 'PT Sinar Pangan Nusantara']);
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
+    $store = RecipientStore::factory()->create([
+        'market_id' => $market->id,
+        'name' => 'toko sinar jaya',
+        'alamat' => 'jl. merdeka no. 5',
+        'nib' => '1234567890123',
+    ]);
 
     Distribution::factory()->create([
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
+        'recipient_store_id' => $store->id,
         'uptd_user_id' => $uptd->id,
         'distribution_date' => now()->toDateString(),
         'cartons' => 250,
-        'notes' => 'Pengiriman lancar.',
     ]);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))
         ->assertOk()
         ->assertSee('Laporan Penyaluran')
-        ->assertSeeInOrder(['NO', 'Tanggal', 'Distributor', 'Pasar', 'Toko', 'Jumlah Karton', 'Keterangan'])
+        ->assertSeeInOrder(['NO', 'Tanggal Penyaluran', 'Nama Toko', 'Jumlah Disalurkan (Karton)', 'Alamat', 'Nomor NIB'])
+        ->assertDontSee('>Distributor</th>', false)
+        ->assertDontSee('>Pasar</th>', false)
+        ->assertDontSee('>Keterangan</th>', false)
         ->assertDontSee('Tambah Data')
-        ->assertSee('PT Sinar Pangan Nusantara')
-        ->assertSee('Pasar Raya Padang')
-        ->assertSee('250 karton')
-        ->assertSee('Pengiriman lancar.')
+        ->assertSeeInOrder(['Toko Sinar Jaya', '250', 'Jl. Merdeka No. 5', '1234567890123'])
         ->assertSee(now()->format('d/m/Y'));
 });
 
-it('menampilkan tanda minus di tengah saat keterangan kosong', function () {
+it('menampilkan data penyaluran terbaru pada nomor satu', function () {
+    $latestStore = RecipientStore::factory()->create(['name' => 'Toko Paling Baru']);
+    $olderStore = RecipientStore::factory()->create(['name' => 'Toko Lebih Lama']);
+
     Distribution::factory()->create([
+        'recipient_store_id' => $olderStore->id,
+        'distribution_date' => now()->subDays(2)->toDateString(),
+    ]);
+
+    Distribution::factory()->create([
+        'recipient_store_id' => $latestStore->id,
         'distribution_date' => now()->toDateString(),
-        'notes' => null,
     ]);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))
         ->assertOk()
-        ->assertSee('text-slate-700 text-center', false);
+        ->assertSeeInOrder([
+            now()->format('d/m/Y'),
+            'Toko Paling Baru',
+            now()->subDays(2)->format('d/m/Y'),
+            'Toko Lebih Lama',
+        ]);
+});
+
+it('mengutamakan laporan yang paling baru dicatat saat tanggalnya sama', function () {
+    $firstStore = RecipientStore::factory()->create(['name' => 'Toko Dicatat Awal']);
+    $secondStore = RecipientStore::factory()->create(['name' => 'Toko Dicatat Akhir']);
+
+    Distribution::factory()->create([
+        'recipient_store_id' => $firstStore->id,
+        'distribution_date' => now()->toDateString(),
+    ]);
+
+    Distribution::factory()->create([
+        'recipient_store_id' => $secondStore->id,
+        'distribution_date' => now()->toDateString(),
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSeeInOrder(['Toko Dicatat Akhir', 'Toko Dicatat Awal']);
+});
+
+it('menampilkan tanda minus saat data toko tidak tersedia', function () {
+    Distribution::factory()->create([
+        'distribution_date' => now()->toDateString(),
+        'recipient_store_id' => null,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSee('—');
+});
+
+it('menampilkan tombol ekspor nonaktif pada laporan penyaluran', function () {
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'));
+
+    $response->assertOk()
+        ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF']);
+
+    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
 });
 
 it('tidak menampilkan aksi hapus pada laporan penyaluran admin', function () {
@@ -74,11 +135,24 @@ it('memfilter laporan penyaluran berdasarkan distributor, pasar, dan bulan', fun
     $secondDistributor = Distributor::factory()->create(['name' => 'PT Beta Pangan']);
     $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
     $secondMarket = Market::factory()->create(['name' => 'Pasar Beta']);
+    $firstStore = RecipientStore::factory()->create([
+        'market_id' => $firstMarket->id,
+        'name' => 'Toko Filter Alpha',
+    ]);
+    $secondStore = RecipientStore::factory()->create([
+        'market_id' => $secondMarket->id,
+        'name' => 'Toko Filter Beta',
+    ]);
+    $previousStore = RecipientStore::factory()->create([
+        'market_id' => $firstMarket->id,
+        'name' => 'Toko Filter Bulan Lalu',
+    ]);
     $uptd = User::factory()->create(['role' => Role::UptdPasar]);
 
     Distribution::factory()->create([
         'distributor_id' => $firstDistributor->id,
         'market_id' => $firstMarket->id,
+        'recipient_store_id' => $firstStore->id,
         'uptd_user_id' => $uptd->id,
         'distribution_date' => now()->toDateString(),
         'cartons' => 100,
@@ -87,6 +161,7 @@ it('memfilter laporan penyaluran berdasarkan distributor, pasar, dan bulan', fun
     Distribution::factory()->create([
         'distributor_id' => $secondDistributor->id,
         'market_id' => $secondMarket->id,
+        'recipient_store_id' => $secondStore->id,
         'uptd_user_id' => $uptd->id,
         'distribution_date' => now()->toDateString(),
         'cartons' => 200,
@@ -95,6 +170,7 @@ it('memfilter laporan penyaluran berdasarkan distributor, pasar, dan bulan', fun
     Distribution::factory()->create([
         'distributor_id' => $firstDistributor->id,
         'market_id' => $firstMarket->id,
+        'recipient_store_id' => $previousStore->id,
         'uptd_user_id' => $uptd->id,
         'distribution_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
         'cartons' => 300,
@@ -106,22 +182,22 @@ it('memfilter laporan penyaluran berdasarkan distributor, pasar, dan bulan', fun
         ->get(route('admin.distribution.index', ['distributor' => $firstDistributor->id]))
         ->assertOk()
         ->assertSee('value="'.$firstDistributor->id.'" selected', false)
-        ->assertSee('100 karton')
-        ->assertDontSee('200 karton')
-        ->assertDontSee('300 karton');
+        ->assertSee('Toko Filter Alpha')
+        ->assertDontSee('Toko Filter Beta')
+        ->assertDontSee('Toko Filter Bulan Lalu');
 
     $this->get(route('admin.distribution.index', ['market' => $secondMarket->id]))
         ->assertOk()
         ->assertSee('value="'.$secondMarket->id.'" selected', false)
-        ->assertSee('200 karton')
-        ->assertDontSee('100 karton');
+        ->assertSee('Toko Filter Beta')
+        ->assertDontSee('Toko Filter Alpha');
 
     $this->get(route('admin.distribution.index', [
         'month' => now()->subMonthNoOverflow()->format('Y-m'),
     ]))
         ->assertOk()
-        ->assertSee('300 karton')
-        ->assertDontSee('100 karton');
+        ->assertSee('Toko Filter Bulan Lalu')
+        ->assertDontSee('Toko Filter Alpha');
 });
 
 it('mengabaikan bulan tidak valid dan kembali ke bulan berjalan', function () {
@@ -164,18 +240,18 @@ it('mencari laporan penyaluran berdasarkan toko, distributor, dan pasar', functi
 
     $this->get(route('admin.distribution.index', ['search' => 'Toko Alpha']))
         ->assertOk()
-        ->assertSee('111 karton')
-        ->assertDontSee('222 karton');
+        ->assertSee('Toko Alpha')
+        ->assertDontSee('Toko Beta');
 
     $this->get(route('admin.distribution.index', ['search' => 'PT Beta Pangan']))
         ->assertOk()
-        ->assertSee('222 karton')
-        ->assertDontSee('111 karton');
+        ->assertSee('Toko Beta')
+        ->assertDontSee('Toko Alpha');
 
     $this->get(route('admin.distribution.index', ['search' => 'Pasar Alpha']))
         ->assertOk()
-        ->assertSee('111 karton')
-        ->assertDontSee('222 karton');
+        ->assertSee('Toko Alpha')
+        ->assertDontSee('Toko Beta');
 });
 
 it('menampilkan ringkasan total karton, jumlah toko penerima, dan jumlah laporan sesuai filter', function () {
@@ -251,7 +327,7 @@ it('menampilkan keadaan kosong saat belum ada laporan penyaluran', function () {
         ->assertSee('Belum ada laporan penyaluran pada periode ini');
 });
 
-it('menampilkan nama toko penerima pada laporan penyaluran', function () {
+it('menampilkan nama toko penerima dalam Title Case pada laporan penyaluran', function () {
     $store = RecipientStore::factory()->create(['name' => 'Toko Atong']);
 
     Distribution::factory()->create([
@@ -264,5 +340,6 @@ it('menampilkan nama toko penerima pada laporan penyaluran', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))
         ->assertOk()
-        ->assertSee('Toko Atong');
+        ->assertSee('Toko Atong')
+        ->assertDontSee('TOKO ATONG');
 });

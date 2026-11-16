@@ -25,7 +25,7 @@ class MarketController extends Controller
                 ->orWhere('lokasi', 'like', "%{$search}%")))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('id')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 

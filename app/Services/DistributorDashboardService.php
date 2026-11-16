@@ -67,8 +67,9 @@ class DistributorDashboardService
         $cartons = (int) (clone $baseQuery)->sum('cartons');
 
         $paginatedReports = (clone $baseQuery)
-            ->with(['market:id,name', 'store:id,name'])
-            ->orderBy('id')
+            ->with(['store:id,name,alamat,nib,market_id', 'store.market:id,name'])
+            ->orderByDesc('distribution_date')
+            ->orderByDesc('id')
             ->paginate(5)
             ->withQueryString();
 

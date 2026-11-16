@@ -75,8 +75,9 @@ class DistributionReportService
         ];
 
         $distributions = $baseQuery
-            ->with(['distributor:id,name', 'market:id,name', 'store:id,name,market_id'])
-            ->orderBy('id')
+            ->with(['store:id,name,alamat,nib,market_id', 'store.market:id,name'])
+            ->orderByDesc('distribution_date')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 

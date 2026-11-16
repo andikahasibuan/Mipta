@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\Market;
-use App\Models\User;
+use App\Models\UptdContributor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +14,7 @@ use Illuminate\Validation\Rule;
 class UptdContributorController extends Controller
 {
     /**
-     * Tampilkan daftar akun kontributor UPTD Pasar.
+     * Tampilkan daftar profil kontributor UPTD Pasar.
      */
     public function index(Request $request): View
     {
@@ -23,16 +22,15 @@ class UptdContributorController extends Controller
         $status = $request->string('status')->toString();
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
-        $contributors = User::where('role', Role::UptdPasar->value)
-            ->whereNotNull('market_id')
+        $contributors = UptdContributor::query()
             ->with('market:id,name')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('username', 'like', "%{$search}%")))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('id')
-            ->paginate(5)
+            ->orderByDesc('id')
+            ->paginate(10)
             ->withQueryString();
 
         return view('admin.uptd-contributors.index', [
@@ -45,7 +43,7 @@ class UptdContributorController extends Controller
     }
 
     /**
-     * Tampilkan formulir tambah kontributor UPTD Pasar.
+     * Tampilkan formulir tambah profil kontributor UPTD Pasar.
      */
     public function create(): View
     {
@@ -57,28 +55,26 @@ class UptdContributorController extends Controller
     }
 
     /**
-     * Simpan kontributor UPTD Pasar baru.
+     * Simpan profil kontributor UPTD Pasar baru.
      */
     public function store(Request $request): RedirectResponse
     {
+        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')],
             'market_id' => [
                 'required',
                 'integer',
                 Rule::exists('markets', 'id'),
-                Rule::unique('users', 'market_id')
-                    ->where(fn ($query) => $query->where('role', Role::UptdPasar->value)),
+                Rule::unique('uptd_contributors', 'market_id'),
             ],
         ], $this->validationMessages());
 
-        User::create([
+        UptdContributor::create([
             'name' => $validated['name'],
             'username' => $validated['username'],
-            'email' => null,
-            'password' => Str::password(32),
-            'role' => Role::UptdPasar->value,
             'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
         ]);
@@ -87,12 +83,10 @@ class UptdContributorController extends Controller
     }
 
     /**
-     * Tampilkan formulir edit kontributor UPTD Pasar.
+     * Tampilkan formulir edit profil kontributor UPTD Pasar.
      */
-    public function edit(User $contributor): View
+    public function edit(UptdContributor $contributor): View
     {
-        $this->ensureUptdContributor($contributor);
-
         return view('admin.uptd-contributors.edit', [
             'contributor' => $contributor,
             'markets' => Market::where(fn ($query) => $query
@@ -104,55 +98,45 @@ class UptdContributorController extends Controller
     }
 
     /**
-     * Perbarui data kontributor UPTD Pasar.
+     * Perbarui profil kontributor UPTD Pasar.
      */
-    public function update(Request $request, User $contributor): RedirectResponse
+    public function update(Request $request, UptdContributor $contributor): RedirectResponse
     {
-        $this->ensureUptdContributor($contributor);
+        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($contributor->id)],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')->ignore($contributor->id)],
             'market_id' => [
                 'required',
                 'integer',
                 Rule::exists('markets', 'id'),
-                Rule::unique('users', 'market_id')
-                    ->where(fn ($query) => $query->where('role', Role::UptdPasar->value))
-                    ->ignore($contributor->id),
+                Rule::unique('uptd_contributors', 'market_id')->ignore($contributor->id),
             ],
         ], $this->validationMessages());
 
-        $data = [
+        $contributor->update([
             'name' => $validated['name'],
             'username' => $validated['username'],
             'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
-        ];
-
-        $contributor->update($data);
+        ]);
 
         return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil diperbarui.');
     }
 
     /**
-     * Hapus kontributor UPTD Pasar.
+     * Hapus profil kontributor UPTD Pasar.
      */
-    public function destroy(User $contributor): RedirectResponse
+    public function destroy(UptdContributor $contributor): RedirectResponse
     {
-        $this->ensureUptdContributor($contributor);
-
-        if ($contributor->is(auth()->user())) {
-            return back()->withErrors(['delete' => 'Anda tidak dapat menghapus akun yang sedang digunakan untuk login.']);
-        }
-
         $contributor->delete();
 
         return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil dihapus.');
     }
 
     /**
-     * Pesan validasi akun kontributor UPTD.
+     * Pesan validasi profil kontributor UPTD.
      *
      * @return array<string, string>
      */
@@ -160,21 +144,10 @@ class UptdContributorController extends Controller
     {
         return [
             'name.regex' => 'Nama hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
             'market_id.required' => 'Pasar terkait wajib dipilih.',
             'market_id.exists' => 'Pasar yang dipilih tidak valid.',
             'market_id.unique' => 'Pasar ini sudah memiliki kontributor UPTD.',
         ];
-    }
-
-    /**
-     * Pastikan pengguna yang diakses adalah kontributor UPTD yang terkait ke pasar.
-     */
-    private function ensureUptdContributor(User $contributor): void
-    {
-        abort_unless(
-            $contributor->role === Role::UptdPasar && $contributor->market_id !== null,
-            404,
-        );
     }
 }

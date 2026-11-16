@@ -35,7 +35,7 @@
                     type="search"
                     name="q"
                     value="{{ $filters['q'] }}"
-                    placeholder="Cari nama atau wilayah distributor..."
+                    placeholder="Cari nama distributor..."
                     class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                 >
             </div>
@@ -55,16 +55,16 @@
         </form>
 
         <div class="mt-4 overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 font-semibold">NO</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Nama Distributor</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Wilayah</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Alamat Kantor</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Email Akun</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Status</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Aksi</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 font-semibold">Distributor</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 font-semibold">Username</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 font-semibold">Penanggung Jawab</th>
+                        <th scope="col" class="w-[14%] px-5 py-3 font-semibold">No HP</th>
+                        <th scope="col" class="w-[10%] px-5 py-3 font-semibold">Status</th>
+                        <th scope="col" class="w-[14%] px-5 py-3 font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
@@ -73,17 +73,17 @@
                             <td class="whitespace-nowrap px-3 py-3 font-mono text-xs text-slate-600">
                                 {{ $loop->iteration }}
                             </td>
-                            <td class="px-5 py-3 text-slate-900">
+                            <td class="px-5 py-3 text-left capitalize text-slate-900">
                                 {{ $distributor->name }}
                             </td>
-                            <td class="px-5 py-3 text-slate-700">
-                                {{ $distributor->wilayah }}
+                            <td class="px-5 py-3 text-left text-slate-700">
+                                {{ $distributor->account?->username ?? '—' }}
                             </td>
-                            <td class="px-5 py-3 text-slate-700">
-                                {{ $distributor->alamat_kantor ?: '-' }}
+                            <td class="px-5 py-3 text-left capitalize text-slate-700">
+                                {{ $distributor->penanggung_jawab ?: '-' }}
                             </td>
-                            <td class="px-5 py-3 text-slate-600">
-                                {{ $distributor->account?->email ?? 'Belum ada akun' }}
+                            <td class="whitespace-nowrap px-5 py-3 text-slate-700">
+                                {{ $distributor->telepon ?: '-' }}
                             </td>
                             <td class="px-5 py-3">
                                 <span @class([

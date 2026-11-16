@@ -46,7 +46,7 @@ class DistributorReportHistoryService
         $reports = Distribution::query()
             ->where('distributor_id', $distributor->id)
             ->where('status', DistributionStatus::Submitted->value)
-            ->with(['market:id,name', 'store:id,name'])
+            ->with(['store:id,name,alamat,nib,market_id', 'store.market:id,name'])
             ->when($month !== 'all', function ($query) use ($month): void {
                 $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
 
@@ -59,7 +59,8 @@ class DistributorReportHistoryService
                 'store',
                 fn ($storeQuery) => $storeQuery->where('name', 'like', '%'.$search.'%'),
             ))
-            ->orderBy('id')
+            ->orderByDesc('distribution_date')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 

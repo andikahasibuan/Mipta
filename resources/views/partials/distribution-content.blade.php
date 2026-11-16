@@ -1,5 +1,8 @@
 @php
     $formatNumber = fn (int $value): string => number_format($value, 0, ',', '.');
+    $titleOrDash = fn (?string $value): string => filled($value)
+        ? \Illuminate\Support\Str::title($value)
+        : '—';
 @endphp
 
 <x-ui.flash-messages />
@@ -28,8 +31,30 @@
 </div>
 
 <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div class="px-5 pt-5">
+    <div class="flex flex-wrap items-center justify-between gap-3 px-5 pt-5">
         <h2 class="text-lg font-semibold text-slate-900">Laporan Penyaluran</h2>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
+            >
+                <x-heroicon-o-document-arrow-down class="h-4 w-4" />
+                Ekspor Excel
+            </button>
+
+            <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
+            >
+                <x-heroicon-o-document-text class="h-4 w-4" />
+                Ekspor PDF
+            </button>
+        </div>
     </div>
 
     <form
@@ -108,19 +133,18 @@
     </form>
 
     <div class="mt-4 overflow-x-auto">
-        <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
+        <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-200 text-[11px] uppercase tracking-widest text-slate-700">
                 <tr>
-                    <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
-                    <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal</th>
-                    <th scope="col" class="w-[17%] px-5 py-3 align-middle font-semibold">Distributor</th>
-                    <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                    <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Toko</th>
-                    <th scope="col" class="w-[12%] whitespace-nowrap px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
-                    <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Keterangan</th>
+                    <th scope="col" class="w-[6%] px-3 py-3 text-center align-middle font-semibold">NO</th>
+                    <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Tanggal Penyaluran</th>
+                    <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                    <th scope="col" class="w-[16%] px-5 py-3 text-center align-middle font-semibold">Jumlah Disalurkan (Karton)</th>
+                    <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                    <th scope="col" class="w-[16%] px-5 py-3 text-center align-middle font-semibold">Nomor NIB</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-center">
+            <tbody class="divide-y divide-slate-100">
                 @forelse ($distributions as $distribution)
                     <tr>
                         <td class="whitespace-nowrap px-3 py-4 text-center align-middle font-mono text-xs text-slate-500">
@@ -129,29 +153,22 @@
                         <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                             {{ $distribution->distribution_date->format('d/m/Y') }}
                         </td>
-                        <td class="px-5 py-4 align-middle text-slate-900">
-                            {{ $distribution->distributor->name }}
+                        <td class="break-words px-5 py-4 align-middle text-slate-900">
+                            {{ $titleOrDash($distribution->store?->name) }}
                         </td>
-                        <td class="px-5 py-4 align-middle text-slate-700">
-                            {{ $distribution->market->name }}
+                        <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
+                            {{ $formatNumber($distribution->cartons) }}
                         </td>
-                        <td class="px-5 py-4 align-middle text-slate-700">
-                            {{ $distribution->store?->name ?? '—' }}
+                        <td class="break-words px-5 py-4 align-middle text-slate-700">
+                            {{ $titleOrDash($distribution->store?->alamat_lengkap) }}
                         </td>
-                        <td class="whitespace-nowrap px-5 py-4 text-center align-middle font-semibold text-slate-900">
-                            {{ $formatNumber($distribution->cartons) }} karton
-                        </td>
-                        <td @class([
-                            'break-words px-5 py-4 align-middle text-slate-700',
-                            'text-left' => filled($distribution->notes),
-                            'text-center' => blank($distribution->notes),
-                        ])>
-                            {{ $distribution->notes ?: '-' }}
+                        <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
+                            {{ $distribution->store?->nib ?: '—' }}
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-500">
+                        <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
                             Belum ada laporan penyaluran pada periode ini
                         </td>
                     </tr>

@@ -33,11 +33,14 @@ it('menampilkan dashboard distributor dengan identitas perusahaan', function () 
     $this->actingAs($user)
         ->get(route('distributor.dashboard'))
         ->assertOk()
-        ->assertSee('Hai, PT Rajawali Nusantara Indonesia')
+        ->assertSee('PT Rajawali Nusantara Indonesia')
         ->assertDontSee('Periode aktif')
         ->assertSee('Total Laporan')
         ->assertSee('Jumlah Penyaluran')
         ->assertSee('Laporan Penyaluran')
+        ->assertSeeInOrder(['NO', 'Tanggal Penyaluran', 'Nama Toko', 'Jumlah Disalurkan (Karton)', 'Alamat', 'Nomor NIB'])
+        ->assertDontSee('>Pasar</th>', false)
+        ->assertDontSee('>Keterangan</th>', false)
         ->assertDontSee('MIPTA / DASHBOARD DISTRIBUTOR')
         ->assertDontSee('Buat Laporan')
         ->assertDontSee('Lihat semua');
@@ -47,7 +50,12 @@ it('menghitung ringkasan hanya dari laporan terkirim milik distributor', functio
     [$distributor, $user] = distributorAccount();
     $otherDistributor = Distributor::factory()->create();
     $market = Market::factory()->create();
-    $store = RecipientStore::factory()->create(['market_id' => $market->id]);
+    $store = RecipientStore::factory()->create([
+        'market_id' => $market->id,
+        'name' => 'toko dashboard',
+        'alamat' => 'jl. dashboard no. 1',
+        'nib' => '1234567890123',
+    ]);
 
     Distribution::factory()->create([
         'distributor_id' => $distributor->id,
@@ -72,14 +80,17 @@ it('menghitung ringkasan hanya dari laporan terkirim milik distributor', functio
         'cartons' => 777,
     ]);
 
-    $this->actingAs($user)
+    $response = $this->actingAs($user)
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSeeInOrder(['Total Laporan', '2'])
         ->assertSeeInOrder(['Jumlah Penyaluran', '400'])
-        ->assertSee('250 karton')
-        ->assertSee('150 karton')
-        ->assertDontSee('777 karton');
+        ->assertSee('Toko Dashboard')
+        ->assertSee('Jl. Dashboard No. 1')
+        ->assertSee('1234567890123')
+        ->assertDontSee('toko dashboard');
+
+    expect($response->viewData('reports')->pluck('cartons')->all())->toBe([150, 250]);
 });
 
 it('memfilter ringkasan dan daftar laporan berdasarkan bulan', function () {
@@ -101,20 +112,20 @@ it('memfilter ringkasan dan daftar laporan berdasarkan bulan', function () {
         'cartons' => 50,
     ]);
 
-    $this->actingAs($user)
+    $currentMonth = $this->actingAs($user)
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSeeInOrder(['Total Laporan', '1'])
-        ->assertSeeInOrder(['Jumlah Penyaluran', '100'])
-        ->assertSee('100 karton')
-        ->assertDontSee('50 karton');
+        ->assertSeeInOrder(['Jumlah Penyaluran', '100']);
 
-    $this->get(route('distributor.dashboard', ['month' => $previousMonth->format('Y-m')]))
+    expect($currentMonth->viewData('reports')->pluck('cartons')->all())->toBe([100]);
+
+    $previousPeriod = $this->get(route('distributor.dashboard', ['month' => $previousMonth->format('Y-m')]))
         ->assertOk()
         ->assertSeeInOrder(['Total Laporan', '1'])
-        ->assertSeeInOrder(['Jumlah Penyaluran', '50'])
-        ->assertSee('50 karton')
-        ->assertDontSee('100 karton');
+        ->assertSeeInOrder(['Jumlah Penyaluran', '50']);
+
+    expect($previousPeriod->viewData('reports')->pluck('cartons')->all())->toBe([50]);
 });
 
 it('memfilter ringkasan dan daftar laporan berdasarkan nama toko', function () {
@@ -169,18 +180,19 @@ it('menampilkan lima laporan terkirim per halaman dengan pagination', function (
         ]);
     }
 
-    $this->actingAs($user)
+    $firstPage = $this->actingAs($user)
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSee('Menampilkan 5 dari 6 laporan')
-        ->assertSee('5 karton')
-        ->assertDontSee('6 karton')
         ->assertSee('?page=2', false);
 
-    $this->get(route('distributor.dashboard', ['page' => 2]))
+    expect($firstPage->viewData('reports')->pluck('cartons')->all())->toBe([6, 5, 4, 3, 2]);
+
+    $secondPage = $this->get(route('distributor.dashboard', ['page' => 2]))
         ->assertOk()
-        ->assertSee('6 karton')
-        ->assertDontSee('5 karton');
+        ->assertSee('Menampilkan 1 dari 6 laporan');
+
+    expect($secondPage->viewData('reports')->pluck('cartons')->all())->toBe([1]);
 });
 
 it('menampilkan keadaan kosong saat belum ada laporan', function () {

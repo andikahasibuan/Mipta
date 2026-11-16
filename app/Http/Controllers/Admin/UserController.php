@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -39,7 +40,7 @@ class UserController extends Controller
             ->when($role, fn ($query, Role $role) => $query->where('role', $role->value))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('id')
+            ->orderByDesc('id')
             ->paginate(5)
             ->withQueryString();
 
@@ -68,22 +69,25 @@ class UserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
         ], [
             'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'username.unique' => 'Username sudah digunakan.',
             'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
 
         User::create([
             'name' => $validated['name'],
             'username' => $validated['username'],
-            'email' => $validated['email'],
+            'email' => $validated['email'] ?? null,
             'password' => $validated['password'],
             'role' => $validated['role'],
             'is_active' => $request->boolean('is_active'),
@@ -112,28 +116,39 @@ class UserController extends Controller
     {
         $this->ensureManageableUser($user);
 
+        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($user->id)],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($user->id)],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
             'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
         ], [
             'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'username.unique' => 'Username sudah digunakan.',
             'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
         ]);
 
         $data = [
             'name' => $validated['name'],
             'username' => $validated['username'],
-            'email' => $validated['email'],
+            'email' => $validated['email'] ?? null,
             'role' => $validated['role'],
             'is_active' => $request->boolean('is_active'),
         ];
 
+        $newRole = Role::from($validated['role']);
+
+        if ($user->role === Role::Admin && $newRole !== Role::Admin && ! $this->hasOtherAdmin($user)) {
+            return back()->withErrors([
+                'role' => 'Sistem harus memiliki minimal satu akun admin.',
+            ])->withInput();
+        }
+
         if ($user->is($request->user())) {
-            if (Role::from($validated['role']) !== $user->role) {
+            if ($newRole !== $user->role) {
                 return back()->withErrors([
                     'role' => 'Anda tidak dapat mengubah peran akun yang sedang digunakan untuk login.',
                 ])->withInput();
@@ -162,6 +177,10 @@ class UserController extends Controller
     {
         $this->ensureManageableUser($user);
 
+        if ($user->role === Role::Admin && ! $this->hasOtherAdmin($user)) {
+            return back()->withErrors(['delete' => 'Sistem harus memiliki minimal satu akun admin.']);
+        }
+
         if ($user->is(auth()->user())) {
             return back()->withErrors(['delete' => 'Anda tidak dapat menghapus akun yang sedang digunakan untuk login.']);
         }
@@ -182,6 +201,17 @@ class UserController extends Controller
             Role::cases(),
             fn (Role $role): bool => $role !== Role::Distributor,
         ));
+    }
+
+    /**
+     * Pastikan masih ada akun admin lain selain pengguna yang diperiksa.
+     */
+    private function hasOtherAdmin(User $user): bool
+    {
+        return User::query()
+            ->where('role', Role::Admin->value)
+            ->whereKeyNot($user->getKey())
+            ->exists();
     }
 
     /**

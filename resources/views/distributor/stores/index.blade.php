@@ -57,15 +57,14 @@
         </form>
 
         <div class="mt-4 overflow-x-auto">
-            <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
+            <table class="w-full min-w-[52rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
-                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[27%] px-5 py-3 align-middle font-semibold">Alamat</th>
-                        <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">NIB</th>
-                        <th scope="col" class="w-[17%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[11%] px-5 py-3 align-middle font-semibold">Aksi</th>
+                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[38%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">NIB</th>
+                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
@@ -74,17 +73,14 @@
                             <td class="whitespace-nowrap px-3 py-3 font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
-                            <td class="px-5 py-3 text-slate-900">
+                            <td class="px-5 py-3 capitalize text-left text-slate-900">
                                 {{ $store->name }}
                             </td>
-                            <td class="px-5 py-3 text-slate-700">
-                                {{ $store->alamat ?? '—' }}
+                            <td class="px-5 py-3 capitalize text-left text-slate-700">
+                                {{ $store->alamat_lengkap ?: '—' }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
                                 {{ $store->nib ?? '—' }}
-                            </td>
-                            <td class="px-5 py-3 text-slate-700">
-                                {{ $store->market->name }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-3">
                                 <a
@@ -99,7 +95,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-500">
                                 @if ($filters['q'] !== '' || $filters['market'] !== null)
                                     Tidak ada toko yang sesuai filter
                                 @else

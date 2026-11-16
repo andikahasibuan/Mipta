@@ -48,16 +48,6 @@ class LoginController extends Controller
             return redirect()->route('uptd.contributors.index');
         }
 
-        if ($user->isMarketUptdContributor()) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return back()->withErrors([
-                'identifier' => 'Silakan masuk melalui akun bersama UPTD Pasar.',
-            ])->onlyInput('identifier');
-        }
-
         if ($user->role === Role::Distributor && $user->distributor_id === null) {
             Auth::logout();
             $request->session()->invalidate();

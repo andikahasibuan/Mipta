@@ -1,24 +1,24 @@
 <?php
 
 use App\Enums\FieldCondition;
-use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use App\Models\RecipientStore;
-use App\Models\User;
+use App\Models\UptdContributor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 it('menampilkan identitas kontributor dan tautan navigasi dashboard', function () {
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
-    $contributor = User::factory()->create([
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
-        'role' => Role::UptdPasar,
         'market_id' => $market->id,
     ]);
 
-    $response = $this->actingAs($contributor)->get(route('uptd.dashboard'));
+    $response = $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
+        ->get(route('uptd.dashboard'));
 
     $response->assertOk()
         ->assertSee('Kontributor UPTD 01')
@@ -38,40 +38,35 @@ it('menampilkan identitas kontributor dan tautan navigasi dashboard', function (
 it('menghitung total laporan kondisi pasar milik kontributor di pasar ini', function () {
     $market = Market::factory()->create();
     $otherMarket = Market::factory()->create();
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
-    $otherContributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
+    $otherContributor = UptdContributor::factory()->create(['market_id' => $otherMarket->id]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'condition' => FieldCondition::Normal,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'condition' => FieldCondition::PerluPerhatian,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $otherContributor->id,
+        'uptd_contributor_id' => $otherContributor->id,
         'condition' => FieldCondition::Normal,
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $otherMarket->id,
-        'uptd_user_id' => $contributor->id,
+        'uptd_contributor_id' => $contributor->id,
         'condition' => FieldCondition::Normal,
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSeeInOrder(['Total Laporan', '2']);
@@ -80,10 +75,7 @@ it('menghitung total laporan kondisi pasar milik kontributor di pasar ini', func
 it('menghitung toko penerima aktif di pasar kontributor', function () {
     $market = Market::factory()->create();
     $otherMarket = Market::factory()->create();
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 
     RecipientStore::factory()->create([
         'market_id' => $market->id,
@@ -105,7 +97,8 @@ it('menghitung toko penerima aktif di pasar kontributor', function () {
         'is_active' => true,
     ]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSeeInOrder(['Toko Penerima', '2']);
@@ -113,19 +106,16 @@ it('menghitung toko penerima aktif di pasar kontributor', function () {
 
 it('menampilkan lima laporan kondisi pasar terbaru per halaman secara berurutan', function () {
     $market = Market::factory()->create();
-    $contributor = User::factory()->create([
+    $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
-        'role' => Role::UptdPasar,
         'market_id' => $market->id,
     ]);
-    $otherContributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $otherContributor = UptdContributor::factory()->create();
+    $otherMarket = Market::factory()->create();
 
     FieldDistributionReport::factory()->create([
-        'market_id' => $market->id,
-        'uptd_user_id' => $otherContributor->id,
+        'market_id' => $otherMarket->id,
+        'uptd_contributor_id' => $otherContributor->id,
         'report_date' => '2026-05-21',
         'condition' => FieldCondition::Normal,
     ]);
@@ -133,13 +123,14 @@ it('menampilkan lima laporan kondisi pasar terbaru per halaman secara berurutan'
     foreach (['2026-05-20', '2026-05-19', '2026-05-18', '2026-05-17', '2026-05-16', '2026-05-15'] as $index => $date) {
         FieldDistributionReport::factory()->create([
             'market_id' => $market->id,
-            'uptd_user_id' => $contributor->id,
+            'uptd_contributor_id' => $contributor->id,
             'report_date' => $date,
             'condition' => $index === 0 ? FieldCondition::PerluPerhatian : FieldCondition::Normal,
         ]);
     }
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSeeInOrder(['20 Mei 2026', '19 Mei 2026', '18 Mei 2026', '17 Mei 2026', '16 Mei 2026'])
@@ -150,8 +141,7 @@ it('menampilkan lima laporan kondisi pasar terbaru per halaman secara berurutan'
         ->assertSee('Perlu Perhatian')
         ->assertSee('Normal');
 
-    $this->actingAs($contributor)
-        ->get(route('uptd.dashboard', ['page' => 2]))
+    $this->get(route('uptd.dashboard', ['page' => 2]))
         ->assertOk()
         ->assertSee('15 Mei 2026')
         ->assertDontSee('20 Mei 2026')
@@ -160,12 +150,10 @@ it('menampilkan lima laporan kondisi pasar terbaru per halaman secara berurutan'
 
 it('menampilkan keadaan kosong saat belum ada laporan dan toko penerima', function () {
     $market = Market::factory()->create();
-    $contributor = User::factory()->create([
-        'role' => Role::UptdPasar,
-        'market_id' => $market->id,
-    ]);
+    $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 
-    $this->actingAs($contributor)
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSee('Belum ada laporan kondisi pasar')

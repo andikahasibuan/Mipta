@@ -64,7 +64,8 @@ class FieldSupervisionService
 
         $reports = $baseQuery
             ->with(['market:id,name', 'contributor:id,name'])
-            ->orderBy('id')
+            ->orderByDesc('report_date')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 

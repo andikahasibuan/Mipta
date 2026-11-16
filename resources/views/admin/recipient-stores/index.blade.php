@@ -83,15 +83,14 @@
         </form>
 
         <div class="mt-4 overflow-x-auto">
-            <table class="w-full min-w-[72rem] table-fixed divide-y divide-slate-200 text-sm">
+            <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
-                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Alamat</th>
-                        <th scope="col" class="w-[11%] px-5 py-3 align-middle font-semibold">NIB</th>
-                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[13%] px-5 py-3 align-middle font-semibold">Distributor</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">NIB</th>
+                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Distributor</th>
                         <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">Status</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
@@ -102,19 +101,16 @@
                             <td class="whitespace-nowrap px-3 py-3 font-mono text-xs text-slate-600">
                                 {{ $loop->iteration }}
                             </td>
-                            <td class="px-5 py-3 text-slate-900">
+                            <td class="px-5 py-3 text-left capitalize text-slate-900">
                                 {{ $store->name }}
                             </td>
-                            <td class="px-5 py-3 text-slate-700">
-                                {{ $store->alamat ?? '—' }}
+                            <td class="px-5 py-3 text-left capitalize text-slate-700">
+                                {{ $store->alamat_lengkap ?: '—' }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
                                 {{ $store->nib ?? '—' }}
                             </td>
-                            <td class="px-5 py-3 text-slate-700">
-                                {{ $store->market->name }}
-                            </td>
-                            <td class="px-5 py-3 text-slate-700">
+                            <td class="px-5 py-3 text-left capitalize text-slate-700">
                                 {{ $store->distributor?->name ?? '—' }}
                             </td>
                             <td class="px-5 py-3">
@@ -136,7 +132,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-500">
                                 @if ($filters['q'] !== '' || $filters['market'] || $filters['distributor'] || $filters['status'])
                                     Tidak ada toko penerima yang sesuai filter
                                 @else

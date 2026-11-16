@@ -4,14 +4,14 @@ namespace Database\Seeders;
 
 use App\Enums\Role;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class UptdContributorSeeder extends Seeder
 {
     /**
-     * Seed akun bersama dan sembilan kontributor UPTD per pasar.
+     * Seed akun bersama dan sembilan profil kontributor UPTD per pasar.
      */
     public function run(): void
     {
@@ -36,49 +36,39 @@ class UptdContributorSeeder extends Seeder
             )->id;
         }
 
-        $this->upsertAccount(
-            name: 'Kontributor UPTD Pasar',
-            username: 'uptd',
-            email: 'uptd@mipta.test',
-            password: 'UptdPasar#2026',
-            marketId: null,
-        );
+        $this->upsertSharedAccount();
 
         foreach ($markets as $index => $market) {
             $number = str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
 
-            $this->upsertAccount(
-                name: 'Kontributor UPTD '.$number,
-                username: 'kontributor.uptd.'.$number,
-                email: null,
-                password: null,
-                marketId: $marketIds[$market['name']],
+            UptdContributor::updateOrCreate(
+                ['market_id' => $marketIds[$market['name']]],
+                [
+                    'name' => 'Kontributor UPTD '.$number,
+                    'username' => 'kontributor.uptd.'.$number,
+                    'is_active' => true,
+                ],
             );
         }
     }
 
     /**
-     * Buat atau perbarui akun UPTD tanpa menimpa password yang sudah diubah.
+     * Buat atau perbarui akun bersama UPTD tanpa menimpa password yang sudah diubah.
      */
-    private function upsertAccount(
-        string $name,
-        string $username,
-        ?string $email,
-        ?string $password,
-        ?int $marketId,
-    ): void {
-        $user = User::firstOrNew(['username' => $username]);
+    private function upsertSharedAccount(): void
+    {
+        $user = User::firstOrNew(['username' => 'uptd']);
 
         $user->fill([
-            'name' => $name,
-            'email' => $email,
+            'name' => 'Kontributor UPTD Pasar',
+            'email' => 'uptd@mipta.test',
             'role' => Role::UptdPasar->value,
-            'market_id' => $marketId,
+            'market_id' => null,
             'is_active' => true,
         ]);
 
         if (! $user->exists) {
-            $user->password = $password ?? Str::password(32);
+            $user->password = 'UptdPasar#2026';
         }
 
         $user->save();

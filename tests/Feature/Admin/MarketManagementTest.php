@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -22,7 +23,7 @@ it('menampilkan daftar pasar dari database', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.markets.index'))
         ->assertOk()
-        ->assertSeeInOrder(['NO', 'Nama Pasar', 'Lokasi', 'Status'])
+        ->assertSeeInOrder(['NO', 'Nama Pasar', 'Alamat', 'Status'])
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Jln. Merdeka')
         ->assertSee('Pasar Nonaktif')
@@ -133,11 +134,11 @@ it('membatasi halaman pasar hanya untuk admin', function () {
 
 it('menolak menghapus pasar yang masih memiliki laporan kondisi lapangan', function () {
     $market = Market::factory()->create();
-    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
-        'uptd_user_id' => $uptd->id,
+        'uptd_contributor_id' => $contributor->id,
     ]);
 
     $this->actingAs(User::factory()->create())
@@ -151,8 +152,7 @@ it('menolak menghapus pasar yang masih memiliki laporan kondisi lapangan', funct
 it('menolak menghapus pasar yang masih memiliki kontributor UPTD', function () {
     $market = Market::factory()->create();
 
-    User::factory()->create([
-        'role' => Role::UptdPasar,
+    UptdContributor::factory()->create([
         'market_id' => $market->id,
     ]);
 

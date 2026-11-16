@@ -7,6 +7,7 @@ use App\Models\Market;
 use App\Models\RecipientStore;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
@@ -16,6 +17,7 @@ it('menampilkan daftar toko penerima beserta pasarnya', function () {
     RecipientStore::factory()->create([
         'market_id' => $market->id,
         'name' => 'Toko Berkah',
+        'alamat' => 'Jln. Berkah No. 1',
     ]);
     RecipientStore::factory()->create([
         'market_id' => $market->id,
@@ -26,9 +28,10 @@ it('menampilkan daftar toko penerima beserta pasarnya', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.recipient-stores.index'))
         ->assertOk()
-        ->assertSeeInOrder(['NO', 'Nama Toko', 'Alamat', 'NIB', 'Pasar', 'Distributor', 'Status', 'Aksi'])
+        ->assertSeeInOrder(['NO', 'Nama Toko', 'Alamat', 'NIB', 'Distributor', 'Status', 'Aksi'])
+        ->assertDontSee('>Pasar</th>', false)
         ->assertSee('Toko Berkah')
-        ->assertSee('Pasar Raya Padang')
+        ->assertSee('Pasar Raya Padang, Jln. Berkah No. 1')
         ->assertSee('Nonaktif');
 });
 
@@ -47,7 +50,7 @@ it('menampilkan toko yang dibuat distributor pada halaman toko penerima admin', 
         ->get(route('admin.recipient-stores.index'))
         ->assertOk()
         ->assertSee('Toko Distributor')
-        ->assertSee('Jln. Merdeka No. 1')
+        ->assertSee('Pasar Raya Padang, Jln. Merdeka No. 1')
         ->assertSee('PT Amanah Niaga Mandiri');
 });
 
@@ -122,6 +125,57 @@ it('memperbarui alamat dan distributor toko dari admin', function () {
     ]);
 });
 
+it('menyimpan toko admin tanpa detail alamat', function () {
+    $market = Market::factory()->create(['name' => 'Pasar Tanpa Detail']);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.recipient-stores.store'), [
+            'market_id' => $market->id,
+            'name' => 'Toko Tanpa Detail',
+            'nib' => '1234567890123',
+        ])
+        ->assertRedirect(route('admin.recipient-stores.index'));
+
+    $this->assertDatabaseHas('recipient_stores', [
+        'name' => 'Toko Tanpa Detail',
+        'market_id' => $market->id,
+        'alamat' => null,
+    ]);
+
+    $this->get(route('admin.recipient-stores.index'))
+        ->assertOk()
+        ->assertSee('Pasar Tanpa Detail');
+});
+
+it('menampilkan form toko dengan petunjuk alamat yang ringkas', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.recipient-stores.create'))
+        ->assertOk()
+        ->assertSee('Alamat (opsional)')
+        ->assertSee('Tambahkan detail alamat bila diperlukan.')
+        ->assertDontSee('Nama pasar otomatis menjadi alamat.')
+        ->assertDontSee('Contoh: Jln. Merdeka No. 1, Gang Mawar');
+});
+
+it('menampilkan detail alamat lama dalam huruf besar', function () {
+    $market = Market::factory()->create(['name' => 'Pasar Lama']);
+
+    DB::table('recipient_stores')->insert([
+        'market_id' => $market->id,
+        'name' => 'Toko Lama',
+        'alamat' => 'Jln. Lama No. 1',
+        'nib' => '1234567890123',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.recipient-stores.index'))
+        ->assertOk()
+        ->assertSee('Pasar Lama, Jln. Lama No. 1');
+});
+
 it('mewajibkan NIB saat admin menambah toko', function () {
     $market = Market::factory()->create();
 
@@ -189,13 +243,26 @@ it('menampilkan navigasi tab data master hingga toko penerima', function () {
     expect($tabs)->not->toContain(route('admin.distributors.index'));
 });
 
-it('menampilkan pagination saat toko lebih dari sepuluh', function () {
-    RecipientStore::factory()->count(11)->create();
+it('menampilkan sepuluh toko per halaman', function () {
+    foreach (range(1, 11) as $number) {
+        RecipientStore::factory()->create([
+            'name' => 'Toko '.str_pad((string) $number, 2, '0', STR_PAD_LEFT),
+        ]);
+    }
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.recipient-stores.index'))
         ->assertOk()
-        ->assertSee('?page=2', false);
+        ->assertSee('Menampilkan 10 dari 11 toko')
+        ->assertSee('?page=2', false)
+        ->assertSeeInOrder(['Toko 11', 'Toko 10', 'Toko 09'])
+        ->assertDontSee('Toko 01');
+
+    $this->get(route('admin.recipient-stores.index', ['page' => 2]))
+        ->assertOk()
+        ->assertSee('Menampilkan 1 dari 11 toko')
+        ->assertSee('Toko 01')
+        ->assertDontSee('Toko 11');
 });
 
 it('mencari toko berdasarkan nama atau alamat', function () {
@@ -215,6 +282,27 @@ it('mencari toko berdasarkan nama atau alamat', function () {
         ->assertOk()
         ->assertSee('Toko Makmur')
         ->assertDontSee('Toko Berkah');
+});
+
+it('mencari toko berdasarkan nama pasar pada alamat', function () {
+    $admin = User::factory()->create();
+    $firstMarket = Market::factory()->create(['name' => 'Pasar Pencarian Alpha']);
+    $secondMarket = Market::factory()->create(['name' => 'Pasar Pencarian Beta']);
+
+    RecipientStore::factory()->create([
+        'market_id' => $firstMarket->id,
+        'name' => 'Toko Alpha',
+    ]);
+    RecipientStore::factory()->create([
+        'market_id' => $secondMarket->id,
+        'name' => 'Toko Beta',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.recipient-stores.index', ['q' => 'Pencarian Alpha']))
+        ->assertOk()
+        ->assertSee('Toko Alpha')
+        ->assertDontSee('Toko Beta');
 });
 
 it('memfilter toko berdasarkan pasar dan status', function () {

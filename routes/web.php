@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\DistributionController;
 use App\Http\Controllers\Admin\DistributorController;
 use App\Http\Controllers\Admin\MarketController;
 use App\Http\Controllers\Admin\RecipientStoreController;
-use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SupervisionController;
 use App\Http\Controllers\Admin\UptdContributorController;
 use App\Http\Controllers\Admin\UserController;
@@ -18,7 +17,6 @@ use App\Http\Controllers\Distributor\ReportHistoryController as DistributorRepor
 use App\Http\Controllers\Distributor\StoreController as DistributorStoreController;
 use App\Http\Controllers\KepalaDinas\DashboardController as KepalaDinasDashboardController;
 use App\Http\Controllers\KepalaDinas\DistributionController as KepalaDinasDistributionController;
-use App\Http\Controllers\KepalaDinas\ReportController as KepalaDinasReportController;
 use App\Http\Controllers\KepalaDinas\SupervisionController as KepalaDinasSupervisionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Uptd\ContributorController as UptdAreaContributorController;
@@ -117,14 +115,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('uptd-contributors/{contributor}', [UptdContributorController::class, 'destroy'])->name('uptd-contributors.destroy');
     Route::get('distribution', [DistributionController::class, 'index'])->name('distribution.index');
     Route::get('supervision', [SupervisionController::class, 'index'])->name('supervision.index');
-    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 });
 
 Route::prefix('kepala-dinas')->name('kepala-dinas.')->middleware(['auth', 'role:kepala_dinas'])->group(function () {
     Route::get('/', [KepalaDinasDashboardController::class, 'index'])->name('dashboard');
     Route::get('distribution', [KepalaDinasDistributionController::class, 'index'])->name('distribution.index');
     Route::get('supervision', [KepalaDinasSupervisionController::class, 'index'])->name('supervision.index');
-    Route::get('reports', [KepalaDinasReportController::class, 'index'])->name('reports.index');
 });
 
 Route::prefix('uptd')->name('uptd.')->middleware(['auth', 'role:uptd_pasar', 'uptd.linked'])->group(function () {

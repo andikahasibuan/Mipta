@@ -41,7 +41,6 @@ class DistributionReportController extends Controller
             'recipient_store_id' => $store->id,
             'distribution_date' => $validated['distribution_date'],
             'cartons' => $validated['cartons'],
-            'notes' => $validated['notes'] ?? null,
             'status' => DistributionStatus::Submitted,
         ]);
 
@@ -74,7 +73,6 @@ class DistributionReportController extends Controller
             'recipient_store_id' => $store->id,
             'distribution_date' => $validated['distribution_date'],
             'cartons' => $validated['cartons'],
-            'notes' => $validated['notes'] ?? null,
         ]);
 
         if ($distribution->isDirty()) {
@@ -118,7 +116,6 @@ class DistributionReportController extends Controller
             'distribution_date' => ['required', 'date', 'before_or_equal:today'],
             'recipient_store_id' => ['required', 'integer', 'exists:recipient_stores,id'],
             'cartons' => ['required', 'integer', 'min:1'],
-            'notes' => ['nullable', 'string', 'max:120'],
         ]);
     }
 

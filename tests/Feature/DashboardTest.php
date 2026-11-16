@@ -17,8 +17,7 @@ it('menampilkan dashboard admin dengan sidebar MIPTA', function () {
             'Pengguna',
             'Data Master',
             'Penyaluran',
-            'Kondisi Pasar',
-            'Rekap Laporan',
+            'Pengawasan',
             'Logout',
         ]);
 });

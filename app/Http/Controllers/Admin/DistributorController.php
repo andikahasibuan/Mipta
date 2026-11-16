@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\Distributor;
-use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,13 +24,11 @@ class DistributorController extends Controller
         $status = in_array($status, ['aktif', 'nonaktif'], true) ? $status : null;
 
         $distributors = Distributor::query()
-            ->with('account:id,name,email,distributor_id')
-            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
-                ->where('name', 'like', "%{$search}%")
-                ->orWhere('wilayah', 'like', "%{$search}%")))
+            ->with('account:id,name,username,distributor_id')
+            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
             ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
-            ->orderBy('id')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -57,28 +54,31 @@ class DistributorController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
+
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/', Rule::unique('distributors', 'name')],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')],
             'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,15}$/'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,13}$/'],
+            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
         ], $this->accountMessages());
 
         DB::transaction(function () use ($validated): void {
             $distributor = Distributor::create([
                 'name' => $validated['name'],
-                'wilayah' => 'Padang',
                 'penanggung_jawab' => $validated['penanggung_jawab'],
                 'telepon' => $validated['telepon'],
-                'alamat_kantor' => null,
+                'alamat_kantor' => $validated['alamat_kantor'] ?? null,
                 'is_active' => true,
             ]);
 
             $distributor->account()->create([
                 'name' => $distributor->name,
-                'username' => $this->generateUsername($distributor->name),
-                'email' => $validated['email'],
+                'username' => $validated['username'],
+                'email' => $validated['email'] ?? null,
                 'password' => $validated['password'],
                 'role' => Role::Distributor->value,
                 'is_active' => true,
@@ -107,17 +107,23 @@ class DistributorController extends Controller
     {
         $account = $distributor->account;
 
+        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
+
         $emailRule = Rule::unique('users', 'email');
+        $usernameRule = Rule::unique('users', 'username');
 
         if ($account !== null) {
             $emailRule->ignore($account->id);
+            $usernameRule->ignore($account->id);
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/', Rule::unique('distributors', 'name')->ignore($distributor->id)],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', $usernameRule],
             'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,15}$/'],
-            'email' => ['required', 'string', 'email', 'max:255', $emailRule],
+            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,13}$/'],
+            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+            'email' => ['nullable', 'string', 'email', 'max:255', $emailRule],
             'password' => [$account === null ? 'required' : 'nullable', 'string', 'min:8'],
         ], $this->accountMessages());
 
@@ -126,11 +132,13 @@ class DistributorController extends Controller
                 'name' => $validated['name'],
                 'penanggung_jawab' => $validated['penanggung_jawab'],
                 'telepon' => $validated['telepon'],
+                'alamat_kantor' => $validated['alamat_kantor'] ?? null,
             ]);
 
             $attributes = [
                 'name' => $distributor->name,
-                'email' => $validated['email'],
+                'username' => $validated['username'],
+                'email' => $validated['email'] ?? null,
             ];
 
             if (! empty($validated['password'])) {
@@ -142,7 +150,6 @@ class DistributorController extends Controller
             } else {
                 $distributor->account()->create([
                     ...$attributes,
-                    'username' => $this->generateUsername($distributor->name),
                     'role' => Role::Distributor->value,
                     'is_active' => $distributor->is_active,
                 ]);
@@ -172,28 +179,6 @@ class DistributorController extends Controller
     }
 
     /**
-     * Buat username unik dari nama perusahaan distributor.
-     */
-    private function generateUsername(string $name): string
-    {
-        $base = Str::slug($name);
-
-        if ($base === '') {
-            $base = 'distributor';
-        }
-
-        $username = $base;
-        $suffix = 2;
-
-        while (User::where('username', $username)->exists()) {
-            $username = "{$base}-{$suffix}";
-            $suffix++;
-        }
-
-        return $username;
-    }
-
-    /**
      * Pesan validasi untuk akun login distributor.
      *
      * @return array<string, string>
@@ -203,11 +188,15 @@ class DistributorController extends Controller
         return [
             'name.required' => 'Nama perusahaan distributor wajib diisi.',
             'name.regex' => 'Nama perusahaan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
+            'name.unique' => 'Nama distributor sudah digunakan.',
+            'username.required' => 'Username distributor wajib diisi.',
+            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'username.unique' => 'Username sudah digunakan.',
             'penanggung_jawab.required' => 'Nama penanggung jawab wajib diisi.',
             'penanggung_jawab.regex' => 'Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
             'telepon.required' => 'No. handphone penanggung jawab wajib diisi.',
-            'telepon.regex' => 'No. handphone hanya boleh berisi angka (10 sampai 15 digit).',
-            'email.required' => 'Email perusahaan wajib diisi.',
+            'telepon.regex' => 'No. handphone hanya boleh berisi angka (10 sampai 13 digit).',
+            'alamat_kantor.regex' => 'Alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
             'email.unique' => 'Email perusahaan sudah digunakan akun lain.',
             'password.required' => 'Password wajib diisi untuk membuat akun distributor.',
             'password.min' => 'Password minimal 8 karakter.',

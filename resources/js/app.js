@@ -48,3 +48,26 @@ document.addEventListener('keydown', (event) => {
         closeDropdowns();
     }
 });
+
+// Tampilkan atau sembunyikan isi password pada form password.
+document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+    const input = document.getElementById(toggle.dataset.passwordToggle);
+
+    if (! input) {
+        return;
+    }
+
+    const showIcon = toggle.querySelector('[data-password-icon-show]');
+    const hideIcon = toggle.querySelector('[data-password-icon-hide]');
+
+    toggle.addEventListener('click', () => {
+        const shouldShow = input.type === 'password';
+        const label = shouldShow ? 'Sembunyikan password' : 'Tampilkan password';
+
+        input.type = shouldShow ? 'text' : 'password';
+        toggle.setAttribute('aria-label', label);
+        toggle.setAttribute('title', label);
+        showIcon?.classList.toggle('hidden', shouldShow);
+        hideIcon?.classList.toggle('hidden', !shouldShow);
+    });
+});

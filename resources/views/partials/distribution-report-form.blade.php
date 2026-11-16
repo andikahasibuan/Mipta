@@ -13,11 +13,11 @@
 <div class="min-w-0">
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="min-w-0 lg:col-span-2">
-            <div class="flex min-h-[34rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div class="flex min-h-[32rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <div class="border-b border-slate-200 px-6 py-4">
                     <h3 class="text-lg font-semibold text-slate-900">Laporan Penyaluran</h3>
                     <p class="mt-1 text-sm text-slate-500">
-                        Lengkapi data sesuai catatan penyaluran. Kolom bertanda * wajib diisi.
+                        Lengkapi data sesuai catatan penyaluran. Kolom bertanda <span class="text-red-500">*</span> wajib diisi.
                     </p>
                 </div>
 
@@ -72,8 +72,7 @@
                                 @foreach ($stores as $store)
                                     <option
                                         value="{{ $store->id }}"
-                                        data-market="{{ $store->market->name }}"
-                                        data-alamat="{{ $store->alamat ?? '' }}"
+                                        data-alamat="{{ $store->alamat_lengkap }}"
                                         data-nib="{{ $store->nib ?? '' }}"
                                         @selected($selectedStoreId === $store->id)
                                     >
@@ -87,26 +86,14 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 grid gap-5 sm:grid-cols-3">
-                        <div>
-                            <label for="store-market" class="block text-sm font-medium text-slate-700">Pasar</label>
-                            <input
-                                id="store-market"
-                                type="text"
-                                readonly
-                                value="{{ $selectedStore?->market?->name }}"
-                                placeholder="Terisi otomatis"
-                                class="mt-1 w-full cursor-default rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600 placeholder:text-slate-400"
-                            >
-                        </div>
-
+                    <div class="mt-5 grid gap-5 sm:grid-cols-2">
                         <div>
                             <label for="store-alamat" class="block text-sm font-medium text-slate-700">Alamat</label>
                             <input
                                 id="store-alamat"
                                 type="text"
                                 readonly
-                                value="{{ $selectedStore?->alamat }}"
+                                value="{{ $selectedStore?->alamat_lengkap }}"
                                 placeholder="Terisi otomatis"
                                 class="mt-1 w-full cursor-default rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600 placeholder:text-slate-400"
                             >
@@ -134,28 +121,11 @@
                             name="cartons"
                             type="number"
                             min="1"
+                            max="100"
                             value="{{ old('cartons', $report?->cartons) }}"
                             class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                         >
                         @error('cartons')
-                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-5">
-                        <label for="notes" class="block text-sm font-medium text-slate-700">
-                            Keterangan
-                        </label>
-                        <textarea
-                            id="notes"
-                            name="notes"
-                            rows="3"
-                            maxlength="120"
-                            placeholder="Tambahkan keterangan penyaluran (opsional)..."
-                            class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
-                        >{{ old('notes', $report?->notes) }}</textarea>
-                        <p class="mt-1 text-xs text-slate-500">Maksimal 120 karakter.</p>
-                        @error('notes')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -193,7 +163,7 @@
 
                 <ul class="mt-4 list-disc space-y-2 pl-5 text-sm leading-snug text-[#018F98]">
                     <li>Pastikan toko penerima yang sudah terdaftar.</li>
-                    <li>Alamat, NIB, dan pasar akan terisi otomatis.</li>
+                    <li>Alamat dan NIB akan terisi otomatis.</li>
                     <li>Jumlah penyaluran dicatat dalam karton.</li>
                 </ul>
             </div>
@@ -205,18 +175,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const storeSelect = document.getElementById('recipient_store_id');
-            const marketInput = document.getElementById('store-market');
             const alamatInput = document.getElementById('store-alamat');
             const nibInput = document.getElementById('store-nib');
 
-            if (! storeSelect || ! marketInput || ! alamatInput || ! nibInput) {
+            if (! storeSelect || ! alamatInput || ! nibInput) {
                 return;
             }
 
             const syncStoreFields = () => {
                 const option = storeSelect.selectedOptions[0];
 
-                marketInput.value = option?.dataset.market ?? '';
                 alamatInput.value = option?.dataset.alamat ?? '';
                 nibInput.value = option?.dataset.nib ?? '';
             };

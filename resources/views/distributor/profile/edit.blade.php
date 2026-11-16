@@ -8,8 +8,14 @@
     @php
         $editableFields = [
             [
+                'name' => 'email',
+                'label' => 'Email',
+                'value' => $account->email,
+                'type' => 'email',
+            ],
+            [
                 'name' => 'penanggung_jawab',
-                'label' => 'Nama penanggung jawab',
+                'label' => 'penanggung jawab',
                 'value' => $distributor->penanggung_jawab,
                 'type' => 'text',
             ],
@@ -50,30 +56,23 @@
                 </div>
 
                 <dl class="mt-7 grid gap-x-10 gap-y-6 border-t border-slate-200 pt-6 sm:grid-cols-2">
-                    <div>
-                        <dt class="text-xs font-semibold uppercase tracking-widest text-slate-400">Nama akun</dt>
-                        <dd class="mt-1.5 break-words text-sm font-semibold text-slate-900">
-                            {{ $account->username }}
-                        </dd>
-                    </div>
 
-                    <div>
-                        <dt class="text-xs font-semibold uppercase tracking-widest text-slate-400">Nama distributor</dt>
+                     <div>
+                        <dt class="text-xs font-semibold uppercase tracking-widest text-slate-400">distributor</dt>
                         <dd class="mt-1.5 break-words text-sm font-semibold text-slate-900">
                             {{ $distributor->name }}
                         </dd>
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-widest text-slate-400">Email perusahaan</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-widest text-slate-400">Username</dt>
                         <dd class="mt-1.5 break-words text-sm font-semibold text-slate-900">
-                            {{ $account->email }}
+                            {{ $account->username }}
                         </dd>
-                    </div>
-
+                    </div>z
                     @foreach ($editableFields as $field)
                         @php
-                            $isEmptyAddress = $field['name'] === 'alamat_kantor' && blank($field['value']);
+                            $isEmptyField = in_array($field['name'], ['email', 'alamat_kantor'], true) && blank($field['value']);
                         @endphp
 
                         <div data-inline-field>
@@ -88,7 +87,7 @@
                                         'hidden' => $errors->has($field['name']),
                                     ])
                                 >
-                                    @if ($isEmptyAddress)
+                                    @if ($isEmptyField)
                                         <span class="min-w-0 break-words text-sm font-semibold text-red-600">
                                             Belum diisi
                                         </span>
@@ -125,15 +124,18 @@
                                         name="{{ $field['name'] }}"
                                         type="{{ $field['type'] }}"
                                         value="{{ old($field['name'], $field['value']) }}"
-                                        @if ($field['name'] === 'penanggung_jawab')
+                                        @if ($field['name'] === 'email')
+                                            maxlength="255"
+                                            autocomplete="email"
+                                        @elseif ($field['name'] === 'penanggung_jawab')
                                             pattern="[A-Za-z .'-]+"
                                             title="Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung."
                                         @elseif ($field['name'] === 'telepon')
                                             inputmode="numeric"
                                             minlength="10"
-                                            maxlength="15"
-                                            pattern="[0-9]{10,15}"
-                                            title="Nomor telepon hanya boleh berisi angka (10 sampai 15 digit)."
+                                            maxlength="13"
+                                            pattern="[0-9]{10,13}"
+                                            title="Nomor telepon hanya boleh berisi angka (10 sampai 13 digit)."
                                         @elseif ($field['name'] === 'alamat_kantor')
                                             pattern="[A-Za-z0-9 .,/'-]+"
                                             title="Alamat kantor hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/'-)."

@@ -5,6 +5,7 @@ use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -42,6 +43,7 @@ it('menghitung total laporan dari penyaluran dan kondisi pasar', function () {
     $firstMarket = Market::factory()->create();
     $secondMarket = Market::factory()->create();
     $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $contributor = UptdContributor::factory()->create();
 
     Distribution::factory()->create([
         'distributor_id' => $firstDistributor->id,
@@ -69,19 +71,19 @@ it('menghitung total laporan dari penyaluran dan kondisi pasar', function () {
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $uptd->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $secondMarket->id,
-        'uptd_user_id' => $uptd->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $firstMarket->id,
-        'uptd_user_id' => $uptd->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
     ]);
 
@@ -104,6 +106,7 @@ it('memfilter total laporan kondisi pasar berdasarkan pasar tetapi tidak distrib
     $selectedDistributor = Distributor::factory()->create();
     $otherDistributor = Distributor::factory()->create();
     $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $contributor = UptdContributor::factory()->create();
 
     Distribution::factory()->create([
         'distributor_id' => $selectedDistributor->id,
@@ -123,13 +126,13 @@ it('memfilter total laporan kondisi pasar berdasarkan pasar tetapi tidak distrib
 
     FieldDistributionReport::factory()->create([
         'market_id' => $selectedMarket->id,
-        'uptd_user_id' => $uptd->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
     ]);
 
     FieldDistributionReport::factory()->create([
         'market_id' => $otherMarket->id,
-        'uptd_user_id' => $uptd->id,
+        'uptd_contributor_id' => $contributor->id,
         'report_date' => now()->startOfMonth()->toDateString(),
     ]);
 

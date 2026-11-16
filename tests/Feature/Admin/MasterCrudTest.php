@@ -15,6 +15,7 @@ it('menyimpan distributor baru beserta akun perusahaannya', function () {
 
     $this->post(route('admin.distributors.store'), [
         'name' => 'PT Contoh Baru',
+        'username' => 'pt.contoh.baru',
         'penanggung_jawab' => 'Budi Santoso',
         'telepon' => '081234567890',
         'email' => 'pt.contoh@example.com',
@@ -25,14 +26,13 @@ it('menyimpan distributor baru beserta akun perusahaannya', function () {
 
     $this->assertDatabaseHas('distributors', [
         'name' => 'PT Contoh Baru',
-        'wilayah' => 'Padang',
         'is_active' => true,
     ]);
 
     $this->assertDatabaseHas('users', [
         'name' => 'PT Contoh Baru',
         'email' => 'pt.contoh@example.com',
-        'username' => 'pt-contoh-baru',
+        'username' => 'pt.contoh.baru',
         'role' => Role::Distributor->value,
         'distributor_id' => $distributor->id,
         'is_active' => true,
@@ -54,6 +54,7 @@ it('memperbarui distributor dan akun perusahaannya', function () {
 
     $this->put(route('admin.distributors.update', $distributor), [
         'name' => 'Nama Baru',
+        'username' => 'nama.baru',
         'penanggung_jawab' => 'Budi Santoso',
         'telepon' => '081234567890',
         'email' => 'nama.baru@example.com',
@@ -68,7 +69,7 @@ it('memperbarui distributor dan akun perusahaannya', function () {
     $this->assertDatabaseHas('users', [
         'name' => 'Nama Baru',
         'email' => 'nama.baru@example.com',
-        'username' => 'nama-baru',
+        'username' => 'nama.baru',
         'role' => Role::Distributor->value,
         'distributor_id' => $distributor->id,
     ]);

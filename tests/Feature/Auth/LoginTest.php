@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\Role;
-use App\Models\Market;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -16,6 +15,7 @@ it('menampilkan halaman login untuk tamu', function () {
         ->assertSee('Email atau Username')
         ->assertSee('Ingat saya')
         ->assertSee('Lupa kata sandi?')
+        ->assertSee('data-password-toggle="password"', false)
         ->assertSee('Masuk');
 });
 
@@ -66,23 +66,25 @@ it('mengautentikasi kepala dinas dan mengarahkan ke dashboard kepala dinas', fun
     $this->assertAuthenticatedAs($kepalaDinas);
 });
 
-it('menolak login langsung kontributor UPTD tanpa pemilihan identitas', function () {
-    User::factory()->create([
-        'email' => 'kontributor.uptd.01@mipta.test',
+it('menghapus identitas kontributor lama saat akun bersama UPTD login', function () {
+    $shared = User::factory()->create([
+        'email' => 'uptd@mipta.test',
         'password' => 'admin123',
         'role' => Role::UptdPasar,
-        'market_id' => Market::factory(),
+    ]);
+
+    $this->withSession([
+        'uptd_selected_contributor' => ['id' => 99],
     ]);
 
     $this->post(route('login'), [
-        'identifier' => 'kontributor.uptd.01@mipta.test',
+        'identifier' => 'uptd@mipta.test',
         'password' => 'admin123',
-    ])->assertSessionHasErrors('identifier');
+    ])
+        ->assertRedirect(route('uptd.contributors.index'))
+        ->assertSessionMissing('uptd_selected_contributor');
 
-    expect(session('errors')->first('identifier'))
-        ->toContain('Silakan masuk melalui akun bersama UPTD Pasar.');
-
-    $this->assertGuest();
+    $this->assertAuthenticatedAs($shared);
 });
 
 it('mengarahkan akun bersama UPTD ke halaman pemilihan identitas', function () {

@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Uptd;
 
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\UptdContributor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 class ContributorController extends Controller
 {
     /**
-     * Tampilkan halaman pemilihan identitas kontributor UPTD Pasar.
+     * Tampilkan halaman pemilihan profil kontributor UPTD Pasar.
      */
     public function index(Request $request): View|RedirectResponse
     {
@@ -36,7 +35,7 @@ class ContributorController extends Controller
     }
 
     /**
-     * Simpan identitas kontributor aktif lalu lanjut ke dashboard.
+     * Simpan profil kontributor aktif lalu lanjut ke dashboard.
      */
     public function select(Request $request): RedirectResponse
     {
@@ -75,15 +74,13 @@ class ContributorController extends Controller
     }
 
     /**
-     * Query akun kontributor UPTD aktif yang terkait ke pasar aktif.
+     * Query profil kontributor aktif yang terkait ke pasar aktif.
      *
-     * @return Builder<User>
+     * @return Builder<UptdContributor>
      */
     private function marketContributors(): Builder
     {
-        return User::query()
-            ->where('role', Role::UptdPasar->value)
-            ->whereNotNull('market_id')
+        return UptdContributor::query()
             ->where('is_active', true)
             ->whereHas('market', fn (Builder $query) => $query->where('is_active', true));
     }
