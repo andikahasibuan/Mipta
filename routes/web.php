@@ -116,7 +116,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::put('uptd-contributors/{contributor}', [UptdContributorController::class, 'update'])->name('uptd-contributors.update');
     Route::delete('uptd-contributors/{contributor}', [UptdContributorController::class, 'destroy'])->name('uptd-contributors.destroy');
     Route::get('distribution', [DistributionController::class, 'index'])->name('distribution.index');
-    Route::delete('distribution/{distribution}', [DistributionController::class, 'destroy'])->name('distribution.destroy');
     Route::get('supervision', [SupervisionController::class, 'index'])->name('supervision.index');
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 });
@@ -145,7 +144,6 @@ Route::prefix('distributor')->name('distributor.')->middleware(['auth', 'role:di
     Route::post('stores', [DistributorStoreController::class, 'store'])->name('stores.store');
     Route::get('stores/{store}/edit', [DistributorStoreController::class, 'edit'])->name('stores.edit');
     Route::put('stores/{store}', [DistributorStoreController::class, 'update'])->name('stores.update');
-    Route::delete('stores/{store}', [DistributorStoreController::class, 'destroy'])->name('stores.destroy');
     Route::get('distribution-reports/create', [DistributorDistributionReportController::class, 'create'])->name('distribution-reports.create');
     Route::post('distribution-reports', [DistributorDistributionReportController::class, 'store'])->name('distribution-reports.store');
     Route::get('distribution-reports/{distribution}/edit', [DistributorDistributionReportController::class, 'edit'])->name('distribution-reports.edit');

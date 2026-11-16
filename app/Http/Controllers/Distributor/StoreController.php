@@ -116,25 +116,6 @@ class StoreController extends Controller
     }
 
     /**
-     * Hapus toko penerima milik distributor.
-     */
-    public function destroy(Request $request, RecipientStore $store): RedirectResponse
-    {
-        $this->ensureOwnedBy($request, $store);
-
-        if ($store->distributions()->exists()) {
-            return redirect()->route('distributor.stores.index')->withErrors([
-                'delete' => 'Toko penerima tidak dapat dihapus karena sudah memiliki laporan penyaluran.',
-            ]);
-        }
-
-        $store->delete();
-
-        return redirect()->route('distributor.stores.index')
-            ->with('success', 'Toko penerima berhasil dihapus.');
-    }
-
-    /**
      * Pastikan toko benar-benar milik distributor yang sedang login.
      */
     private function ensureOwnedBy(Request $request, RecipientStore $store): void

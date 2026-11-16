@@ -66,7 +66,7 @@
 
             <button
                 type="submit"
-                class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#018F98] hover:bg-[#018F98] hover:text-white active:border-[#018F98] active:bg-[#018F98] active:text-white focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 Terapkan Filter
             </button>
@@ -76,7 +76,7 @@
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Tanggal</th>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Pasar</th>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
@@ -86,7 +86,7 @@
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($reports as $report)
                         <tr>
-                            <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                            <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">

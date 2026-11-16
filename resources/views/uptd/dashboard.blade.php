@@ -37,7 +37,7 @@
                 <table class="w-full min-w-[44rem] table-fixed divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                         <tr>
-                            <th scope="col" class="w-[8%] px-5 py-3 font-semibold">NO</th>
+                            <th scope="col" class="w-[6%] px-3 py-3 font-semibold">NO</th>
                             <th scope="col" class="w-[28%] px-5 py-3 font-semibold">Pasar</th>
                             <th scope="col" class="w-[26%] px-5 py-3 font-semibold">Kontributor</th>
                             <th scope="col" class="w-[23%] px-5 py-3 font-semibold">Tanggal</th>
@@ -47,7 +47,7 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($reports as $report)
                             <tr>
-                                <td class="px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                                <td class="px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                     {{ $loop->iteration }}
                                 </td>
                                 <td class="px-5 py-4 align-middle font-medium text-slate-900">

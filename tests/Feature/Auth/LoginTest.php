@@ -80,7 +80,7 @@ it('menolak login langsung kontributor UPTD tanpa pemilihan identitas', function
     ])->assertSessionHasErrors('identifier');
 
     expect(session('errors')->first('identifier'))
-        ->toContain('Silakan masuk melalui akun bersama UPTD Pasar, lalu pilih identitas kontributor.');
+        ->toContain('Silakan masuk melalui akun bersama UPTD Pasar.');
 
     $this->assertGuest();
 });

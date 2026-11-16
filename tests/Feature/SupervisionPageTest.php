@@ -32,6 +32,7 @@ it('menampilkan laporan kondisi lapangan dari database', function () {
         ->get(route('admin.supervision.index'))
         ->assertOk()
         ->assertSee('Laporan Kondisi Pasar')
+        ->assertSee('Keterangan')
         ->assertSee('Andi Pratama')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Stok Minyakita tersedia, harga sesuai HET')
@@ -157,7 +158,6 @@ it('menampilkan ringkasan total, pasar sudah melapor, dan perlu perhatian', func
         ->assertSee('Jumlah Laporan')
         ->assertSee('Pasar Sudah Melapor')
         ->assertSee('Perlu Perhatian')
-        ->assertSee('3 dari '.Market::count().' pasar')
         ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 6
             && $summary['reported_markets'] === 3
             && $summary['total_markets'] === Market::count()
@@ -195,7 +195,6 @@ it('membatasi card total dan pasar dengan filter tetapi tidak card perlu perhati
 
     $this->get(route('admin.supervision.index', ['q' => 'Pasar Alpha']))
         ->assertOk()
-        ->assertSee('1 dari '.Market::count().' pasar')
         ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 1
             && $summary['reported_markets'] === 1
             && $summary['needs_attention_markets'] === 1);
@@ -211,22 +210,6 @@ it('membatasi card total dan pasar dengan filter tetapi tidak card perlu perhati
         ->assertViewHas('summary', fn (array $summary): bool => $summary['reports'] === 1
             && $summary['reported_markets'] === 1
             && $summary['needs_attention_markets'] === 1);
-});
-
-it('menampilkan bulan terpilih pada subtitle card jumlah laporan', function () {
-    $this->travelTo('2026-11-15');
-
-    $this->actingAs(User::factory()->create());
-
-    $this->get(route('admin.supervision.index'))
-        ->assertOk()
-        ->assertSee('<p class="mt-1 text-xs text-slate-500">November 2026</p>', false)
-        ->assertViewHas('month_label', 'November 2026');
-
-    $this->get(route('admin.supervision.index', ['month' => '2026-10']))
-        ->assertOk()
-        ->assertSee('<p class="mt-1 text-xs text-slate-500">Oktober 2026</p>', false)
-        ->assertViewHas('month_label', 'Oktober 2026');
 });
 
 it('menampilkan keadaan kosong saat belum ada laporan kondisi lapangan', function () {

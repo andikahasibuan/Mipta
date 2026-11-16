@@ -42,6 +42,7 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
         'recipient_store_id' => $store->id,
         'distribution_date' => now()->startOfMonth()->toDateString(),
         'cartons' => 120,
+        'notes' => 'Pengiriman lengkap.',
     ]);
 
     Distribution::factory()->create([
@@ -54,10 +55,11 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
     $this->actingAs($user)
         ->get(route('distributor.report-history.index'))
         ->assertOk()
-        ->assertSeeInOrder(['NO', 'Tanggal', 'Nama Toko', 'Pasar', 'Jumlah Karton', 'Aksi'])
+        ->assertSeeInOrder(['NO', 'Tanggal', 'Nama Toko', 'Pasar', 'Jumlah Karton', 'Keterangan', 'Aksi'])
         ->assertSee('Toko Riwayat')
         ->assertSee('Pasar Riwayat')
         ->assertSee('120 karton')
+        ->assertSee('Pengiriman lengkap.')
         ->assertDontSee('999 karton')
         ->assertSee(route('distributor.report-history.destroy', $report), false)
         ->assertSee(route('distributor.distribution-reports.edit', $report), false)

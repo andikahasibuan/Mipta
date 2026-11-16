@@ -5,28 +5,24 @@
 <x-ui.flash-messages />
 
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
+    <div class="flex min-h-[7.25rem] flex-col justify-center rounded-xl border border-slate-200 bg-white p-5">
         <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Jumlah Laporan</p>
-            <p class="mt-1 text-3xl font-bold text-[#018F98]">{{ $formatNumber($summary['reports']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">{{ $month_label }}</p>
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Jumlah Laporan</p>
+            <p class="mt-1 text-[2rem] font-bold text-[#018F98]">{{ $formatNumber($summary['reports']) }}</p>
         </div>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white p-5">
+    <div class="flex min-h-[7.25rem] flex-col justify-center rounded-xl border border-slate-200 bg-white p-5">
         <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Pasar Sudah Melapor</p>
-            <p class="mt-1 text-3xl font-bold text-[#018F98]">{{ $formatNumber($summary['reported_markets']) }}</p>
-            <p class="mt-1 text-xs text-slate-500">
-                {{ $formatNumber($summary['reported_markets']) }} dari {{ $formatNumber($summary['total_markets']) }} pasar
-            </p>
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Pasar Sudah Melapor</p>
+            <p class="mt-1 text-[2rem] font-bold text-[#018F98]">{{ $formatNumber($summary['reported_markets']) }}</p>
         </div>
     </div>
 
-    <div class="rounded-xl border border-amber-200 bg-amber-100 p-5">
+    <div class="flex min-h-[7.25rem] flex-col justify-center rounded-xl border border-amber-200 bg-amber-100 p-5">
         <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-amber-700">Perlu Perhatian</p>
-            <p class="mt-1 text-3xl font-bold text-amber-900">{{ $formatNumber($summary['needs_attention_markets']) }}</p>
+            <p class="text-xs font-semibold uppercase tracking-widest text-amber-700">Perlu Perhatian</p>
+            <p class="mt-1 text-[2rem] font-bold text-amber-900">{{ $formatNumber($summary['needs_attention_markets']) }}</p>
         </div>
     </div>
 </div>
@@ -82,7 +78,7 @@
 
         <button
             type="submit"
-            class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+            class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#018F98] hover:bg-[#018F98] hover:text-white active:border-[#018F98] active:bg-[#018F98] active:text-white focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
         >
             Terapkan Filter
         </button>
@@ -92,18 +88,18 @@
         <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
             <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                 <tr>
-                    <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">NO</th>
+                    <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                     <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
                     <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Identitas Kontributor</th>
                     <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                    <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Deskripsi Kondisi Lapangan</th>
+                    <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Keterangan</th>
                     <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Kondisi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-center">
                 @forelse ($reports as $report)
                     <tr>
-                        <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                        <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                             {{ $loop->iteration }}
                         </td>
                         <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
@@ -116,7 +112,7 @@
                             {{ $report->market?->name ?? '—' }}
                         </td>
                         <td class="break-words px-5 py-4 text-left align-middle text-slate-700">
-                            {{ $report->description }}
+                            {{ \Illuminate\Support\Str::limit($report->description, 120, '') }}
                         </td>
                         <td class="whitespace-nowrap px-5 py-4 align-middle">
                             <span @class([

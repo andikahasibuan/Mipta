@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Market;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class UptdContributorSeeder extends Seeder
 {
@@ -50,7 +51,7 @@ class UptdContributorSeeder extends Seeder
                 name: 'Kontributor UPTD '.$number,
                 username: 'kontributor.uptd.'.$number,
                 email: null,
-                password: 'KontributorUptd#'.$number,
+                password: null,
                 marketId: $marketIds[$market['name']],
             );
         }
@@ -63,7 +64,7 @@ class UptdContributorSeeder extends Seeder
         string $name,
         string $username,
         ?string $email,
-        string $password,
+        ?string $password,
         ?int $marketId,
     ): void {
         $user = User::firstOrNew(['username' => $username]);
@@ -77,7 +78,7 @@ class UptdContributorSeeder extends Seeder
         ]);
 
         if (! $user->exists) {
-            $user->password = $password;
+            $user->password = $password ?? Str::password(32);
         }
 
         $user->save();

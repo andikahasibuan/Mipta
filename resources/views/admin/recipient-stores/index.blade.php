@@ -86,7 +86,7 @@
             <table class="w-full min-w-[72rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Alamat</th>
                         <th scope="col" class="w-[11%] px-5 py-3 align-middle font-semibold">NIB</th>
@@ -99,7 +99,7 @@
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($stores as $store)
                         <tr>
-                            <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
+                            <td class="whitespace-nowrap px-3 py-3 font-mono text-xs text-slate-600">
                                 {{ $loop->iteration }}
                             </td>
                             <td class="px-5 py-3 text-slate-900">

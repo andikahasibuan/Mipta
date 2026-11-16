@@ -43,7 +43,7 @@ it('menampilkan informasi profil distributor sesuai desain', function () {
         ->get(route('distributor.profile.edit'))
         ->assertOk()
         ->assertSee('Profil')
-        ->assertSee('Informasi Akun Distributor')
+        ->assertSee('Informasi Akun')
         ->assertSee('Data identitas yang terhubung dengan akun anda')
         ->assertSeeInOrder(['Nama akun', 'andalas.niaga'])
         ->assertSeeInOrder(['Nama distributor', $distributor->name])
@@ -51,7 +51,8 @@ it('menampilkan informasi profil distributor sesuai desain', function () {
         ->assertSeeInOrder(['Nama penanggung jawab', 'Pengelola Distributor'])
         ->assertSeeInOrder(['Nomor Telepon', '0751-000000'])
         ->assertSeeInOrder(['Alamat kantor', 'Kota Padang, Sumatera Barat'])
-        ->assertSeeInOrder(['Distributor MinyaKita', 'Aktif'])
+        ->assertSee('Distributor MinyaKita')
+        ->assertDontSee('Aktif')
         ->assertSee('Keamanan akun')
         ->assertSee('Kata sandi')
         ->assertSee('Ubah')
@@ -72,7 +73,6 @@ it('menampilkan penanda alamat kantor belum diisi pada profil', function () {
         ->get(route('distributor.profile.edit'))
         ->assertOk()
         ->assertSee('Belum diisi')
-        ->assertSee('title="Belum diisi"', false)
         ->assertSeeInOrder(['Alamat kantor', 'Belum diisi']);
 });
 

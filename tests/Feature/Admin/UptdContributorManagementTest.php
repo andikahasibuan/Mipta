@@ -56,7 +56,6 @@ it('menyimpan kontributor UPTD dengan nama akun generik dan username bernomor', 
         ->post(route('admin.uptd-contributors.store'), [
             'name' => 'Kontributor UPTD 01',
             'username' => 'kontributor.uptd.01',
-            'password' => 'password123',
             'market_id' => $market->id,
             'is_active' => '1',
         ])
@@ -267,7 +266,8 @@ it('hanya menampilkan pasar yang belum memiliki kontributor pada form tambah', f
         ->assertOk()
         ->assertSee('Pasar Baru')
         ->assertDontSee('Pasar Terpakai')
-        ->assertDontSee('Email');
+        ->assertDontSee('Email')
+        ->assertDontSee('Password');
 });
 
 it('menolak pasar yang sudah memiliki kontributor UPTD', function () {
@@ -283,7 +283,6 @@ it('menolak pasar yang sudah memiliki kontributor UPTD', function () {
         ->post(route('admin.uptd-contributors.store'), [
             'name' => 'Kontributor Baru',
             'username' => 'kontributor.baru',
-            'password' => 'password123',
             'market_id' => $market->id,
             'is_active' => '1',
         ])
@@ -317,7 +316,8 @@ it('mempertahankan pasar saat ini dan hanya menampilkan pasar kosong pada form e
         ->assertSee('Pasar Saat Ini')
         ->assertSee('Pasar Kosong')
         ->assertDontSee('Pasar Terpakai Lain')
-        ->assertDontSee('Email');
+        ->assertDontSee('Email')
+        ->assertDontSee('Password');
 });
 
 it('menolak memindahkan kontributor ke pasar yang sudah memiliki kontributor lain', function () {

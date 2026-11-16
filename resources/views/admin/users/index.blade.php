@@ -66,7 +66,7 @@
             <table class="w-full min-w-[50rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama / Identitas</th>
                         <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Akun</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Peran</th>
@@ -77,7 +77,7 @@
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($users as $user)
                         <tr>
-                            <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">{{ $loop->iteration }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">{{ $loop->iteration }}</td>
                             <td class="px-5 py-4 align-middle text-slate-900">{{ $user->name }}</td>
                             <td class="px-5 py-4 align-middle">
                                 <span class="text-sm text-slate-600">{{ $user->username ?? '—' }}</span>

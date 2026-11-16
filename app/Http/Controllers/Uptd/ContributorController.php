@@ -9,7 +9,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class ContributorController extends Controller
@@ -17,23 +16,32 @@ class ContributorController extends Controller
     /**
      * Tampilkan halaman pemilihan identitas kontributor UPTD Pasar.
      */
-    public function index(): View
+    public function index(Request $request): View|RedirectResponse
     {
+        if (! $request->user()?->isSharedUptdAccount()) {
+            return redirect()->route('uptd.dashboard');
+        }
+
         $contributors = $this->marketContributors()
             ->with('market:id,name')
             ->orderBy('username')
             ->get(['id', 'name', 'username', 'market_id']);
 
+        $selected = $request->session()->get('uptd_selected_contributor');
+
         return view('uptd.contributors.index', [
             'contributors' => $contributors,
+            'selectedContributorId' => is_array($selected) ? (int) ($selected['id'] ?? 0) : null,
         ]);
     }
 
     /**
-     * Lanjutkan ke dashboard bila identitas sama, atau simpan identitas baru lalu ke login.
+     * Simpan identitas kontributor aktif lalu lanjut ke dashboard.
      */
     public function select(Request $request): RedirectResponse
     {
+        abort_unless($request->user()?->isSharedUptdAccount(), 403);
+
         $validated = $request->validate([
             'contributor_id' => ['required', 'integer'],
         ], [
@@ -52,12 +60,6 @@ class ContributorController extends Controller
             ]);
         }
 
-        if ($request->user()?->is($contributor)) {
-            $request->session()->forget('uptd_selected_contributor');
-
-            return redirect()->route('uptd.dashboard');
-        }
-
         $selectedContributor = [
             'id' => $contributor->id,
             'username' => $contributor->username,
@@ -65,12 +67,11 @@ class ContributorController extends Controller
             'market' => $contributor->market?->name,
         ];
 
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->session()->regenerate();
         $request->session()->put('uptd_selected_contributor', $selectedContributor);
 
-        return redirect()->route('login');
+        return redirect()->route('uptd.dashboard')
+            ->with('success', 'Identitas kontributor berhasil dipilih.');
     }
 
     /**

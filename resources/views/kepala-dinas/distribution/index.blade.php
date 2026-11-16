@@ -5,6 +5,5 @@
 @section('content')
     @include('partials.distribution-content', [
         'area' => 'kepala-dinas',
-        'readOnly' => true,
     ])
 @endsection

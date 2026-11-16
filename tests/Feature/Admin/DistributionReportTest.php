@@ -28,20 +28,35 @@ it('menampilkan laporan penyaluran dari database', function () {
         'uptd_user_id' => $uptd->id,
         'distribution_date' => now()->toDateString(),
         'cartons' => 250,
+        'notes' => 'Pengiriman lancar.',
     ]);
 
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))
         ->assertOk()
         ->assertSee('Laporan Penyaluran')
+        ->assertSeeInOrder(['NO', 'Tanggal', 'Distributor', 'Pasar', 'Toko', 'Jumlah Karton', 'Keterangan'])
         ->assertDontSee('Tambah Data')
         ->assertSee('PT Sinar Pangan Nusantara')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('250 karton')
+        ->assertSee('Pengiriman lancar.')
         ->assertSee(now()->format('d/m/Y'));
 });
 
-it('menampilkan tombol hapus pada laporan penyaluran admin', function () {
+it('menampilkan tanda minus di tengah saat keterangan kosong', function () {
+    Distribution::factory()->create([
+        'distribution_date' => now()->toDateString(),
+        'notes' => null,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSee('text-slate-700 text-center', false);
+});
+
+it('tidak menampilkan aksi hapus pada laporan penyaluran admin', function () {
     Distribution::factory()->create([
         'distribution_date' => now()->toDateString(),
         'cartons' => 120,
@@ -50,7 +65,8 @@ it('menampilkan tombol hapus pada laporan penyaluran admin', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))
         ->assertOk()
-        ->assertSee('aria-label="Hapus"', false);
+        ->assertDontSee('aria-label="Hapus"', false)
+        ->assertDontSee('Aksi');
 });
 
 it('memfilter laporan penyaluran berdasarkan distributor, pasar, dan bulan', function () {
@@ -228,22 +244,6 @@ it('menampilkan ringkasan total karton, jumlah toko penerima, dan jumlah laporan
             && $summary['recipient_stores'] === 1);
 });
 
-it('menampilkan bulan terpilih pada subtitle card jumlah laporan', function () {
-    $this->travelTo('2026-11-15');
-
-    $this->actingAs(User::factory()->create());
-
-    $this->get(route('admin.distribution.index'))
-        ->assertOk()
-        ->assertSee('<p class="mt-1 text-xs text-slate-500">November 2026</p>', false)
-        ->assertViewHas('month_label', 'November 2026');
-
-    $this->get(route('admin.distribution.index', ['month' => '2026-10']))
-        ->assertOk()
-        ->assertSee('<p class="mt-1 text-xs text-slate-500">Oktober 2026</p>', false)
-        ->assertViewHas('month_label', 'Oktober 2026');
-});
-
 it('menampilkan keadaan kosong saat belum ada laporan penyaluran', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.distribution.index'))
@@ -265,14 +265,4 @@ it('menampilkan nama toko penerima pada laporan penyaluran', function () {
         ->get(route('admin.distribution.index'))
         ->assertOk()
         ->assertSee('Toko Atong');
-});
-
-it('menghapus laporan penyaluran dari database', function () {
-    $this->actingAs(User::factory()->create());
-    $distribution = Distribution::factory()->create();
-
-    $this->delete(route('admin.distribution.destroy', $distribution))
-        ->assertRedirect(route('admin.distribution.index'));
-
-    $this->assertDatabaseMissing('distributions', ['id' => $distribution->id]);
 });

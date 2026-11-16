@@ -3,9 +3,9 @@
         <div class="flex w-full items-center justify-center">
             <img
                 data-sidebar-logo
-                src="{{ asset('images/mipta-logo.png') }}"
+                src="{{ asset('images/logo-sidebar.png') }}"
                 alt="MIPTA"
-                class="block h-[100px] w-[100px] shrink-0 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
+                class="block h-[120px] w-[120px] shrink-0 object-contain"
             >
         </div>
     </div>

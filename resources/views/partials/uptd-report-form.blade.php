@@ -30,7 +30,6 @@
                             Identitas Kontributor
                         </p>
                         <p class="mt-1 truncate text-sm font-semibold text-slate-900">{{ $contributor->name }}</p>
-                        <p class="mt-0.5 text-xs text-[#018F98]">Terisi otomatis</p>
                     </div>
 
                     <div class="rounded-lg border border-[#CFE9EB] bg-[#E0F2F3] px-4 py-4">
@@ -38,7 +37,6 @@
                             Pasar yang Ditugaskan
                         </p>
                         <p class="mt-1 truncate text-sm font-semibold text-slate-900">{{ $contributor->market?->name ?? '—' }}</p>
-                        <p class="mt-0.5 text-xs text-[#018F98]">Tidak dapat diubah</p>
                     </div>
                 </div>
 
@@ -89,15 +87,17 @@
 
                 <div class="mt-6">
                     <label for="description" class="block text-sm font-medium text-slate-700">
-                        Deskripsi Kondisi lapangan <span class="text-red-500">*</span>
+                        Keterangan <span class="text-red-500">*</span>
                     </label>
                     <textarea
                         id="description"
                         name="description"
                         rows="4"
+                        maxlength="120"
                         placeholder="Jelaskan kondisi pasar atau kendala distribusi yang ditemukan di pasar..."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >{{ old('description', $report?->description) }}</textarea>
+                    <p class="mt-1 text-xs text-slate-500">Maksimal 120 karakter.</p>
                     @error('description')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror

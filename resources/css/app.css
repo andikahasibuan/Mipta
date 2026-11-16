@@ -41,7 +41,8 @@
     [class~='rounded-xl'][class~='bg-white'],
     [class~='rounded-xl'][class~='bg-[#018F98]'],
     [class~='rounded-xl'][class~='bg-[#E0F2F3]'],
-    [class~='rounded-xl'][class~='bg-amber-50'] {
+    [class~='rounded-xl'][class~='bg-amber-50'],
+    [class~='rounded-xl'][class~='bg-amber-100'] {
         box-shadow:
             0 1px 2px 0 rgb(15 23 42 / 0.05),
             0 2px 6px -1px rgb(15 23 42 / 0.06);
@@ -71,8 +72,8 @@
 }
 
 [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logo] {
-    height: 3rem;
-    width: 3rem;
+    height: 3.5rem;
+    width: 3.5rem;
 }
 
 [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] {
@@ -126,7 +127,8 @@
 }
 
 /* Bayangan halus untuk setiap kartu di area konten. */
-#app-content .rounded-xl.border-slate-200.bg-white {
+#app-content .rounded-xl.border-slate-200.bg-white,
+#app-content .rounded-xl.border-amber-200.bg-amber-100 {
     box-shadow:
         0 1px 3px rgba(15, 23, 42, 0.1),
         0 1px 2px rgba(15, 23, 42, 0.06);

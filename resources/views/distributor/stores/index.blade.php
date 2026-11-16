@@ -60,7 +60,7 @@
             <table class="w-full min-w-[56rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[7%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                         <th scope="col" class="w-[27%] px-5 py-3 align-middle font-semibold">Alamat</th>
                         <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">NIB</th>
@@ -71,7 +71,7 @@
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($stores as $store)
                         <tr>
-                            <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-500">
+                            <td class="whitespace-nowrap px-3 py-3 font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
                             <td class="px-5 py-3 text-slate-900">
@@ -87,11 +87,14 @@
                                 {{ $store->market->name }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-3">
-                                <x-ui.row-actions
-                                    :edit="route('distributor.stores.edit', $store)"
-                                    :delete="route('distributor.stores.destroy', $store)"
-                                    confirm="Yakin ingin menghapus data toko ini?"
-                                />
+                                <a
+                                    href="{{ route('distributor.stores.edit', $store) }}"
+                                    aria-label="Edit"
+                                    title="Edit"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-[#018F98] transition hover:border-[#018F98] hover:bg-[#E0F2F3]"
+                                >
+                                    <x-heroicon-o-pencil-square class="h-4 w-4" />
+                                </a>
                             </td>
                         </tr>
                     @empty

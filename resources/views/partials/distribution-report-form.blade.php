@@ -41,12 +41,7 @@
                     @if ($isEdit)
                         @method('PUT')
                     @endif
-
-                    <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                        Informasi penyaluran
-                    </p>
-
-                    <div class="mt-4 grid gap-5 sm:grid-cols-2">
+                    <div class="mt-3 grid gap-5 sm:grid-cols-2">
                         <div>
                             <label for="distribution_date" class="block text-sm font-medium text-slate-700">
                                 Tanggal Penyaluran <span class="text-red-500">*</span>
@@ -143,6 +138,24 @@
                             class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                         >
                         @error('cartons')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="mt-5">
+                        <label for="notes" class="block text-sm font-medium text-slate-700">
+                            Keterangan
+                        </label>
+                        <textarea
+                            id="notes"
+                            name="notes"
+                            rows="3"
+                            maxlength="120"
+                            placeholder="Tambahkan keterangan penyaluran (opsional)..."
+                            class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                        >{{ old('notes', $report?->notes) }}</textarea>
+                        <p class="mt-1 text-xs text-slate-500">Maksimal 120 karakter.</p>
+                        @error('notes')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                         @enderror
                     </div>

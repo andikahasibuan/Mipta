@@ -22,7 +22,7 @@ class ReportController extends Controller
      */
     public function index(Request $request, UptdReportHistoryService $history): View
     {
-        return view('uptd.reports.index', $history->paginate($request, $request->user()));
+        return view('uptd.reports.index', $history->paginate($request, $this->contributor($request)));
     }
 
     /**
@@ -30,7 +30,7 @@ class ReportController extends Controller
      */
     public function create(Request $request): View
     {
-        $contributor = $request->user()->loadMissing('market');
+        $contributor = $this->contributor($request)->loadMissing('market');
 
         return view('uptd.reports.create', [
             'contributor' => $contributor,
@@ -44,10 +44,11 @@ class ReportController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateReport($request);
+        $contributor = $this->contributor($request);
 
         FieldDistributionReport::create([
-            'market_id' => $request->user()->market_id,
-            'uptd_user_id' => $request->user()->id,
+            'market_id' => $contributor->market_id,
+            'uptd_user_id' => $contributor->id,
             'report_date' => $validated['report_date'],
             'condition' => $validated['condition'],
             'description' => $validated['description'],
@@ -62,9 +63,11 @@ class ReportController extends Controller
      */
     public function edit(Request $request, FieldDistributionReport $report): View
     {
-        $this->ensureOwnedBy($request, $report);
+        $contributor = $this->contributor($request);
 
-        $contributor = $request->user()->loadMissing('market');
+        $this->ensureOwnedBy($contributor, $report);
+
+        $contributor->loadMissing('market');
 
         return view('uptd.reports.edit', [
             'report' => $report,
@@ -78,7 +81,7 @@ class ReportController extends Controller
      */
     public function update(Request $request, FieldDistributionReport $report): RedirectResponse
     {
-        $this->ensureOwnedBy($request, $report);
+        $this->ensureOwnedBy($this->contributor($request), $report);
 
         $validated = $this->validateReport($request);
 
@@ -97,7 +100,9 @@ class ReportController extends Controller
      */
     public function destroy(Request $request, FieldDistributionReport $report): RedirectResponse
     {
-        $this->ensureOwnedBy($request, $report);
+        $contributor = $this->contributor($request);
+
+        $this->ensureOwnedBy($contributor, $report);
 
         $report->loadMissing(['contributor:id,name', 'market:id,name']);
 
@@ -109,7 +114,7 @@ class ReportController extends Controller
         $notification = new FieldDistributionReportDeleted(
             $report->report_date->format('d/m/Y'),
             $report->market?->name ?? '—',
-            $report->contributor?->name ?? $request->user()->name,
+            $report->contributor?->name ?? $contributor->name,
         );
 
         $report->delete();
@@ -132,15 +137,27 @@ class ReportController extends Controller
         return $request->validate([
             'report_date' => ['required', 'date', 'before_or_equal:today'],
             'condition' => ['required', Rule::enum(FieldCondition::class)],
-            'description' => ['required', 'string', 'max:2000'],
+            'description' => ['required', 'string', 'max:120'],
         ]);
     }
 
     /**
-     * Pastikan laporan milik kontributor yang sedang login.
+     * Pastikan laporan milik kontributor yang sedang dipilih.
      */
-    private function ensureOwnedBy(Request $request, FieldDistributionReport $report): void
+    private function ensureOwnedBy(User $contributor, FieldDistributionReport $report): void
     {
-        abort_unless($report->uptd_user_id === $request->user()->id, 404);
+        abort_unless($report->uptd_user_id === $contributor->id, 404);
+    }
+
+    /**
+     * Ambil kontributor aktif yang dipilih pada session.
+     */
+    private function contributor(Request $request): User
+    {
+        $contributor = $request->attributes->get('uptd_contributor');
+
+        abort_unless($contributor instanceof User, 403);
+
+        return $contributor;
     }
 }

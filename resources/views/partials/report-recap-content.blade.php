@@ -3,50 +3,8 @@
     $isPenyaluran = $activeTab === 'penyaluran';
 @endphp
 
-<form
-    method="GET"
-    action="{{ route($area.'.reports.index') }}"
-    class="rounded-xl border border-slate-200 bg-white p-3"
->
-    <input type="hidden" name="tab" value="{{ $activeTab }}">
-
-    <div class="flex flex-col gap-3 lg:flex-row lg:items-end">
-        <div class="min-w-0 flex-1">
-            <label for="filter-start-date" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-                Periode mulai
-            </label>
-            <input
-                type="date"
-                id="filter-start-date"
-                name="start_date"
-                value="{{ $filters['start_date'] }}"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
-            >
-        </div>
-
-        <div class="min-w-0 flex-1">
-            <label for="filter-end-date" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-                Sampai
-            </label>
-            <input
-                type="date"
-                id="filter-end-date"
-                name="end_date"
-                value="{{ $filters['end_date'] }}"
-                class="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
-            >
-        </div>
-
-        <button
-            type="submit"
-            class="shrink-0 cursor-pointer rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
-        >
-            Tampilkan rekap
-        </button>
-    </div>
-</form>
-
-<div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+{{-- Ekspor hanya boleh mengambil area [data-export-table]; form filter ditandai data-export-exclude. --}}
+<div class="flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap gap-2">
         <a
             href="{{ route($area.'.reports.index', ['start_date' => $filters['start_date'], 'end_date' => $filters['end_date'], 'tab' => 'penyaluran']) }}"
@@ -85,17 +43,61 @@
     </div>
 </div>
 
-@if ($isPenyaluran)
-    <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div class="px-5 pt-5">
-            <h2 class="text-lg font-semibold text-slate-900">Rekap Laporan Penyaluran</h2>
+<div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div class="px-5 pt-5">
+        <h2 class="text-lg font-semibold text-slate-900">
+            {{ $isPenyaluran ? 'Rekap Laporan Penyaluran' : 'Rekap Laporan Kondisi Pasar' }}
+        </h2>
+    </div>
+
+    <form
+        method="GET"
+        action="{{ route($area.'.reports.index') }}"
+        class="mt-4 flex flex-col gap-3 px-5 lg:flex-row lg:items-end"
+        data-export-exclude
+    >
+        <input type="hidden" name="tab" value="{{ $activeTab }}">
+
+        <div class="min-w-0 flex-1">
+            <label for="filter-start-date" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                Periode mulai
+            </label>
+            <input
+                type="date"
+                id="filter-start-date"
+                name="start_date"
+                value="{{ $filters['start_date'] }}"
+                class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+            >
         </div>
 
+        <div class="min-w-0 flex-1">
+            <label for="filter-end-date" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                Sampai
+            </label>
+            <input
+                type="date"
+                id="filter-end-date"
+                name="end_date"
+                value="{{ $filters['end_date'] }}"
+                class="w-full cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+            >
+        </div>
+
+        <button
+            type="submit"
+            class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#018F98] hover:bg-[#018F98] hover:text-white active:border-[#018F98] active:bg-[#018F98] active:text-white focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+        >
+            Tampilkan rekap
+        </button>
+    </form>
+
+    @if ($isPenyaluran)
         <div class="mt-4 overflow-x-auto">
-            <table class="w-full min-w-[48rem] table-fixed divide-y divide-slate-200 text-sm">
+            <table class="w-full min-w-[48rem] table-fixed divide-y divide-slate-200 text-sm" data-export-table="penyaluran">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[31%] px-5 py-3 align-middle font-semibold">Pasar</th>
                         <th scope="col" class="w-[19%] px-5 py-3 align-middle font-semibold">Jumlah Laporan</th>
                         <th scope="col" class="w-[21%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
@@ -105,7 +107,7 @@
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($distributionRecap as $row)
                         <tr>
-                            <td class="px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                            <td class="px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
                             <td class="px-5 py-4 text-left align-middle text-slate-900">
@@ -131,29 +133,23 @@
                 </tbody>
             </table>
         </div>
-    </div>
-@else
-    <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div class="px-5 pt-5">
-            <h2 class="text-lg font-semibold text-slate-900">Rekap Laporan Kondisi Pasar</h2>
-        </div>
-
+    @else
         <div class="mt-4 overflow-x-auto">
-            <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
+            <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm" data-export-table="kondisi">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[8%] px-5 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Identitas Kontributor</th>
                         <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Deskripsi Kondisi Lapangan</th>
+                        <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Keterangan</th>
                         <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Kondisi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($conditionReports as $report)
                         <tr>
-                            <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                            <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
@@ -166,7 +162,7 @@
                                 {{ $report->market?->name ?? '—' }}
                             </td>
                             <td class="break-words px-5 py-4 text-left align-middle text-slate-700">
-                                {{ $report->description }}
+                                {{ \Illuminate\Support\Str::limit($report->description, 120, '') }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <span @class([
@@ -200,5 +196,5 @@
                 @endif
             </div>
         @endif
-    </div>
-@endif
+    @endif
+</div>

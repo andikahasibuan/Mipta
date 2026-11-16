@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
-it('membuat akun bersama dan sembilan kontributor dengan password berbeda', function () {
+it('membuat akun bersama dan sembilan kontributor dengan password acak', function () {
     $this->seed(UptdContributorSeeder::class);
 
     $shared = User::where('username', 'uptd')->first();
@@ -26,13 +26,15 @@ it('membuat akun bersama dan sembilan kontributor dengan password berbeda', func
     expect(Market::count())->toBe(9)
         ->and($contributors)->toHaveCount(9)
         ->and($contributors->pluck('market_id')->unique())->toHaveCount(9)
+        ->and($contributors->pluck('password')->unique())->toHaveCount(9)
         ->and($contributors->every(fn (User $contributor): bool => $contributor->email === null))->toBeTrue();
 
     foreach ($contributors->values() as $index => $contributor) {
         $number = str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
 
         expect($contributor->username)->toBe('kontributor.uptd.'.$number)
-            ->and(Hash::check('KontributorUptd#'.$number, $contributor->password))->toBeTrue();
+            ->and($contributor->password)->not->toBeEmpty()
+            ->and(Hash::check('KontributorUptd#'.$number, $contributor->password))->toBeFalse();
     }
 });
 

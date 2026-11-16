@@ -56,6 +56,23 @@ it('menampilkan ringkasan periode bulan berjalan secara default', function () {
         ->assertSee('value="'.now()->endOfMonth()->toDateString().'"', false);
 });
 
+it('menandai filter dan tabel rekap untuk kebutuhan ekspor', function () {
+    $admin = User::factory()->create();
+
+    $this->actingAs($admin)
+        ->get(route('admin.reports.index'))
+        ->assertOk()
+        ->assertSee('data-export-exclude', false)
+        ->assertSee('data-export-table="penyaluran"', false)
+        ->assertDontSee('data-export-table="kondisi"', false);
+
+    $this->get(route('admin.reports.index', ['tab' => 'kondisi']))
+        ->assertOk()
+        ->assertSee('data-export-exclude', false)
+        ->assertSee('data-export-table="kondisi"', false)
+        ->assertDontSee('data-export-table="penyaluran"', false);
+});
+
 it('menampilkan dua tombol ekspor nonaktif untuk admin', function () {
     $response = $this->actingAs(User::factory()->create())
         ->get(route('admin.reports.index'));

@@ -42,16 +42,15 @@
                 </div>
             @else
                 @php
-                    $currentContributorId = auth()->user()->isMarketUptdContributor() ? auth()->id() : null;
-                    $selectedId = old('contributor_id', $currentContributorId);
-                    $isCurrentSelection = $currentContributorId !== null && (int) $selectedId === $currentContributorId;
+                    $selectedId = old('contributor_id', $selectedContributorId);
+                    $isCurrentSelection = $selectedContributorId !== null && (int) $selectedId === $selectedContributorId;
                 @endphp
 
                 <form
                     id="contributor-selection-form"
                     method="POST"
                     action="{{ route('uptd.contributors.select') }}"
-                    data-current-contributor-id="{{ $currentContributorId }}"
+                    data-current-contributor-id="{{ $selectedContributorId }}"
                 >
                     @csrf
 
@@ -102,7 +101,7 @@
                             type="submit"
                             class="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#018F98] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#017A81] focus:outline-none focus:ring-2 focus:ring-[#018F98]/50"
                         >
-                            <span id="selection-submit-label">{{ $isCurrentSelection ? 'Kembali ke dashboard' : 'Lanjut ke login' }}</span>
+                            <span id="selection-submit-label">{{ $isCurrentSelection ? 'Kembali ke dashboard' : 'Lanjut ke dashboard' }}</span>
                             <x-heroicon-o-chevron-right class="h-4 w-4" />
                         </button>
                     </div>
@@ -131,7 +130,7 @@
 
                 if (!selected) {
                     summary.textContent = 'Belum ada identitas dipilih';
-                    submitLabel.textContent = 'Lanjut ke login';
+                    submitLabel.textContent = 'Lanjut ke dashboard';
 
                     return;
                 }
@@ -139,7 +138,7 @@
                 summary.textContent = selected.dataset.name;
                 submitLabel.textContent = currentContributorId !== null && selected.value === currentContributorId
                     ? 'Kembali ke dashboard'
-                    : 'Lanjut ke login';
+                    : 'Lanjut ke dashboard';
             };
 
             options.forEach((option) => option.addEventListener('change', updateSummary));

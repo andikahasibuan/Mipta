@@ -46,7 +46,7 @@ it('menampilkan riwayat laporan milik kontributor sendiri', function () {
         ->assertSee('Laporan Kondisi Lapangan')
         ->assertSee('Kontributor UPTD 01')
         ->assertSee('Pasar Raya Padang')
-        ->assertSee('Deskripsi Kondisi')
+        ->assertSee('Keterangan')
         ->assertSee('Kondisi')
         ->assertSee('Aksi')
         ->assertSee('Terapkan Filter')
@@ -179,6 +179,34 @@ it('menolak pembaruan laporan kondisi lapangan yang tidak valid', function (arra
     'kondisi tidak valid' => [['condition' => 'rusak'], 'condition'],
     'deskripsi kosong' => [['description' => ''], 'description'],
 ]);
+
+it('membatasi deskripsi laporan maksimal 120 karakter', function () {
+    [$contributor, $market] = uptdHistoryAccount();
+
+    $report = FieldDistributionReport::factory()->create([
+        'market_id' => $market->id,
+        'uptd_user_id' => $contributor->id,
+        'description' => 'Kondisi awal.',
+    ]);
+
+    $this->actingAs($contributor)
+        ->put(route('uptd.reports.update', $report), [
+            'report_date' => now()->toDateString(),
+            'condition' => FieldCondition::Normal->value,
+            'description' => str_repeat('a', 121),
+        ])
+        ->assertSessionHasErrors('description');
+
+    expect($report->fresh()->description)->toBe('Kondisi awal.');
+
+    $this->put(route('uptd.reports.update', $report), [
+        'report_date' => now()->toDateString(),
+        'condition' => FieldCondition::Normal->value,
+        'description' => str_repeat('a', 120),
+    ])->assertRedirect(route('uptd.reports.index'));
+
+    expect($report->fresh()->description)->toBe(str_repeat('a', 120));
+});
 
 it('menolak mengedit atau memperbarui laporan milik kontributor lain', function () {
     [, $market] = uptdHistoryAccount();

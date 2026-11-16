@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UptdContributorController extends Controller
@@ -63,7 +64,6 @@ class UptdContributorController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
             'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')],
-            'password' => ['required', 'string', 'min:8'],
             'market_id' => [
                 'required',
                 'integer',
@@ -77,7 +77,7 @@ class UptdContributorController extends Controller
             'name' => $validated['name'],
             'username' => $validated['username'],
             'email' => null,
-            'password' => $validated['password'],
+            'password' => Str::password(32),
             'role' => Role::UptdPasar->value,
             'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
@@ -113,7 +113,6 @@ class UptdContributorController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
             'username' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($contributor->id)],
-            'password' => ['nullable', 'string', 'min:8'],
             'market_id' => [
                 'required',
                 'integer',
@@ -130,10 +129,6 @@ class UptdContributorController extends Controller
             'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
         ];
-
-        if (! empty($validated['password'])) {
-            $data['password'] = $validated['password'];
-        }
 
         $contributor->update($data);
 

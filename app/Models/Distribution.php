@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['distributor_id', 'market_id', 'uptd_user_id', 'recipient_store_id', 'distribution_date', 'cartons', 'status'])]
+#[Fillable(['distributor_id', 'market_id', 'uptd_user_id', 'recipient_store_id', 'distribution_date', 'cartons', 'notes', 'status'])]
 class Distribution extends Model
 {
     /** @use HasFactory<DistributionFactory> */

@@ -23,8 +23,6 @@ it('menampilkan formulir laporan kondisi lapangan', function () {
         ->assertSee('Input Laporan')
         ->assertSee('Kontributor UPTD 01')
         ->assertSee('Pasar Raya Padang')
-        ->assertSee('Terisi otomatis')
-        ->assertSee('Tidak dapat diubah')
         ->assertSee('Normal')
         ->assertSee('Perlu Perhatian')
         ->assertSee('Simpan Laporan')

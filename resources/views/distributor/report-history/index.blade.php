@@ -48,7 +48,7 @@
 
             <button
                 type="submit"
-                class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                class="shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#018F98] hover:bg-[#018F98] hover:text-white active:border-[#018F98] active:bg-[#018F98] active:text-white focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 Terapkan Filter
             </button>
@@ -58,18 +58,19 @@
             <table class="w-full min-w-[64rem] table-fixed divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
-                        <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">NO</th>
-                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Tanggal</th>
-                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Pasar</th>
-                        <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Aksi</th>
+                        <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
+                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
+                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">Pasar</th>
+                        <th scope="col" class="w-[13%] px-5 py-3 align-middle font-semibold">Jumlah Karton</th>
+                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Keterangan</th>
+                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($reports as $report)
                         <tr>
-                            <td class="whitespace-nowrap px-5 py-4 align-middle font-mono text-xs text-slate-500">
+                            <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
@@ -83,6 +84,13 @@
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle font-semibold text-slate-900">
                                 {{ $formatNumber($report->cartons) }} karton
+                            </td>
+                            <td @class([
+                                'break-words px-5 py-4 align-middle text-slate-700',
+                                'text-left' => filled($report->notes),
+                                'text-center' => blank($report->notes),
+                            ])>
+                                {{ $report->notes ?: '-' }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <div class="flex items-center justify-center gap-2">
@@ -116,7 +124,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-500">
+                            <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-500">
                                 Belum ada riwayat laporan penyaluran pada periode ini
                             </td>
                         </tr>

@@ -15,9 +15,9 @@
                 href="{{ route($tab['route']) }}"
                 @if ($active === $tab['key']) aria-current="page" @endif
                 @class([
-                    'rounded-md border px-4 py-2 text-sm transition',
-                    'border-[#018F98] bg-white font-semibold text-[#016B72] shadow-sm' => $active === $tab['key'],
-                    'border-transparent bg-[#E0F2F3] text-[#018F98] hover:bg-[#CFE9EB]' => $active !== $tab['key'],
+                    'rounded-lg px-4 py-2 text-sm font-semibold transition',
+                    'bg-[#018F98] text-white' => $active === $tab['key'],
+                    'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50' => $active !== $tab['key'],
                 ])
             >
                 {{ $tab['label'] }}

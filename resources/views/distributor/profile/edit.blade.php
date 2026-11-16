@@ -31,12 +31,12 @@
     <div class="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:items-start">
         <section class="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div class="border-b border-slate-200 px-6 py-5">
-                <h2 class="text-xl font-semibold text-slate-900">Informasi Akun Distributor</h2>
+                <h2 class="text-xl font-semibold text-slate-900">Informasi Akun</h2>
                 <p class="mt-1 text-sm text-slate-500">Data identitas yang terhubung dengan akun anda</p>
             </div>
 
             <div class="px-6 py-6">
-                <div class="flex items-center gap-4">
+                <div class="flex items-start gap-4">
                     <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#018F98] text-xl font-semibold text-white">
                         {{ $account->initials() }}
                     </span>
@@ -46,18 +46,6 @@
                         <p class="mt-1 text-sm text-slate-500">
                             Distributor MinyaKita
                         </p>
-                        <span @class([
-                            'mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-                            'bg-emerald-100 text-emerald-700' => $distributor->is_active,
-                            'bg-slate-100 text-slate-600' => ! $distributor->is_active,
-                        ])>
-                            <span @class([
-                                'h-1.5 w-1.5 rounded-full',
-                                'bg-emerald-500' => $distributor->is_active,
-                                'bg-slate-400' => ! $distributor->is_active,
-                            ])></span>
-                            {{ $distributor->is_active ? 'Aktif' : 'Nonaktif' }}
-                        </span>
                     </div>
                 </div>
 
@@ -91,9 +79,6 @@
                         <div data-inline-field>
                             <dt class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
                                 {{ $field['label'] }}
-                                @if ($isEmptyAddress)
-                                    <span class="h-2 w-2 rounded-full bg-red-500" title="Belum diisi"></span>
-                                @endif
                             </dt>
                             <dd class="mt-1.5">
                                 <div
