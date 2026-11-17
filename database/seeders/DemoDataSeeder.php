@@ -79,6 +79,7 @@ class DemoDataSeeder extends Seeder
                 [
                     'name' => 'Kontributor '.$market->name,
                     'username' => 'demo.uptd.'.Str::slug($market->name),
+                    'password' => 'uptdpasar123',
                     'is_active' => true,
                 ],
             );

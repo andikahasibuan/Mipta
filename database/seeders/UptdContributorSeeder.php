@@ -41,14 +41,21 @@ class UptdContributorSeeder extends Seeder
         foreach ($markets as $index => $market) {
             $number = str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
 
-            UptdContributor::updateOrCreate(
-                ['market_id' => $marketIds[$market['name']]],
-                [
-                    'name' => 'Kontributor UPTD '.$number,
-                    'username' => 'kontributor.uptd.'.$number,
-                    'is_active' => true,
-                ],
-            );
+            $contributor = UptdContributor::firstOrNew([
+                'market_id' => $marketIds[$market['name']],
+            ]);
+
+            $contributor->fill([
+                'name' => 'Kontributor UPTD '.$number,
+                'username' => 'kontributor.uptd.'.$number,
+                'is_active' => true,
+            ]);
+
+            if (! $contributor->exists || $contributor->password === null) {
+                $contributor->password = 'uptdpasar123';
+            }
+
+            $contributor->save();
         }
     }
 

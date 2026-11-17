@@ -1,3 +1,10 @@
+@php
+    $selectedUptdContributor = request()->attributes->get('uptd_contributor');
+    $authUser = auth()->user();
+    $profileUsername = $selectedUptdContributor?->username ?? $authUser?->username;
+    $profileAccount = $selectedUptdContributor?->username ?? $authUser?->email ?? $authUser?->username;
+@endphp
+
 <header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-4 lg:px-8">
     <button
         type="button"
@@ -69,7 +76,7 @@
                     {{ auth()->user()->initials() }}
                 </span>
                 <span class="hidden min-w-0 text-left sm:block">
-                    <span class="block max-w-[9rem] truncate text-sm font-semibold text-slate-900">{{ auth()->user()->username }}</span>
+                    <span class="block max-w-[9rem] truncate text-sm font-semibold text-slate-900">{{ $profileUsername }}</span>
                     <span class="block max-w-[9rem] truncate text-xs text-slate-500">{{ auth()->user()->role->label() }}</span>
                 </span>
                 <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -79,7 +86,7 @@
 
             <div class="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Masuk sebagai</p>
-                <p class="mt-1 truncate text-sm font-medium text-slate-900">{{ auth()->user()->email ?? auth()->user()->username }}</p>
+                <p class="mt-1 truncate text-sm font-medium text-slate-900">{{ $profileAccount }}</p>
 
                 <form method="POST" action="{{ route('logout') }}" class="mt-4">
                     @csrf

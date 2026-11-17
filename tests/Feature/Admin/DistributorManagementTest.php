@@ -415,7 +415,7 @@ it('menghapus akun perusahaan saat distributor dihapus', function () {
     $this->assertDatabaseMissing('distributors', ['id' => $distributor->id]);
 });
 
-it('menampilkan empat tab pengguna tanpa tab data master', function () {
+it('menampilkan lima tab pengguna tanpa tab data master', function () {
     $response = $this->actingAs(User::factory()->create())
         ->get(route('admin.distributors.index'));
 
@@ -424,15 +424,15 @@ it('menampilkan empat tab pengguna tanpa tab data master', function () {
     preg_match('/<nav[^>]*aria-label="Navigasi Pengguna".*?<\/nav>/s', $response->getContent(), $matches);
     $tabs = $matches[0] ?? '';
 
-    foreach (['Admin', 'Kepala Dinas', 'Distributor', 'UPTD'] as $label) {
+    foreach (['Admin', 'Kepala Dinas', 'Distributor', 'Kontributor UPTD', 'UPTD'] as $label) {
         expect($tabs)->toContain($label);
     }
 
     expect($tabs)->toContain(route('admin.distributors.index'));
+    expect($tabs)->toContain(route('admin.users.uptd-contributors.index'));
 
     expect($tabs)->not->toContain(route('admin.markets.index'));
     expect($tabs)->not->toContain(route('admin.recipient-stores.index'));
-    expect($tabs)->not->toContain(route('admin.uptd-contributors.index'));
 });
 
 it('menyorot tab aktif pada navigasi pengguna', function () {

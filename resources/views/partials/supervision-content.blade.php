@@ -28,8 +28,30 @@
 </div>
 
 <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div class="px-5 pt-5">
+    <div class="flex flex-wrap items-center justify-between gap-3 px-5 pt-5">
         <h2 class="text-lg font-semibold text-slate-900">Laporan Pengawasan</h2>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
+            >
+                <x-heroicon-o-document-arrow-down class="h-4 w-4" />
+                Ekspor Excel
+            </button>
+
+            <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                class="inline-flex shrink-0 cursor-not-allowed items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white opacity-60"
+            >
+                <x-heroicon-o-document-text class="h-4 w-4" />
+                Ekspor PDF
+            </button>
+        </div>
     </div>
 
     <form
@@ -89,7 +111,7 @@
             <thead class="bg-slate-200 text-center text-[11px] uppercase tracking-widest text-slate-700">
                 <tr>
                     <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
-                    <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
+                    <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Tanggal Laporan</th>
                     <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Identitas Kontributor</th>
                     <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Pasar</th>
                     <th scope="col" class="w-[30%] px-5 py-3 align-middle font-semibold">Keterangan</th>
@@ -111,7 +133,7 @@
                         <td class="break-words px-5 py-4 text-left align-middle capitalize text-slate-700">
                             {{ $report->market?->name ?? '—' }}
                         </td>
-                        <td class="break-words px-5 py-4 text-left align-middle capitalize text-slate-700">
+                        <td class="break-words px-5 py-4 text-left align-middle text-slate-700">
                             {{ \Illuminate\Support\Str::limit($report->description, 120, '') }}
                         </td>
                         <td class="whitespace-nowrap px-5 py-4 align-middle">

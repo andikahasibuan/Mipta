@@ -62,6 +62,7 @@ it('menampilkan informasi profil distributor sesuai desain', function () {
         ->assertSee('aria-label="Edit Alamat kantor"', false)
         ->assertSee('id="password-modal"', false)
         ->assertSee('action="'.route('distributor.profile.password.update').'"', false)
+        ->assertDontSee('</div>z', false)
         ->assertDontSee('Ubah profil');
 });
 

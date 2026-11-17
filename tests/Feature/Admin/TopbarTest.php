@@ -22,18 +22,32 @@ it('menampilkan profil pengguna yang sedang login di topbar', function () {
         ->assertSee('action="'.route('logout').'"', false);
 });
 
-it('menampilkan username di dropdown profil untuk akun bersama UPTD tanpa email', function () {
+it('menampilkan username kontributor UPTD yang dipilih di topbar', function () {
     $shared = User::factory()->create([
         'role' => Role::UptdPasar,
         'email' => null,
+        'username' => 'uptd.bersama',
     ]);
-    $contributor = UptdContributor::factory()->create();
+    $contributor = UptdContributor::factory()->create([
+        'username' => 'uptd.alai',
+    ]);
 
-    $this->actingAs($shared)
+    $response = $this->actingAs($shared)
         ->withSession(uptdContributorSession($contributor))
-        ->get(route('uptd.dashboard'))
-        ->assertOk()
-        ->assertSeeInOrder(['Masuk sebagai', $shared->username, 'Logout']);
+        ->get(route('uptd.dashboard'));
+
+    $response->assertOk()
+        ->assertSeeInOrder(['Masuk sebagai', $contributor->username, 'Logout'])
+        ->assertSee($contributor->username)
+        ->assertDontSee($shared->username);
+
+    preg_match('/<summary[^>]*aria-label="Menu profil".*?<\/summary>/s', $response->getContent(), $matches);
+    $profileSummary = $matches[0] ?? '';
+
+    expect($profileSummary)
+        ->toContain($contributor->username)
+        ->toContain('UPTD Pasar')
+        ->not->toContain($shared->username);
 });
 
 it('mengambil inisial dari dua kata pertama nama', function (string $name, string $initials) {

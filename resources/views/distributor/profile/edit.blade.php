@@ -56,8 +56,7 @@
                 </div>
 
                 <dl class="mt-7 grid gap-x-10 gap-y-6 border-t border-slate-200 pt-6 sm:grid-cols-2">
-
-                     <div>
+                    <div>
                         <dt class="text-xs font-semibold uppercase tracking-widest text-slate-400">distributor</dt>
                         <dd class="mt-1.5 break-words text-sm font-semibold text-slate-900">
                             {{ $distributor->name }}
@@ -69,7 +68,8 @@
                         <dd class="mt-1.5 break-words text-sm font-semibold text-slate-900">
                             {{ $account->username }}
                         </dd>
-                    </div>z
+                    </div>
+
                     @foreach ($editableFields as $field)
                         @php
                             $isEmptyField = in_array($field['name'], ['email', 'alamat_kantor'], true) && blank($field['value']);

@@ -50,6 +50,13 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+// Tutup pesan flash tanpa memuat ulang halaman.
+document.querySelectorAll('[data-flash-dismiss]').forEach((button) => {
+    button.addEventListener('click', () => {
+        button.closest('[data-flash-message]')?.remove();
+    });
+});
+
 // Perbarui notifikasi topbar tanpa memuat ulang halaman.
 const notificationMenu = document.querySelector('[data-notification-menu]');
 const notificationFeedUrl = notificationMenu?.dataset.notificationFeedUrl;

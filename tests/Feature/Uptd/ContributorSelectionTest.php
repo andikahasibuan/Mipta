@@ -60,7 +60,7 @@ it('menampilkan sembilan identitas kontributor UPTD yang aktif', function () {
         ->assertOk()
         ->assertSee('Pilih identitas kontributor')
         ->assertSee('Identitas dipilih')
-        ->assertSee('Lanjut ke dashboard')
+        ->assertSee('Lanjut')
         ->assertSeeInOrder($contributors->pluck('name')->all())
         ->assertSeeInOrder($marketNames)
         ->assertDontSee('Akun Bersama UPTD')
@@ -68,7 +68,7 @@ it('menampilkan sembilan identitas kontributor UPTD yang aktif', function () {
         ->assertDontSee('Kontributor Pasar Nonaktif');
 });
 
-it('menyimpan identitas terpilih dan langsung membuka dashboard tanpa login kedua', function () {
+it('mengarahkan ke halaman login identitas setelah memilih pasar', function () {
     $shared = sharedUptdAccount();
     $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 04',
@@ -78,20 +78,14 @@ it('menyimpan identitas terpilih dan langsung membuka dashboard tanpa login kedu
 
     $this->actingAs($shared)
         ->post(route('uptd.contributors.select'), ['contributor_id' => $contributor->id])
-        ->assertRedirect(route('uptd.dashboard'))
-        ->assertSessionHas('uptd_selected_contributor', [
-            'id' => $contributor->id,
-            'username' => 'kontributor.uptd.04',
-            'name' => 'Kontributor UPTD 04',
-            'market' => 'Pasar Nanggalo',
-        ]);
+        ->assertRedirect(route('uptd.contributors.login', $contributor))
+        ->assertSessionHas('uptd_pending_contributor', $contributor->id)
+        ->assertSessionMissing('uptd_selected_contributor');
 
     $this->assertAuthenticatedAs($shared);
 
     $this->get(route('uptd.dashboard'))
-        ->assertOk()
-        ->assertSee('Kontributor UPTD 04')
-        ->assertSee('Pasar Nanggalo');
+        ->assertRedirect(route('uptd.contributors.index'));
 });
 
 it('menolak pemilihan identitas yang tidak valid', function (mixed $value, string $message) {
@@ -145,7 +139,7 @@ it('menolak identitas kontributor yang nonaktif', function () {
     $this->assertAuthenticatedAs($shared);
 });
 
-it('mengizinkan akun bersama berganti identitas tanpa login ulang', function () {
+it('meminta login identitas baru saat akun bersama berganti identitas', function () {
     $shared = sharedUptdAccount();
     $firstContributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
@@ -159,11 +153,46 @@ it('mengizinkan akun bersama berganti identitas tanpa login ulang', function () 
     $this->actingAs($shared);
 
     $this->post(route('uptd.contributors.select'), ['contributor_id' => $firstContributor->id])
-        ->assertRedirect(route('uptd.dashboard'));
+        ->assertRedirect(route('uptd.contributors.login', $firstContributor));
+
+    $this->post(route('uptd.contributors.login.store', $firstContributor), [
+        'username' => $firstContributor->username,
+        'password' => 'uptdpasar123',
+    ])->assertRedirect(route('uptd.dashboard'));
 
     $this->post(route('uptd.contributors.select'), ['contributor_id' => $secondContributor->id])
-        ->assertRedirect(route('uptd.dashboard'))
+        ->assertRedirect(route('uptd.contributors.login', $secondContributor));
+
+    $this->post(route('uptd.contributors.login.store', $secondContributor), [
+        'username' => $secondContributor->username,
+        'password' => 'uptdpasar123',
+    ])->assertRedirect(route('uptd.dashboard'))
         ->assertSessionHas('uptd_selected_contributor.id', $secondContributor->id);
+
+    $this->assertAuthenticatedAs($shared);
+});
+
+it('mengarahkan langsung ke dashboard saat memilih identitas yang sedang aktif', function () {
+    $shared = sharedUptdAccount();
+    $contributor = UptdContributor::factory()->create([
+        'name' => 'Kontributor UPTD 01',
+        'market_id' => Market::factory()->create(['name' => 'Pasar Raya Padang']),
+    ]);
+
+    $this->actingAs($shared)
+        ->withSession([
+            'uptd_selected_contributor' => [
+                'id' => $contributor->id,
+                'username' => $contributor->username,
+                'name' => $contributor->name,
+                'market' => 'Pasar Raya Padang',
+            ],
+            'uptd_pending_contributor' => 999,
+        ])
+        ->post(route('uptd.contributors.select'), ['contributor_id' => $contributor->id])
+        ->assertRedirect(route('uptd.dashboard'))
+        ->assertSessionMissing('uptd_pending_contributor')
+        ->assertSessionHas('uptd_selected_contributor.id', $contributor->id);
 
     $this->assertAuthenticatedAs($shared);
 });

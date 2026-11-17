@@ -3,15 +3,15 @@
 @section('title', 'Kontributor UPTD')
 
 @section('content')
-    <x-ui.master-data-tabs active="kontributor">
+    <x-ui.user-tabs active="uptd-contributor">
         <a
-            href="{{ route('admin.uptd-contributors.create') }}"
+            href="{{ route('admin.users.uptd-contributors.create') }}"
             class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#018F98]/90"
         >
             <x-heroicon-o-plus class="h-4 w-4" />
             Tambah data
         </a>
-    </x-ui.master-data-tabs>
+    </x-ui.user-tabs>
 
     <x-ui.flash-messages />
 
@@ -26,7 +26,7 @@
 
         <form
             method="GET"
-            action="{{ route('admin.uptd-contributors.index') }}"
+            action="{{ route('admin.users.uptd-contributors.index') }}"
             class="mt-4 flex flex-col gap-3 px-5 lg:flex-row lg:items-center"
         >
             <div class="relative min-w-0 flex-1">
@@ -88,8 +88,8 @@
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <x-ui.row-actions
-                                    :edit="route('admin.uptd-contributors.edit', $contributor)"
-                                    :delete="route('admin.uptd-contributors.destroy', $contributor)"
+                                    :edit="route('admin.users.uptd-contributors.edit', $contributor)"
+                                    :delete="route('admin.users.uptd-contributors.destroy', $contributor)"
                                 />
                             </td>
                         </tr>

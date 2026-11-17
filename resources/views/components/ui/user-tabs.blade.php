@@ -5,6 +5,7 @@
         ['key' => 'admin', 'label' => 'Admin', 'route' => 'admin.users.index', 'params' => ['role' => 'admin']],
         ['key' => 'kepala-dinas', 'label' => 'Kepala Dinas', 'route' => 'admin.users.index', 'params' => ['role' => 'kepala_dinas']],
         ['key' => 'distributor', 'label' => 'Distributor', 'route' => 'admin.distributors.index', 'params' => []],
+        ['key' => 'uptd-contributor', 'label' => 'Kontributor UPTD', 'route' => 'admin.users.uptd-contributors.index', 'params' => []],
         ['key' => 'uptd', 'label' => 'UPTD', 'route' => 'admin.users.index', 'params' => ['role' => 'uptd_pasar']],
     ];
 @endphp

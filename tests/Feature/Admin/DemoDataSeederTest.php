@@ -55,7 +55,7 @@ it('menampilkan data contoh yang tersedia pada dashboard dan menu pengguna dan d
         ->assertDontSee('Andi Pratama')
         ->assertDontSee('Rina Marlina');
 
-    $this->get(route('admin.uptd-contributors.index'))
+    $this->get(route('admin.users.uptd-contributors.index'))
         ->assertOk()
         ->assertSee('Kontributor Pasar Raya Padang')
         ->assertSee('Pasar Raya Padang');

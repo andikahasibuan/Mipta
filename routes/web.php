@@ -71,6 +71,8 @@ Route::post('logout', [LoginController::class, 'destroy'])
 Route::middleware(['auth', 'role:uptd_pasar'])->group(function () {
     Route::get('uptd/contributors', [UptdAreaContributorController::class, 'index'])->name('uptd.contributors.index');
     Route::post('uptd/contributors', [UptdAreaContributorController::class, 'select'])->name('uptd.contributors.select');
+    Route::get('uptd/contributors/{contributor}/login', [UptdAreaContributorController::class, 'showLogin'])->name('uptd.contributors.login');
+    Route::post('uptd/contributors/{contributor}/login', [UptdAreaContributorController::class, 'login'])->name('uptd.contributors.login.store');
 });
 
 Route::middleware(['auth', 'role:admin,kepala_dinas'])->group(function () {
@@ -94,6 +96,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
+    Route::get('users/uptd-contributors', [UptdContributorController::class, 'index'])->name('users.uptd-contributors.index');
+    Route::get('users/uptd-contributors/create', [UptdContributorController::class, 'create'])->name('users.uptd-contributors.create');
+    Route::post('users/uptd-contributors', [UptdContributorController::class, 'store'])->name('users.uptd-contributors.store');
+    Route::get('users/uptd-contributors/{contributor}/edit', [UptdContributorController::class, 'edit'])->name('users.uptd-contributors.edit');
+    Route::put('users/uptd-contributors/{contributor}', [UptdContributorController::class, 'update'])->name('users.uptd-contributors.update');
+    Route::delete('users/uptd-contributors/{contributor}', [UptdContributorController::class, 'destroy'])->name('users.uptd-contributors.destroy');
+
     Route::get('distributors', [DistributorController::class, 'index'])->name('distributors.index');
     Route::get('distributors/create', [DistributorController::class, 'create'])->name('distributors.create');
     Route::post('distributors', [DistributorController::class, 'store'])->name('distributors.store');
@@ -115,12 +124,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::put('recipient-stores/{store}', [RecipientStoreController::class, 'update'])->name('recipient-stores.update');
     Route::delete('recipient-stores/{store}', [RecipientStoreController::class, 'destroy'])->name('recipient-stores.destroy');
 
-    Route::get('uptd-contributors', [UptdContributorController::class, 'index'])->name('uptd-contributors.index');
-    Route::get('uptd-contributors/create', [UptdContributorController::class, 'create'])->name('uptd-contributors.create');
-    Route::post('uptd-contributors', [UptdContributorController::class, 'store'])->name('uptd-contributors.store');
-    Route::get('uptd-contributors/{contributor}/edit', [UptdContributorController::class, 'edit'])->name('uptd-contributors.edit');
-    Route::put('uptd-contributors/{contributor}', [UptdContributorController::class, 'update'])->name('uptd-contributors.update');
-    Route::delete('uptd-contributors/{contributor}', [UptdContributorController::class, 'destroy'])->name('uptd-contributors.destroy');
     Route::get('distribution', [DistributionController::class, 'index'])->name('distribution.index');
     Route::get('supervision', [SupervisionController::class, 'index'])->name('supervision.index');
 });

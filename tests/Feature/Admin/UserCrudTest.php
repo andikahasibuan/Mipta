@@ -157,7 +157,7 @@ it('menolak nama dan username kontributor UPTD yang mengandung karakter khusus',
     $this->actingAs(User::factory()->create());
     $market = Market::factory()->create();
 
-    $this->post(route('admin.uptd-contributors.store'), [
+    $this->post(route('admin.users.uptd-contributors.store'), [
         'name' => 'Rina !@#$%',
         'username' => 'rina!#$',
         'password' => 'password123',
@@ -194,12 +194,13 @@ it('menyimpan profil kontributor UPTD dengan peran UPTD Pasar', function () {
     $this->actingAs(User::factory()->create());
     $market = Market::factory()->create();
 
-    $this->post(route('admin.uptd-contributors.store'), [
+    $this->post(route('admin.users.uptd-contributors.store'), [
         'name' => 'Dewi Anggraini',
         'username' => 'dewi.anggraini',
+        'password' => 'password123',
         'market_id' => $market->id,
         'is_active' => '1',
-    ])->assertRedirect(route('admin.uptd-contributors.index'));
+    ])->assertRedirect(route('admin.users.uptd-contributors.index'));
 
     $this->assertDatabaseHas('uptd_contributors', [
         'username' => 'dewi.anggraini',
@@ -215,11 +216,11 @@ it('memperbarui profil kontributor UPTD dan menyimpannya ke database', function 
         'market_id' => $market->id,
     ]);
 
-    $this->put(route('admin.uptd-contributors.update', $contributor), [
+    $this->put(route('admin.users.uptd-contributors.update', $contributor), [
         'name' => 'Nama Baru',
         'username' => $contributor->username,
         'market_id' => $market->id,
-    ])->assertRedirect(route('admin.uptd-contributors.index'));
+    ])->assertRedirect(route('admin.users.uptd-contributors.index'));
 
     $this->assertDatabaseHas('uptd_contributors', [
         'id' => $contributor->id,
@@ -234,8 +235,8 @@ it('menghapus profil kontributor UPTD dari database', function () {
         'market_id' => Market::factory(),
     ]);
 
-    $this->delete(route('admin.uptd-contributors.destroy', $contributor))
-        ->assertRedirect(route('admin.uptd-contributors.index'));
+    $this->delete(route('admin.users.uptd-contributors.destroy', $contributor))
+        ->assertRedirect(route('admin.users.uptd-contributors.index'));
 
     $this->assertDatabaseMissing('uptd_contributors', ['id' => $contributor->id]);
 });

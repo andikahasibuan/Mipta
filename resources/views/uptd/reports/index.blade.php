@@ -92,7 +92,7 @@
                             <td class="break-words px-5 py-4 align-middle capitalize text-slate-700">
                                 {{ $report->market?->name ?? '—' }}
                             </td>
-                            <td class="break-words px-5 py-4 text-left align-middle capitalize text-slate-600">
+                            <td class="break-words px-5 py-4 text-left align-middle text-slate-600">
                                 {{ \Illuminate\Support\Str::limit($report->description, 120, '') }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">

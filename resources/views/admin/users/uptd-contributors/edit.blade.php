@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="mx-auto max-w-2xl">
-        <form method="POST" action="{{ route('admin.uptd-contributors.update', $contributor) }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <form method="POST" action="{{ route('admin.users.uptd-contributors.update', $contributor) }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
             @csrf
             @method('PUT')
 
@@ -48,6 +48,20 @@
                 </div>
 
                 <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <x-ui.password-input
+                        id="password"
+                        name="password"
+                        minlength="8"
+                        autocomplete="new-password"
+                        class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
+                    />
+                    @error('password')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label for="market_id" class="block text-sm font-medium text-slate-700">Pasar Terkait</label>
                     <select
                         id="market_id"
@@ -80,7 +94,7 @@
 
             <div class="flex items-center justify-end gap-3 border-t border-slate-200 px-5 py-4">
                 <a
-                    href="{{ route('admin.uptd-contributors.index') }}"
+                    href="{{ route('admin.users.uptd-contributors.index') }}"
                     class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                 >
                     Batal

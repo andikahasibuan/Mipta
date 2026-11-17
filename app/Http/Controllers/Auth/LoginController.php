@@ -43,7 +43,7 @@ class LoginController extends Controller
         $request->session()->regenerate();
 
         if ($user->isSharedUptdAccount()) {
-            $request->session()->forget('uptd_selected_contributor');
+            $request->session()->forget(['uptd_selected_contributor', 'uptd_pending_contributor']);
 
             return redirect()->route('uptd.contributors.index');
         }
@@ -58,7 +58,7 @@ class LoginController extends Controller
             ])->onlyInput('identifier');
         }
 
-        $request->session()->forget('uptd_selected_contributor');
+        $request->session()->forget(['uptd_selected_contributor', 'uptd_pending_contributor']);
 
         return redirect()->to($this->intendedUrl(route($home), $user->role->routePrefix()));
     }

@@ -54,6 +54,7 @@ dataset('user tab pages', [
     'kepala dinas' => ['admin.users.index', ['role' => 'kepala_dinas'], 'Kepala Dinas'],
     'uptd' => ['admin.users.index', ['role' => 'uptd_pasar'], 'UPTD'],
     'distributor' => ['admin.distributors.index', [], 'Distributor'],
+    'uptd contributor' => ['admin.users.uptd-contributors.index', [], 'Kontributor UPTD'],
 ]);
 
 it('menjaga konsistensi tab pengguna dan sorotan sidebar', function (string $routeName, array $query, string $tabLabel) {
@@ -66,7 +67,7 @@ it('menjaga konsistensi tab pengguna dan sorotan sidebar', function (string $rou
     preg_match('/<nav[^>]*aria-label="Navigasi Pengguna".*?<\/nav>/s', $html, $tabMatches);
     $tabsNav = $tabMatches[0] ?? '';
 
-    foreach (['Admin', 'Kepala Dinas', 'Distributor', 'UPTD'] as $label) {
+    foreach (['Admin', 'Kepala Dinas', 'Distributor', 'Kontributor UPTD', 'UPTD'] as $label) {
         expect($tabsNav)->toContain($label);
     }
 
@@ -83,7 +84,6 @@ it('menjaga konsistensi tab pengguna dan sorotan sidebar', function (string $rou
 dataset('master data tab pages', [
     'pasar' => ['admin.markets.index', 'Pasar'],
     'toko penerima' => ['admin.recipient-stores.index', 'Toko Penerima'],
-    'kontributor uptd' => ['admin.uptd-contributors.index', 'Kontributor UPTD'],
 ]);
 
 it('menjaga konsistensi tab data master dan sorotan sidebar', function (string $routeName, string $tabLabel) {
@@ -96,9 +96,11 @@ it('menjaga konsistensi tab data master dan sorotan sidebar', function (string $
     preg_match('/<nav[^>]*aria-label="Navigasi Data Master".*?<\/nav>/s', $html, $tabMatches);
     $tabsNav = $tabMatches[0] ?? '';
 
-    foreach (['Pasar', 'Toko Penerima', 'Kontributor UPTD'] as $label) {
+    foreach (['Pasar', 'Toko Penerima'] as $label) {
         expect($tabsNav)->toContain($label);
     }
+
+    expect($tabsNav)->not->toContain('Kontributor UPTD');
 
     expect(substr_count($tabsNav, 'aria-current="page"'))->toBe(1)
         ->and($tabsNav)->toMatch('/aria-current="page"[^>]*>\s*'.preg_quote($tabLabel, '/').'\s*<\/a>/s');

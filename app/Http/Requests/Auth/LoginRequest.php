@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\Role;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
@@ -71,6 +73,15 @@ class LoginRequest extends FormRequest
 
         $this->ensureIsNotRateLimited($user, $identifier);
 
+        if ($this->isUptdContributorLogin($field, $identifier, $user)) {
+            RateLimiter::hit($this->accountThrottleKey($user, $identifier), self::LOCKOUT_SECONDS);
+            RateLimiter::hit($this->ipThrottleKey(), self::LOCKOUT_SECONDS);
+
+            throw ValidationException::withMessages([
+                'identifier' => 'Akun kontributor UPTD harus masuk melalui akun bersama UPTD.',
+            ]);
+        }
+
         if (! Auth::attempt([$field => $identifier, 'password' => $password, 'is_active' => true])) {
             RateLimiter::hit($this->accountThrottleKey($user, $identifier), self::LOCKOUT_SECONDS);
 
@@ -113,6 +124,19 @@ class LoginRequest extends FormRequest
                 'identifier' => "Terlalu banyak percobaan masuk. Coba lagi dalam {$minutes} menit.",
             ]);
         }
+    }
+
+    /**
+     * Periksa apakah percobaan login memakai akun kontributor UPTD yang tidak boleh masuk langsung.
+     */
+    private function isUptdContributorLogin(string $field, string $identifier, ?User $user): bool
+    {
+        if ($user !== null && $user->role === Role::UptdPasar && ! $user->isSharedUptdAccount()) {
+            return true;
+        }
+
+        return $field === 'username'
+            && UptdContributor::query()->where('username', Str::lower($identifier))->exists();
     }
 
     /**

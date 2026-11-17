@@ -59,11 +59,11 @@ it('menampilkan navigasi tab data master', function () {
 
     expect($tabs)
         ->toContain(route('admin.markets.index'))
-        ->toContain(route('admin.recipient-stores.index'))
-        ->toContain(route('admin.uptd-contributors.index'));
+        ->toContain(route('admin.recipient-stores.index'));
 
     expect($tabs)->not->toContain(route('admin.users.index'));
     expect($tabs)->not->toContain(route('admin.distributors.index'));
+    expect($tabs)->not->toContain(route('admin.users.uptd-contributors.index'));
 });
 
 it('menampilkan pagination saat pasar lebih dari sepuluh', function () {

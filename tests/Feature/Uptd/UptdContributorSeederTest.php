@@ -32,7 +32,8 @@ it('membuat akun bersama dan sembilan profil kontributor tanpa akun login terpis
         $number = str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
 
         expect($contributor->username)->toBe('kontributor.uptd.'.$number)
-            ->and($contributor->is_active)->toBeTrue();
+            ->and($contributor->is_active)->toBeTrue()
+            ->and(Hash::check('uptdpasar123', $contributor->password))->toBeTrue();
     }
 });
 
@@ -47,7 +48,7 @@ it('memisahkan akun bersama dan profil kontributor pasar pada menu admin', funct
         ->assertSee('Kontributor UPTD Pasar')
         ->assertDontSee('Kontributor UPTD 01');
 
-    $this->get(route('admin.uptd-contributors.index'))
+    $this->get(route('admin.users.uptd-contributors.index'))
         ->assertOk()
         ->assertSee('Kontributor UPTD 09')
         ->assertDontSee('Kontributor UPTD Pasar');

@@ -4,29 +4,22 @@
 
 @section('content')
     <header class="w-full border-b border-slate-200 bg-white">
-        <div class="flex w-full flex-wrap items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+        <div class="flex w-full items-center justify-between gap-4 px-6 py-4 lg:px-8">
             <img
                 src="{{ asset('images/mipta-logo.png') }}"
                 alt="MIPTA"
-                class="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20"
+                class="h-10 w-10 shrink-0 object-contain"
             >
-            <div class="min-w-0 leading-tight">
-                <p class="text-xl font-semibold tracking-wide text-[#018F98] sm:text-2xl">MIPTA</p>
-                <p class="text-xs text-slate-500 sm:text-sm">Portal UPTD Pasar</p>
-            </div>
-
-            <div class="ml-auto">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50"
-                    >
-                        <x-heroicon-o-arrow-right-on-rectangle class="h-4 w-4" />
-                        Keluar
-                    </button>
-                </form>
-            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button
+                    type="submit"
+                    class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                >
+                    <x-heroicon-o-arrow-right-on-rectangle class="h-4 w-4" />
+                    Keluar
+                </button>
+            </form>
         </div>
     </header>
 
@@ -43,14 +36,12 @@
             @else
                 @php
                     $selectedId = old('contributor_id', $selectedContributorId);
-                    $isCurrentSelection = $selectedContributorId !== null && (int) $selectedId === $selectedContributorId;
                 @endphp
 
                 <form
                     id="contributor-selection-form"
                     method="POST"
                     action="{{ route('uptd.contributors.select') }}"
-                    data-current-contributor-id="{{ $selectedContributorId }}"
                 >
                     @csrf
 
@@ -101,7 +92,7 @@
                             type="submit"
                             class="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#018F98] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#017A81] focus:outline-none focus:ring-2 focus:ring-[#018F98]/50"
                         >
-                            <span id="selection-submit-label">{{ $isCurrentSelection ? 'Kembali ke dashboard' : 'Lanjut ke dashboard' }}</span>
+                            <span>Lanjut</span>
                             <x-heroicon-o-chevron-right class="h-4 w-4" />
                         </button>
                     </div>
@@ -121,24 +112,14 @@
             }
 
             const summary = document.getElementById('selected-contributor');
-            const submitLabel = document.getElementById('selection-submit-label');
-            const currentContributorId = form.dataset.currentContributorId || null;
             const options = form.querySelectorAll('input[name="contributor_id"]');
 
             const updateSummary = () => {
                 const selected = form.querySelector('input[name="contributor_id"]:checked');
 
-                if (!selected) {
-                    summary.textContent = 'Belum ada identitas dipilih';
-                    submitLabel.textContent = 'Lanjut ke dashboard';
-
-                    return;
-                }
-
-                summary.textContent = selected.dataset.name;
-                submitLabel.textContent = currentContributorId !== null && selected.value === currentContributorId
-                    ? 'Kembali ke dashboard'
-                    : 'Lanjut ke dashboard';
+                summary.textContent = selected
+                    ? selected.dataset.name
+                    : 'Belum ada identitas dipilih';
             };
 
             options.forEach((option) => option.addEventListener('change', updateSummary));

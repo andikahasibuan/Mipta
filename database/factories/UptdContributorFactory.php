@@ -22,6 +22,7 @@ class UptdContributorFactory extends Factory
             'market_id' => Market::factory(),
             'name' => 'Kontributor '.fake()->unique()->words(2, true),
             'username' => 'kontributor.'.fake()->unique()->userName(),
+            'password' => 'uptdpasar123',
             'is_active' => true,
         ];
     }

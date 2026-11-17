@@ -6,6 +6,8 @@
 @endphp
 
 <div class="min-w-0">
+    <x-ui.flash-messages />
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="flex h-28 flex-col justify-center rounded-xl bg-[#018F98] px-6 py-2.5 text-white shadow-sm sm:col-span-2 sm:px-8">
             <p class="text-[11px] font-semibold uppercase tracking-widest text-[#E6F7F8]">

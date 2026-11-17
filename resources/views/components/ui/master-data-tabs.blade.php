@@ -4,7 +4,6 @@
     $tabs = [
         ['key' => 'pasar', 'label' => 'Pasar', 'route' => 'admin.markets.index'],
         ['key' => 'toko', 'label' => 'Toko Penerima', 'route' => 'admin.recipient-stores.index'],
-        ['key' => 'kontributor', 'label' => 'Kontributor UPTD', 'route' => 'admin.uptd-contributors.index'],
     ];
 @endphp
 

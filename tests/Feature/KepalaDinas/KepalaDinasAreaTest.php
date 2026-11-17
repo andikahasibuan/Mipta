@@ -48,7 +48,7 @@ dataset('admin pages', [
     'distributors' => ['admin.distributors.index'],
     'markets' => ['admin.markets.index'],
     'stores' => ['admin.recipient-stores.index'],
-    'uptd' => ['admin.uptd-contributors.index'],
+    'uptd' => ['admin.users.uptd-contributors.index'],
     'distribution' => ['admin.distribution.index'],
     'supervision' => ['admin.supervision.index'],
 ]);
@@ -152,6 +152,17 @@ it('menampilkan keadaan kosong laporan pengawasan untuk kepala dinas', function 
 it('menampilkan dua tombol ekspor nonaktif pada laporan penyaluran kepala dinas', function () {
     $response = $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.distribution.index'));
+
+    $response->assertOk()
+        ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])
+        ->assertDontSee('akan tersedia segera');
+
+    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
+});
+
+it('menampilkan dua tombol ekspor nonaktif pada laporan pengawasan kepala dinas', function () {
+    $response = $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
+        ->get(route('kepala-dinas.supervision.index'));
 
     $response->assertOk()
         ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])

@@ -39,6 +39,17 @@ it('menampilkan laporan pengawasan dari database', function () {
         ->assertSee(now()->format('d/m/Y'));
 });
 
+it('menampilkan dua tombol ekspor nonaktif pada laporan pengawasan', function () {
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('admin.supervision.index'));
+
+    $response->assertOk()
+        ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])
+        ->assertDontSee('akan tersedia segera');
+
+    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
+});
+
 it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () {
     $firstContributor = UptdContributor::factory()->create(['name' => 'Andi Pratama']);
     $secondContributor = UptdContributor::factory()->create(['name' => 'Rina Marlina']);

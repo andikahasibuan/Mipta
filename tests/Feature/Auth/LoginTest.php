@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Market;
+use App\Models\UptdContributor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -99,6 +101,42 @@ it('mengarahkan akun bersama UPTD ke halaman pemilihan identitas', function () {
     ])->assertRedirect(route('uptd.contributors.index'));
 
     $this->assertAuthenticatedAs($shared);
+});
+
+it('menolak login langsung memakai identitas kontributor UPTD', function () {
+    $contributor = UptdContributor::factory()->create([
+        'username' => 'uptd.alai',
+        'market_id' => Market::factory(),
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => $contributor->username,
+        'password' => 'uptdpasar123',
+    ])->assertSessionHasErrors('identifier');
+
+    expect(session('errors')->first('identifier'))
+        ->toContain('Akun kontributor UPTD harus masuk melalui akun bersama UPTD.');
+
+    $this->assertGuest();
+});
+
+it('menolak login langsung akun pengguna lama yang terikat ke pasar', function () {
+    User::factory()->create([
+        'username' => 'uptd.lama',
+        'password' => 'admin123',
+        'role' => Role::UptdPasar,
+        'market_id' => Market::factory(),
+    ]);
+
+    $this->post(route('login'), [
+        'identifier' => 'uptd.lama',
+        'password' => 'admin123',
+    ])->assertSessionHasErrors('identifier');
+
+    expect(session('errors')->first('identifier'))
+        ->toContain('Akun kontributor UPTD harus masuk melalui akun bersama UPTD.');
+
+    $this->assertGuest();
 });
 
 it('menolak distributor yang belum dikaitkan ke PT', function () {

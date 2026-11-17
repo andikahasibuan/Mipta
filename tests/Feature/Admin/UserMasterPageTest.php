@@ -25,7 +25,7 @@ it('menampilkan judul halaman pengguna dan data master di setiap tab', function 
         'admin.distributors.index' => 'Distributor',
         'admin.markets.index' => 'Pasar',
         'admin.recipient-stores.index' => 'Toko Penerima',
-        'admin.uptd-contributors.index' => 'Kontributor UPTD',
+        'admin.users.uptd-contributors.index' => 'Kontributor UPTD',
     ])->each(function (string $title, string $route) use ($admin): void {
         $this->actingAs($admin)
             ->get(route($route))

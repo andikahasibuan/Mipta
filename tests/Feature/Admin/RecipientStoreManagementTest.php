@@ -236,11 +236,11 @@ it('menampilkan navigasi tab data master hingga toko penerima', function () {
 
     expect($tabs)
         ->toContain(route('admin.markets.index'))
-        ->toContain(route('admin.recipient-stores.index'))
-        ->toContain(route('admin.uptd-contributors.index'));
+        ->toContain(route('admin.recipient-stores.index'));
 
     expect($tabs)->not->toContain(route('admin.users.index'));
     expect($tabs)->not->toContain(route('admin.distributors.index'));
+    expect($tabs)->not->toContain(route('admin.users.uptd-contributors.index'));
 });
 
 it('menampilkan sepuluh toko per halaman', function () {

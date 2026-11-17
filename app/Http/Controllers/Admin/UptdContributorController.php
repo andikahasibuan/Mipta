@@ -33,7 +33,7 @@ class UptdContributorController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.uptd-contributors.index', [
+        return view('admin.users.uptd-contributors.index', [
             'contributors' => $contributors,
             'filters' => [
                 'q' => $search,
@@ -47,7 +47,7 @@ class UptdContributorController extends Controller
      */
     public function create(): View
     {
-        return view('admin.uptd-contributors.create', [
+        return view('admin.users.uptd-contributors.create', [
             'markets' => Market::whereDoesntHave('uptdContributors')
                 ->orderBy('name')
                 ->get(['id', 'name']),
@@ -64,6 +64,7 @@ class UptdContributorController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
             'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')],
+            'password' => ['required', 'string', 'min:8'],
             'market_id' => [
                 'required',
                 'integer',
@@ -75,11 +76,12 @@ class UptdContributorController extends Controller
         UptdContributor::create([
             'name' => $validated['name'],
             'username' => $validated['username'],
+            'password' => $validated['password'],
             'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
         ]);
 
-        return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil ditambahkan.');
+        return redirect()->route('admin.users.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil ditambahkan.');
     }
 
     /**
@@ -87,7 +89,7 @@ class UptdContributorController extends Controller
      */
     public function edit(UptdContributor $contributor): View
     {
-        return view('admin.uptd-contributors.edit', [
+        return view('admin.users.uptd-contributors.edit', [
             'contributor' => $contributor,
             'markets' => Market::where(fn ($query) => $query
                 ->whereDoesntHave('uptdContributors')
@@ -107,6 +109,7 @@ class UptdContributorController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
             'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')->ignore($contributor->id)],
+            'password' => ['nullable', 'string', 'min:8'],
             'market_id' => [
                 'required',
                 'integer',
@@ -115,14 +118,20 @@ class UptdContributorController extends Controller
             ],
         ], $this->validationMessages());
 
-        $contributor->update([
+        $attributes = [
             'name' => $validated['name'],
             'username' => $validated['username'],
             'market_id' => $validated['market_id'],
             'is_active' => $request->boolean('is_active'),
-        ]);
+        ];
 
-        return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil diperbarui.');
+        if (filled($validated['password'] ?? null)) {
+            $attributes['password'] = $validated['password'];
+        }
+
+        $contributor->update($attributes);
+
+        return redirect()->route('admin.users.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil diperbarui.');
     }
 
     /**
@@ -132,7 +141,7 @@ class UptdContributorController extends Controller
     {
         $contributor->delete();
 
-        return redirect()->route('admin.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil dihapus.');
+        return redirect()->route('admin.users.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil dihapus.');
     }
 
     /**
@@ -145,6 +154,8 @@ class UptdContributorController extends Controller
         return [
             'name.regex' => 'Nama hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
             'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
             'market_id.required' => 'Pasar terkait wajib dipilih.',
             'market_id.exists' => 'Pasar yang dipilih tidak valid.',
             'market_id.unique' => 'Pasar ini sudah memiliki kontributor UPTD.',
