@@ -94,7 +94,7 @@
                         name="description"
                         rows="4"
                         maxlength="120"
-                        placeholder="Jelaskan kondisi pasar atau kendala distribusi yang ditemukan di pasar..."
+                        placeholder="Jelaskan hasil pengawasan atau kendala distribusi yang ditemukan di pasar..."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >{{ old('description', $report?->description) }}</textarea>
                     <p class="mt-1 text-xs text-slate-500">Maksimal 120 karakter.</p>
@@ -132,7 +132,7 @@
             </div>
 
             <p class="mt-4 text-sm leading-snug text-[#018F98]">
-                Gunakan data yang sesuai dengan kondisi pasar. Laporan yang dikirim akan menjadi bahan evaluasi
+                Gunakan data yang sesuai dengan hasil pengawasan. Laporan yang dikirim akan menjadi bahan evaluasi
                 dan dapat dilihat oleh Admin serta Kepala Dinas.
             </p>
         </div>

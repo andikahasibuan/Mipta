@@ -5,12 +5,18 @@ namespace App\Http\Controllers\Distributor;
 use App\Http\Controllers\Controller;
 use App\Models\Market;
 use App\Models\RecipientStore;
+use App\Notifications\RecipientStoreCreated;
+use App\Notifications\RecipientStoreUpdated;
+use App\Services\NotificationDispatcher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StoreController extends Controller
 {
+    public function __construct(private readonly NotificationDispatcher $notifications) {}
+
     /**
      * Tampilkan daftar toko penerima milik distributor.
      */
@@ -65,14 +71,28 @@ class StoreController extends Controller
             'nib' => ['required', 'digits:13'],
         ], $this->storeValidationMessages());
 
-        RecipientStore::create([
-            'distributor_id' => $request->user()->distributor_id,
-            'market_id' => $validated['market_id'],
-            'name' => $validated['name'],
-            'alamat' => $validated['alamat'] ?? null,
-            'nib' => $validated['nib'] ?? null,
-            'is_active' => true,
-        ]);
+        $distributorName = $request->user()->distributor->name;
+        $marketName = Market::query()->whereKey($validated['market_id'])->value('name') ?? '—';
+
+        DB::transaction(function () use ($request, $validated, $distributorName, $marketName): void {
+            $store = RecipientStore::create([
+                'distributor_id' => $request->user()->distributor_id,
+                'market_id' => $validated['market_id'],
+                'name' => $validated['name'],
+                'alamat' => $validated['alamat'] ?? null,
+                'nib' => $validated['nib'] ?? null,
+                'is_active' => true,
+            ]);
+
+            $this->notifications->sendToAdmin(
+                new RecipientStoreCreated(
+                    $store->name,
+                    $marketName,
+                    $distributorName,
+                    $store->id,
+                ),
+            );
+        });
 
         return redirect()->route('distributor.stores.index')
             ->with('success', 'Toko penerima berhasil ditambahkan.');
@@ -105,12 +125,30 @@ class StoreController extends Controller
             'nib' => ['required', 'digits:13'],
         ], $this->storeValidationMessages());
 
-        $store->update([
+        $store->fill([
             'market_id' => $validated['market_id'],
             'name' => $validated['name'],
             'alamat' => $validated['alamat'] ?? null,
             'nib' => $validated['nib'] ?? null,
         ]);
+
+        if ($store->isDirty()) {
+            $distributorName = $request->user()->distributor->name;
+            $marketName = Market::query()->whereKey($validated['market_id'])->value('name') ?? '—';
+
+            DB::transaction(function () use ($store, $distributorName, $marketName): void {
+                $store->save();
+
+                $this->notifications->sendToAdmin(
+                    new RecipientStoreUpdated(
+                        $store->name,
+                        $marketName,
+                        $distributorName,
+                        $store->id,
+                    ),
+                );
+            });
+        }
 
         return redirect()->route('distributor.stores.index')
             ->with('success', 'Toko penerima berhasil diperbarui.');

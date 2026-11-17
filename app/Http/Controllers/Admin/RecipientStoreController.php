@@ -7,8 +7,10 @@ use App\Models\Distributor;
 use App\Models\Market;
 use App\Models\RecipientStore;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 
 class RecipientStoreController extends Controller
 {
@@ -27,7 +29,10 @@ class RecipientStoreController extends Controller
         $distributorId = $request->integer('distributor');
         $distributorId = $distributorId > 0 && Distributor::whereKey($distributorId)->exists() ? $distributorId : null;
 
-        $stores = RecipientStore::with(['market:id,name', 'distributor:id,name'])
+        $highlightId = $request->integer('highlight');
+        $highlightId = $highlightId > 0 && RecipientStore::whereKey($highlightId)->exists() ? $highlightId : null;
+
+        $query = RecipientStore::with(['market:id,name', 'distributor:id,name'])
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('name', 'like', "%{$search}%")
                 ->orWhere('alamat', 'like', "%{$search}%")
@@ -36,8 +41,10 @@ class RecipientStoreController extends Controller
             ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
             ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
             ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
-            ->orderByDesc('id')
-            ->paginate(10)
+            ->orderByDesc('id');
+
+        $stores = $query
+            ->paginate(10, ['*'], 'page', $this->highlightPage($query, $highlightId))
             ->withQueryString();
 
         return view('admin.recipient-stores.index', [
@@ -49,8 +56,29 @@ class RecipientStoreController extends Controller
                 'market' => $marketId,
                 'distributor' => $distributorId,
                 'status' => $status,
+                'highlight' => $highlightId,
             ],
         ]);
+    }
+
+    /**
+     * Tentukan halaman yang memuat baris yang perlu di-highlight.
+     *
+     * @param  Builder<RecipientStore>  $query
+     */
+    private function highlightPage(Builder $query, ?int $highlightId): int
+    {
+        if ($highlightId === null) {
+            return Paginator::resolveCurrentPage();
+        }
+
+        $highlighted = (clone $query)->whereKey($highlightId)->first();
+
+        if ($highlighted === null) {
+            return Paginator::resolveCurrentPage();
+        }
+
+        return intdiv((clone $query)->where('id', '>', $highlighted->id)->count(), 10) + 1;
     }
 
     /**

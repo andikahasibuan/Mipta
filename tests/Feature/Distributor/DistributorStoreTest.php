@@ -282,6 +282,96 @@ it('menolak mengakses toko milik distributor lain', function () {
     ]);
 });
 
+it('mengirim notifikasi penambahan toko ke admin saja', function () {
+    [, $user] = storeDistributorAccount('PT Rajawali Nusantara');
+    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
+
+    $admin = User::factory()->create(['role' => Role::Admin]);
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+    $inactiveAdmin = User::factory()->inactive()->create(['role' => Role::Admin]);
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $otherDistributor = User::factory()->distributor()->create();
+
+    $this->actingAs($user)
+        ->post(route('distributor.stores.store'), [
+            'market_id' => $market->id,
+            'name' => 'Toko Baru',
+            'alamat' => 'Jln. Baru No. 1',
+            'nib' => '1234567890123',
+        ])
+        ->assertRedirect(route('distributor.stores.index'));
+
+    $expectedMessage = 'Toko Toko Baru telah ditambahkan oleh PT Rajawali Nusantara.';
+
+    $this->assertDatabaseCount('notifications', 1);
+
+    expect($admin->notifications()->first()?->data['title'])->toBe('Toko penerima baru')
+        ->and($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($kepalaDinas->notifications()->count())->toBe(0)
+        ->and($inactiveAdmin->notifications()->count())->toBe(0)
+        ->and($uptd->notifications()->count())->toBe(0)
+        ->and($otherDistributor->notifications()->count())->toBe(0);
+});
+
+it('mengirim notifikasi perubahan toko ke admin saja', function () {
+    [$distributor, $user] = storeDistributorAccount('PT Rajawali Nusantara');
+    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
+    $store = RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Nama Lama',
+        'alamat' => 'Alamat Lama',
+        'nib' => '1111111111111',
+    ]);
+
+    $admin = User::factory()->create(['role' => Role::Admin]);
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+    $inactiveAdmin = User::factory()->inactive()->create(['role' => Role::Admin]);
+
+    $this->actingAs($user)
+        ->put(route('distributor.stores.update', $store), [
+            'market_id' => $market->id,
+            'name' => 'Nama Baru',
+            'alamat' => 'Alamat Baru',
+            'nib' => '9876543210123',
+        ])
+        ->assertRedirect(route('distributor.stores.index'));
+
+    $expectedMessage = 'Data pada toko Nama Baru telah diperbarui oleh PT Rajawali Nusantara.';
+
+    $this->assertDatabaseCount('notifications', 1);
+
+    expect($admin->notifications()->first()?->data['title'])->toBe('Toko penerima diperbarui')
+        ->and($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($kepalaDinas->notifications()->count())->toBe(0)
+        ->and($inactiveAdmin->notifications()->count())->toBe(0);
+});
+
+it('tidak mengirim notifikasi saat data toko diedit tanpa perubahan', function () {
+    [$distributor, $user] = storeDistributorAccount();
+    $market = Market::factory()->create();
+    $store = RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'name' => 'Nama Tetap',
+        'alamat' => 'Alamat Tetap',
+        'nib' => '1111111111111',
+    ]);
+
+    User::factory()->create(['role' => Role::Admin]);
+
+    $this->actingAs($user)
+        ->put(route('distributor.stores.update', $store), [
+            'market_id' => $market->id,
+            'name' => 'Nama Tetap',
+            'alamat' => 'Alamat Tetap',
+            'nib' => '1111111111111',
+        ])
+        ->assertRedirect(route('distributor.stores.index'));
+
+    $this->assertDatabaseCount('notifications', 0);
+});
+
 it('membatasi halaman manajemen toko hanya untuk distributor', function () {
     $this->get(route('distributor.stores.index'))->assertRedirect(route('login'));
 

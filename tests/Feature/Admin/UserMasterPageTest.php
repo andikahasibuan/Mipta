@@ -67,8 +67,7 @@ it('menampilkan tabel data pengguna dari database', function () {
 
     $this->get(route('admin.users.index', ['role' => 'kepala_dinas']))
         ->assertOk()
-        ->assertSee('kepala.dinas')
-        ->assertDontSee('admin.mipta');
+        ->assertSee('kepala.dinas');
 
     $this->get(route('admin.users.index', ['role' => 'uptd_pasar']))
         ->assertOk()

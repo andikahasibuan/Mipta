@@ -30,7 +30,7 @@
 
         <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div class="px-5 py-5">
-                <h3 class="text-lg font-semibold text-slate-900">Laporan kondisi pasar</h3>
+                <h3 class="text-lg font-semibold text-slate-900">Laporan pengawasan</h3>
             </div>
 
             <div class="overflow-x-auto border-t border-slate-200">
@@ -72,7 +72,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-500">
-                                    Belum ada laporan kondisi pasar
+                                    Belum ada laporan pengawasan
                                 </td>
                             </tr>
                         @endforelse

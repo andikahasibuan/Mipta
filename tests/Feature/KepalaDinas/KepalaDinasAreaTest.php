@@ -88,7 +88,7 @@ it('menampilkan tabel laporan penyaluran tanpa aksi hapus untuk kepala dinas', f
         ->assertDontSee('Aksi');
 });
 
-it('menampilkan laporan kondisi lapangan untuk kepala dinas', function () {
+it('menampilkan laporan pengawasan untuk kepala dinas', function () {
     $contributor = UptdContributor::factory()->create([
         'name' => 'Andi Pratama',
     ]);
@@ -113,7 +113,7 @@ it('menampilkan laporan kondisi lapangan untuk kepala dinas', function () {
         ->assertSee('action="'.route('kepala-dinas.supervision.index').'"', false);
 });
 
-it('memfilter laporan kondisi lapangan untuk kepala dinas', function () {
+it('memfilter laporan pengawasan untuk kepala dinas', function () {
     $firstContributor = UptdContributor::factory()->create(['name' => 'Andi Pratama']);
     $secondContributor = UptdContributor::factory()->create(['name' => 'Rina Marlina']);
     $firstMarket = Market::factory()->create(['name' => 'Pasar Alpha']);
@@ -142,11 +142,11 @@ it('memfilter laporan kondisi lapangan untuk kepala dinas', function () {
         ->assertDontSee('Stok aman');
 });
 
-it('menampilkan keadaan kosong laporan kondisi lapangan untuk kepala dinas', function () {
+it('menampilkan keadaan kosong laporan pengawasan untuk kepala dinas', function () {
     $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
         ->get(route('kepala-dinas.supervision.index'))
         ->assertOk()
-        ->assertSee('Belum ada laporan kondisi lapangan');
+        ->assertSee('Belum ada laporan pengawasan');
 });
 
 it('menampilkan dua tombol ekspor nonaktif pada laporan penyaluran kepala dinas', function () {

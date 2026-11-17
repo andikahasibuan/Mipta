@@ -3,21 +3,24 @@
 namespace App\Http\Controllers\Uptd;
 
 use App\Enums\FieldCondition;
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\FieldDistributionReport;
 use App\Models\UptdContributor;
-use App\Models\User;
+use App\Notifications\FieldDistributionReportCreated;
 use App\Notifications\FieldDistributionReportDeleted;
+use App\Notifications\FieldDistributionReportUpdated;
+use App\Services\NotificationDispatcher;
 use App\Services\UptdReportHistoryService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ReportController extends Controller
 {
+    public function __construct(private readonly NotificationDispatcher $notifications) {}
+
     /**
      * Tampilkan riwayat laporan kontributor UPTD Pasar.
      */
@@ -40,23 +43,34 @@ class ReportController extends Controller
     }
 
     /**
-     * Simpan laporan kondisi lapangan milik kontributor UPTD Pasar.
+     * Simpan laporan pengawasan milik kontributor UPTD Pasar.
      */
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateReport($request);
-        $contributor = $this->contributor($request);
+        $contributor = $this->contributor($request)->loadMissing('market');
 
-        FieldDistributionReport::create([
-            'market_id' => $contributor->market_id,
-            'uptd_contributor_id' => $contributor->id,
-            'report_date' => $validated['report_date'],
-            'condition' => $validated['condition'],
-            'description' => $validated['description'],
-        ]);
+        DB::transaction(function () use ($contributor, $validated): void {
+            $report = FieldDistributionReport::create([
+                'market_id' => $contributor->market_id,
+                'uptd_contributor_id' => $contributor->id,
+                'report_date' => $validated['report_date'],
+                'condition' => $validated['condition'],
+                'description' => $validated['description'],
+            ]);
+
+            $this->notifications->sendToAdminAndKepalaDinas(
+                new FieldDistributionReportCreated(
+                    $report->report_date->format('d/m/Y'),
+                    $contributor->market?->name ?? '—',
+                    $contributor->name,
+                    $report->id,
+                ),
+            );
+        });
 
         return redirect()->route('uptd.dashboard')
-            ->with('success', 'Laporan kondisi lapangan berhasil disimpan.');
+            ->with('success', 'Laporan pengawasan berhasil disimpan.');
     }
 
     /**
@@ -78,26 +92,43 @@ class ReportController extends Controller
     }
 
     /**
-     * Perbarui laporan kondisi lapangan milik kontributor UPTD Pasar.
+     * Perbarui laporan pengawasan milik kontributor UPTD Pasar.
      */
     public function update(Request $request, FieldDistributionReport $report): RedirectResponse
     {
-        $this->ensureOwnedBy($this->contributor($request), $report);
+        $contributor = $this->contributor($request)->loadMissing('market');
+
+        $this->ensureOwnedBy($contributor, $report);
 
         $validated = $this->validateReport($request);
 
-        $report->update([
+        $report->fill([
             'report_date' => $validated['report_date'],
             'condition' => $validated['condition'],
             'description' => $validated['description'],
         ]);
 
+        if ($report->isDirty()) {
+            DB::transaction(function () use ($report, $contributor): void {
+                $report->save();
+
+                $this->notifications->sendToAdminAndKepalaDinas(
+                    new FieldDistributionReportUpdated(
+                        $report->report_date->format('d/m/Y'),
+                        $contributor->market?->name ?? '—',
+                        $contributor->name,
+                        $report->id,
+                    ),
+                );
+            });
+        }
+
         return redirect()->route('uptd.reports.index')
-            ->with('success', 'Laporan kondisi lapangan berhasil diperbarui.');
+            ->with('success', 'Laporan pengawasan berhasil diperbarui.');
     }
 
     /**
-     * Hapus laporan kondisi lapangan dan kirim notifikasi ke admin.
+     * Hapus laporan pengawasan dan kirim notifikasi ke admin dan kepala dinas.
      */
     public function destroy(Request $request, FieldDistributionReport $report): RedirectResponse
     {
@@ -107,29 +138,25 @@ class ReportController extends Controller
 
         $report->loadMissing(['contributor:id,name', 'market:id,name']);
 
-        $recipients = User::query()
-            ->where('role', Role::Admin->value)
-            ->where('is_active', true)
-            ->get();
-
         $notification = new FieldDistributionReportDeleted(
             $report->report_date->format('d/m/Y'),
             $report->market?->name ?? '—',
             $report->contributor?->name ?? $contributor->name,
+            $report->id,
         );
 
-        $report->delete();
+        DB::transaction(function () use ($report, $notification): void {
+            $report->delete();
 
-        if ($recipients->isNotEmpty()) {
-            Notification::send($recipients, $notification);
-        }
+            $this->notifications->sendToAdminAndKepalaDinas($notification);
+        });
 
         return redirect()->route('uptd.reports.index')
-            ->with('success', 'Laporan kondisi lapangan berhasil dihapus.');
+            ->with('success', 'Laporan pengawasan berhasil dihapus.');
     }
 
     /**
-     * Validasi input laporan kondisi lapangan.
+     * Validasi input laporan pengawasan.
      *
      * @return array{report_date: string, condition: string, description: string}
      */

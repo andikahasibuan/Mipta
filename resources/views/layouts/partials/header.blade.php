@@ -21,58 +21,39 @@
     @auth
         <div class="flex shrink-0 items-center gap-3">
             @if (auth()->user()->role?->canReceiveNotifications())
-                @php
-                    $notifications = auth()->user()->notifications()->latest()->take(5)->get();
-                    $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
-                @endphp
-
-                <details class="relative" data-notification-menu>
+                <details class="relative" data-notification-menu data-notification-feed-url="{{ route('notifications.feed') }}">
                 <summary
                     aria-label="Notifikasi"
                     class="relative flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg border border-slate-200 bg-white text-[#018F98] transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50 [&::-webkit-details-marker]:hidden"
                 >
                     <x-heroicon-o-bell class="h-5 w-5" />
 
-                    @if ($unreadNotificationCount > 0)
-                        <span class="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                            {{ $unreadNotificationCount > 9 ? '9+' : $unreadNotificationCount }}
-                        </span>
-                    @endif
+                    <span
+                        data-notification-badge
+                        @class([
+                            'absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white',
+                            'hidden' => $unreadNotificationCount === 0,
+                        ])
+                    >
+                        {{ $unreadNotificationCount > 9 ? '9+' : $unreadNotificationCount }}
+                    </span>
                 </summary>
 
                 <div class="absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
-                    <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Notifikasi</p>
-
-                        @if ($unreadNotificationCount > 0)
-                            <form method="POST" action="{{ route('notifications.read-all') }}">
-                                @csrf
-                                <button
-                                    type="submit"
-                                    class="cursor-pointer text-xs font-semibold text-[#018F98] transition hover:underline"
-                                >
-                                    Tandai semua dibaca
-                                </button>
-                            </form>
-                        @endif
+                    <div data-notification-content>
+                        @include('layouts.partials.notification-menu-content', [
+                            'notifications' => $notifications,
+                            'unreadNotificationCount' => $unreadNotificationCount,
+                        ])
                     </div>
 
-                    <div class="max-h-80 overflow-y-auto">
-                        @forelse ($notifications as $notification)
-                            <div @class([
-                                'border-b border-slate-100 px-4 py-3 last:border-b-0',
-                                'bg-[#E0F2F3]/60' => $notification->read_at === null,
-                            ])>
-                                <p class="text-sm leading-snug text-slate-700">
-                                    {{ data_get($notification->data, 'message', 'Notifikasi baru') }}
-                                </p>
-                                <p class="mt-1 text-[11px] text-slate-400">
-                                    {{ $notification->created_at?->diffForHumans() }}
-                                </p>
-                            </div>
-                        @empty
-                            <p class="px-4 py-5 text-sm text-slate-500">Belum ada notifikasi</p>
-                        @endforelse
+                    <div class="border-t border-slate-100" data-notification-footer>
+                        <a
+                            href="{{ route('notifications.index') }}"
+                            class="block px-4 py-3 text-center text-xs font-semibold text-[#018F98] transition hover:bg-slate-50"
+                        >
+                            Lihat semua pemberitahuan
+                        </a>
                     </div>
                 </div>
             </details>

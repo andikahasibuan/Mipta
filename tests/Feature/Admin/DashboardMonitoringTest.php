@@ -37,7 +37,7 @@ it('menampilkan kartu statistik dari database', function () {
         ->assertDontSee('karton pada');
 });
 
-it('menghitung total laporan dari penyaluran dan kondisi pasar', function () {
+it('menghitung total laporan dari penyaluran dan pengawasan', function () {
     $firstDistributor = Distributor::factory()->create(['name' => 'PT Alpha Niaga']);
     $secondDistributor = Distributor::factory()->create(['name' => 'PT Beta Pangan']);
     $firstMarket = Market::factory()->create();
@@ -100,7 +100,7 @@ it('menghitung total laporan dari penyaluran dan kondisi pasar', function () {
         ->assertSeeInOrder(['PT Beta Pangan', '180']);
 });
 
-it('memfilter total laporan kondisi pasar berdasarkan pasar tetapi tidak distributor', function () {
+it('memfilter total laporan pengawasan berdasarkan pasar tetapi tidak distributor', function () {
     $selectedMarket = Market::factory()->create();
     $otherMarket = Market::factory()->create();
     $selectedDistributor = Distributor::factory()->create();

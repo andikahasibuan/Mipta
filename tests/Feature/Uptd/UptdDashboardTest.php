@@ -35,7 +35,7 @@ it('menampilkan identitas kontributor dan tautan navigasi dashboard', function (
     expect($main)->not->toContain(route('uptd.reports.create'));
 });
 
-it('menghitung total laporan kondisi pasar milik kontributor di pasar ini', function () {
+it('menghitung total laporan pengawasan milik kontributor di pasar ini', function () {
     $market = Market::factory()->create();
     $otherMarket = Market::factory()->create();
     $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
@@ -104,7 +104,7 @@ it('menghitung toko penerima aktif di pasar kontributor', function () {
         ->assertSeeInOrder(['Toko Penerima', '2']);
 });
 
-it('menampilkan lima laporan kondisi pasar terbaru per halaman secara berurutan', function () {
+it('menampilkan lima laporan pengawasan terbaru per halaman secara berurutan', function () {
     $market = Market::factory()->create();
     $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
@@ -156,8 +156,8 @@ it('menampilkan keadaan kosong saat belum ada laporan dan toko penerima', functi
         ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSee('Belum ada laporan kondisi pasar')
+        ->assertSee('Belum ada laporan pengawasan')
         ->assertSeeInOrder(['Total Laporan', '0', 'Toko Penerima', '0'])
-        ->assertDontSee('Laporan kondisi pasar kontributor ini')
+        ->assertDontSee('Laporan pengawasan kontributor ini')
         ->assertDontSee('Toko aktif di pasar ini');
 });

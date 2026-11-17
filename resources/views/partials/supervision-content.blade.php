@@ -98,7 +98,7 @@
             </thead>
             <tbody class="divide-y divide-slate-100 text-center">
                 @forelse ($reports as $report)
-                    <tr>
+                    <tr @if (($filters['highlight'] ?? null) === $report->id) data-highlighted-row class="notification-row-highlight" @endif>
                         <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                             {{ $loop->iteration }}
                         </td>
@@ -130,7 +130,7 @@
                             @if ($filters['q'] !== '' || $filters['condition'] !== null)
                                 Tidak ada laporan yang sesuai filter
                             @else
-                                Belum ada laporan kondisi lapangan
+                                Belum ada laporan pengawasan
                             @endif
                         </td>
                     </tr>

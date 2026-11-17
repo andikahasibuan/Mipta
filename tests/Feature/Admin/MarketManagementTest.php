@@ -132,7 +132,7 @@ it('membatasi halaman pasar hanya untuk admin', function () {
         ->assertForbidden();
 });
 
-it('menolak menghapus pasar yang masih memiliki laporan kondisi lapangan', function () {
+it('menolak menghapus pasar yang masih memiliki laporan pengawasan', function () {
     $market = Market::factory()->create();
     $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 

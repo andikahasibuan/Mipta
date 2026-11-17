@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 class UptdReportHistoryService
 {
     /**
-     * Ambil riwayat laporan kondisi lapangan milik kontributor sesuai filter.
+     * Ambil riwayat laporan pengawasan milik kontributor sesuai filter.
      *
      * @return array{
      *     reports: LengthAwarePaginator,

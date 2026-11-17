@@ -8,13 +8,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('menampilkan profil pengguna yang sedang login di topbar', function () {
-    $admin = User::factory()->create(['name' => 'Iqbal Shyhab']);
+    $admin = User::factory()->create([
+        'name' => 'Iqbal Shyhab',
+        'username' => 'iqbal.shyhab',
+    ]);
 
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['IS', 'Iqbal Shyhab', 'Admin'])
-        ->assertSeeInOrder(['Masuk sebagai', $admin->email, 'Keluar'])
+        ->assertSeeInOrder(['IS', 'iqbal.shyhab', 'Admin'])
+        ->assertSeeInOrder(['Masuk sebagai', $admin->email, 'Logout'])
         ->assertSee('aria-label="Menu profil"', false)
         ->assertSee('action="'.route('logout').'"', false);
 });
@@ -30,7 +33,7 @@ it('menampilkan username di dropdown profil untuk akun bersama UPTD tanpa email'
         ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Masuk sebagai', $shared->username, 'Keluar']);
+        ->assertSeeInOrder(['Masuk sebagai', $shared->username, 'Logout']);
 });
 
 it('mengambil inisial dari dua kata pertama nama', function (string $name, string $initials) {
@@ -56,7 +59,9 @@ it('menampilkan ikon notifikasi', function () {
         ->assertOk()
         ->assertSee('aria-label="Notifikasi"', false)
         ->assertSee('Notifikasi')
-        ->assertSee('Belum ada notifikasi');
+        ->assertSee('Belum ada notifikasi')
+        ->assertSee('Lihat semua pemberitahuan')
+        ->assertSee(route('notifications.index'), false);
 });
 
 it('menampilkan ikon notifikasi untuk kepala dinas', function () {
@@ -76,7 +81,8 @@ it('menyembunyikan ikon notifikasi dari distributor dan kontributor uptd', funct
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertDontSee('aria-label="Notifikasi"', false)
-        ->assertDontSee('Belum ada notifikasi');
+        ->assertDontSee('Belum ada notifikasi')
+        ->assertDontSee('Lihat semua pemberitahuan');
 
     $shared = User::factory()->create(['role' => Role::UptdPasar]);
     $contributor = UptdContributor::factory()->create();
@@ -86,5 +92,6 @@ it('menyembunyikan ikon notifikasi dari distributor dan kontributor uptd', funct
         ->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertDontSee('aria-label="Notifikasi"', false)
-        ->assertDontSee('Belum ada notifikasi');
+        ->assertDontSee('Belum ada notifikasi')
+        ->assertDontSee('Lihat semua pemberitahuan');
 });

@@ -1,6 +1,7 @@
 @php
     $activeMenu = collect($menus)->first(fn (array $menu) => request()->routeIs(...($menu['active'] ?? [$menu['route']])));
-    $activeMenuLabel = data_get($activeMenu, 'label', 'Dashboard Monitoring');
+    $activeMenuLabel = trim($__env->yieldContent('active-menu-label'))
+        ?: data_get($activeMenu, 'label', 'Dashboard Monitoring');
 @endphp
 
 <!DOCTYPE html>

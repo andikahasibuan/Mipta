@@ -14,6 +14,16 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
+     * Jumlah maksimal percobaan login gagal sebelum dikunci.
+     */
+    private const MAX_ATTEMPTS = 3;
+
+    /**
+     * Durasi penguncian login dalam detik (10 menit).
+     */
+    private const LOCKOUT_SECONDS = 600;
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -54,16 +64,19 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
-        $this->ensureIsNotRateLimited();
-
-        $identifier = (string) $this->string('identifier');
+        $identifier = trim((string) $this->string('identifier'));
         $password = (string) $this->string('password');
         $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $user = User::where($field, $identifier)->first();
 
-        if (! Auth::attempt([$field => $identifier, 'password' => $password, 'is_active' => true], $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $this->ensureIsNotRateLimited($user, $identifier);
 
-            $user = User::where($field, $identifier)->first();
+        if (! Auth::attempt([$field => $identifier, 'password' => $password, 'is_active' => true])) {
+            RateLimiter::hit($this->accountThrottleKey($user, $identifier), self::LOCKOUT_SECONDS);
+
+            if ($user === null) {
+                RateLimiter::hit($this->ipThrottleKey(), self::LOCKOUT_SECONDS);
+            }
 
             if ($user && ! $user->is_active && Hash::check($password, $user->password)) {
                 throw ValidationException::withMessages([
@@ -76,7 +89,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        RateLimiter::clear($this->throttleKey());
+        RateLimiter::clear($this->accountThrottleKey($user, $identifier));
     }
 
     /**
@@ -84,26 +97,41 @@ class LoginRequest extends FormRequest
      *
      * @throws ValidationException
      */
-    public function ensureIsNotRateLimited(): void
+    public function ensureIsNotRateLimited(?User $user, string $identifier): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
+        foreach ([$this->accountThrottleKey($user, $identifier), $this->ipThrottleKey()] as $key) {
+            if (! RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
+                continue;
+            }
+
+            event(new Lockout($this));
+
+            $seconds = RateLimiter::availableIn($key);
+            $minutes = max(1, (int) ceil($seconds / 60));
+
+            throw ValidationException::withMessages([
+                'identifier' => "Terlalu banyak percobaan masuk. Coba lagi dalam {$minutes} menit.",
+            ]);
         }
-
-        event(new Lockout($this));
-
-        $seconds = RateLimiter::availableIn($this->throttleKey());
-
-        throw ValidationException::withMessages([
-            'identifier' => "Terlalu banyak percobaan masuk. Coba lagi dalam {$seconds} detik.",
-        ]);
     }
 
     /**
-     * Kunci pembatas percobaan untuk kombinasi identitas dan IP.
+     * Kunci pembatas percobaan untuk akun yang sedang dicoba.
      */
-    public function throttleKey(): string
+    private function accountThrottleKey(?User $user, string $identifier): string
     {
-        return Str::transliterate(Str::lower((string) $this->string('identifier')).'|'.$this->ip());
+        if ($user !== null) {
+            return 'login-account|'.$user->getKey();
+        }
+
+        return 'login-identifier|'.Str::transliterate(Str::lower($identifier));
+    }
+
+    /**
+     * Kunci pembatas percobaan untuk IP klien.
+     */
+    private function ipThrottleKey(): string
+    {
+        return 'login-ip|'.$this->ip();
     }
 }

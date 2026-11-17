@@ -8,12 +8,6 @@
     @php
         $editableFields = [
             [
-                'name' => 'email',
-                'label' => 'Email',
-                'value' => $account->email,
-                'type' => 'email',
-            ],
-            [
                 'name' => 'penanggung_jawab',
                 'label' => 'penanggung jawab',
                 'value' => $distributor->penanggung_jawab,
@@ -24,6 +18,12 @@
                 'label' => 'Nomor Telepon',
                 'value' => $distributor->telepon,
                 'type' => 'tel',
+            ],
+            [
+                'name' => 'email',
+                'label' => 'Email',
+                'value' => $account->email,
+                'type' => 'email',
             ],
             [
                 'name' => 'alamat_kantor',

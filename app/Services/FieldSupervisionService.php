@@ -6,7 +6,9 @@ use App\Enums\FieldCondition;
 use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
 
 class FieldSupervisionService
@@ -30,13 +32,13 @@ class FieldSupervisionService
     ];
 
     /**
-     * Ambil daftar laporan kondisi lapangan sesuai filter yang dipilih.
+     * Ambil daftar laporan pengawasan sesuai filter yang dipilih.
      *
      * @return array{
      *     reports: LengthAwarePaginator,
      *     summary: array{reports: int, reported_markets: int, total_markets: int, needs_attention_markets: int},
      *     month_label: string,
-     *     filters: array{q: string, month: string, condition: string|null},
+     *     filters: array{q: string, month: string, condition: string|null, highlight: int|null},
      *     conditions: array<int, FieldCondition>
      * }
      */
@@ -50,6 +52,10 @@ class FieldSupervisionService
         }
 
         $condition = FieldCondition::tryFrom($request->string('condition')->toString());
+        $highlightId = $request->integer('highlight');
+        $highlightId = $highlightId > 0 && FieldDistributionReport::whereKey($highlightId)->exists()
+            ? $highlightId
+            : null;
 
         $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $periodStart = $start->toDateString();
@@ -66,7 +72,7 @@ class FieldSupervisionService
             ->with(['market:id,name', 'contributor:id,name'])
             ->orderByDesc('report_date')
             ->orderByDesc('id')
-            ->paginate(10)
+            ->paginate(10, ['*'], 'page', $this->highlightPage($baseQuery, $highlightId))
             ->withQueryString();
 
         return [
@@ -82,9 +88,40 @@ class FieldSupervisionService
                 'q' => $search,
                 'month' => $month,
                 'condition' => $condition?->value,
+                'highlight' => $highlightId,
             ],
             'conditions' => FieldCondition::cases(),
         ];
+    }
+
+    /**
+     * Tentukan halaman yang memuat baris yang perlu di-highlight.
+     *
+     * @param  Builder<FieldDistributionReport>  $baseQuery
+     */
+    private function highlightPage(Builder $baseQuery, ?int $highlightId): int
+    {
+        if ($highlightId === null) {
+            return Paginator::resolveCurrentPage();
+        }
+
+        $highlighted = (clone $baseQuery)->whereKey($highlightId)->first();
+
+        if ($highlighted === null) {
+            return Paginator::resolveCurrentPage();
+        }
+
+        $before = (clone $baseQuery)
+            ->where(function (Builder $query) use ($highlighted): void {
+                $query->where('report_date', '>', $highlighted->report_date->toDateString())
+                    ->orWhere(function (Builder $query) use ($highlighted): void {
+                        $query->where('report_date', $highlighted->report_date->toDateString())
+                            ->where('id', '>', $highlighted->id);
+                    });
+            })
+            ->count();
+
+        return intdiv($before, 10) + 1;
     }
 
     /**

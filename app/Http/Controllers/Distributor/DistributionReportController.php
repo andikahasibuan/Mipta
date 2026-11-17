@@ -3,21 +3,23 @@
 namespace App\Http\Controllers\Distributor;
 
 use App\Enums\DistributionStatus;
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\Distribution;
 use App\Models\RecipientStore;
-use App\Models\User;
+use App\Notifications\DistributionReportCreated;
 use App\Notifications\DistributionReportUpdated;
+use App\Services\NotificationDispatcher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DistributionReportController extends Controller
 {
+    public function __construct(private readonly NotificationDispatcher $notifications) {}
+
     /**
      * Tampilkan formulir laporan penyaluran distributor.
      */
@@ -33,16 +35,27 @@ class DistributionReportController extends Controller
     {
         $validated = $this->validateReport($request);
         $store = $this->ownedStore($request, (int) $validated['recipient_store_id']);
+        $distributorName = $request->user()->distributor->name;
 
-        Distribution::create([
-            'distributor_id' => $request->user()->distributor_id,
-            'market_id' => $store->market_id,
-            'uptd_user_id' => null,
-            'recipient_store_id' => $store->id,
-            'distribution_date' => $validated['distribution_date'],
-            'cartons' => $validated['cartons'],
-            'status' => DistributionStatus::Submitted,
-        ]);
+        DB::transaction(function () use ($request, $validated, $store, $distributorName): void {
+            $distribution = Distribution::create([
+                'distributor_id' => $request->user()->distributor_id,
+                'market_id' => $store->market_id,
+                'uptd_user_id' => null,
+                'recipient_store_id' => $store->id,
+                'distribution_date' => $validated['distribution_date'],
+                'cartons' => $validated['cartons'],
+                'status' => DistributionStatus::Submitted,
+            ]);
+
+            $this->notifications->sendToAdminAndKepalaDinas(
+                new DistributionReportCreated(
+                    $distribution->distribution_date->format('d/m/Y'),
+                    $distributorName,
+                    $distribution->id,
+                ),
+            );
+        });
 
         return redirect()->route('distributor.dashboard')
             ->with('success', 'Laporan penyaluran berhasil dikirim.');
@@ -76,8 +89,10 @@ class DistributionReportController extends Controller
         ]);
 
         if ($distribution->isDirty()) {
-            $distribution->save();
-            $this->notifyReportUpdated($request, $distribution);
+            DB::transaction(function () use ($request, $distribution): void {
+                $distribution->save();
+                $this->notifyReportUpdated($request, $distribution);
+            });
 
             return redirect()->route('distributor.report-history.index')
                 ->with('success', 'Laporan penyaluran berhasil diperbarui.');
@@ -151,20 +166,11 @@ class DistributionReportController extends Controller
      */
     private function notifyReportUpdated(Request $request, Distribution $distribution): void
     {
-        $recipients = User::query()
-            ->whereIn('role', [Role::Admin->value, Role::KepalaDinas->value])
-            ->where('is_active', true)
-            ->get();
-
-        if ($recipients->isEmpty()) {
-            return;
-        }
-
-        Notification::send(
-            $recipients,
+        $this->notifications->sendToAdminAndKepalaDinas(
             new DistributionReportUpdated(
                 $distribution->distribution_date->format('d/m/Y'),
                 $request->user()->distributor->name,
+                $distribution->id,
             ),
         );
     }

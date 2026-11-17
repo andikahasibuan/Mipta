@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menampilkan formulir laporan kondisi lapangan', function () {
+it('menampilkan formulir laporan pengawasan', function () {
     $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
     $contributor = UptdContributor::factory()->create([
         'name' => 'Kontributor UPTD 01',
@@ -31,7 +31,7 @@ it('menampilkan formulir laporan kondisi lapangan', function () {
         ->assertDontSee('Batal / Kembali');
 });
 
-it('menyimpan laporan kondisi lapangan milik kontributor yang login', function () {
+it('menyimpan laporan pengawasan milik kontributor yang login', function () {
     $market = Market::factory()->create();
     $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 
@@ -43,7 +43,7 @@ it('menyimpan laporan kondisi lapangan milik kontributor yang login', function (
             'description' => 'Kondisi pasar normal dan penyaluran lancar.',
         ])
         ->assertRedirect(route('uptd.dashboard'))
-        ->assertSessionHas('success', 'Laporan kondisi lapangan berhasil disimpan.');
+        ->assertSessionHas('success', 'Laporan pengawasan berhasil disimpan.');
 
     $report = FieldDistributionReport::query()->firstOrFail();
 
@@ -55,11 +55,45 @@ it('menyimpan laporan kondisi lapangan milik kontributor yang login', function (
 
     $this->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSee('Laporan kondisi lapangan berhasil disimpan.')
+        ->assertSee('Laporan pengawasan berhasil disimpan.')
         ->assertSee('20 Mei 2026');
 });
 
-it('menolak laporan kondisi lapangan yang tidak valid', function (array $overrides, string $field) {
+it('mengirim notifikasi laporan pengawasan baru ke admin dan kepala dinas', function () {
+    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
+    $contributor = UptdContributor::factory()->create([
+        'name' => 'Kontributor UPTD 01',
+        'market_id' => $market->id,
+    ]);
+
+    $shared = sharedUptdAccount();
+    $admin = User::factory()->create(['role' => Role::Admin]);
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+    $inactiveAdmin = User::factory()->inactive()->create(['role' => Role::Admin]);
+    $distributor = User::factory()->distributor()->create();
+
+    $this->actingAs($shared)
+        ->withSession(uptdContributorSession($contributor))
+        ->post(route('uptd.reports.store'), [
+            'report_date' => '2026-05-20',
+            'condition' => FieldCondition::Normal->value,
+            'description' => 'Laporan pengawasan baru.',
+        ])
+        ->assertRedirect(route('uptd.dashboard'));
+
+    $expectedMessage = 'Ada laporan baru dari Kontributor UPTD 01.';
+
+    $this->assertDatabaseCount('notifications', 2);
+
+    expect($admin->notifications()->first()?->data['title'])->toBe('Laporan pengawasan baru')
+        ->and($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($kepalaDinas->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($inactiveAdmin->notifications()->count())->toBe(0)
+        ->and($distributor->notifications()->count())->toBe(0)
+        ->and($shared->notifications()->count())->toBe(0);
+});
+
+it('menolak laporan pengawasan yang tidak valid', function (array $overrides, string $field) {
     $market = Market::factory()->create();
     $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 

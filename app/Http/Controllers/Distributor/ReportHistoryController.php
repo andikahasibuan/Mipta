@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Distributor;
 
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\Distribution;
-use App\Models\User;
 use App\Notifications\DistributionReportDeleted;
 use App\Services\DistributorReportHistoryService;
+use App\Services\NotificationDispatcher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 
 class ReportHistoryController extends Controller
 {
+    public function __construct(private readonly NotificationDispatcher $notifications) {}
+
     /**
      * Tampilkan riwayat laporan distributor.
      */
@@ -34,21 +35,16 @@ class ReportHistoryController extends Controller
         abort_unless($distribution->distributor_id === $request->user()->distributor_id, 404);
 
         $distributionDate = $distribution->distribution_date->format('d/m/Y');
+        $distributionId = $distribution->id;
         $distributorName = $request->user()->distributor->name;
 
-        $distribution->delete();
+        DB::transaction(function () use ($distribution, $distributionDate, $distributionId, $distributorName): void {
+            $distribution->delete();
 
-        $recipients = User::query()
-            ->whereIn('role', [Role::Admin->value, Role::KepalaDinas->value])
-            ->where('is_active', true)
-            ->get();
-
-        if ($recipients->isNotEmpty()) {
-            Notification::send(
-                $recipients,
-                new DistributionReportDeleted($distributionDate, $distributorName),
+            $this->notifications->sendToAdminAndKepalaDinas(
+                new DistributionReportDeleted($distributionDate, $distributorName, $distributionId),
             );
-        }
+        });
 
         return redirect()->route('distributor.report-history.index')
             ->with('success', 'Riwayat laporan berhasil dihapus.');

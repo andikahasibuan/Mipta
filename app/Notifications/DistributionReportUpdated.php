@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Services\NotificationTemplateRenderer;
 use Illuminate\Notifications\Notification;
 
 class DistributionReportUpdated extends Notification
@@ -12,6 +13,7 @@ class DistributionReportUpdated extends Notification
     public function __construct(
         public string $distributionDate,
         public string $distributorName,
+        public ?int $distributionId = null,
     ) {}
 
     /**
@@ -31,15 +33,16 @@ class DistributionReportUpdated extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $template = app(NotificationTemplateRenderer::class)->render('distribution_report_updated', [
+            'tanggal' => $this->distributionDate,
+            'nama distributor' => $this->distributorName,
+        ]);
+
         return [
-            'title' => 'Laporan penyaluran diperbarui',
-            'message' => sprintf(
-                'Laporan penyaluran tanggal %s telah diperbarui oleh %s.',
-                $this->distributionDate,
-                $this->distributorName,
-            ),
+            ...$template,
             'distribution_date' => $this->distributionDate,
             'distributor_name' => $this->distributorName,
+            'distribution_id' => $this->distributionId,
         ];
     }
 }

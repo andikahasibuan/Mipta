@@ -24,7 +24,7 @@ class FieldDistributionReport extends Model
     }
 
     /**
-     * Kontributor UPTD Pasar yang melaporkan kondisi lapangan.
+     * Kontributor UPTD Pasar yang membuat laporan pengawasan.
      */
     public function contributor(): BelongsTo
     {

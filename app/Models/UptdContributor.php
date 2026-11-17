@@ -24,7 +24,7 @@ class UptdContributor extends Model
     }
 
     /**
-     * Laporan kondisi lapangan yang dibuat kontributor ini.
+     * Laporan pengawasan yang dibuat kontributor ini.
      */
     public function fieldReports(): HasMany
     {

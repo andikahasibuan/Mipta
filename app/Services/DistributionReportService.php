@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
 
 class DistributionReportService
@@ -40,7 +41,7 @@ class DistributionReportService
      *     distributions: LengthAwarePaginator,
      *     summary: array{reports: int, cartons: int, recipient_stores: int},
      *     month_label: string,
-     *     filters: array{month: string, search: string, distributor: int|null, market: int|null},
+     *     filters: array{month: string, search: string, distributor: int|null, market: int|null, highlight: int|null},
      *     months: array<int, array{value: string, label: string}>,
      *     distributors: Collection<int, Distributor>,
      *     markets: Collection<int, Market>
@@ -54,6 +55,7 @@ class DistributionReportService
         $search = trim($request->string('search')->toString());
         $distributorId = $this->validId($request->string('distributor')->toString(), Distributor::class);
         $marketId = $this->validId($request->string('market')->toString(), Market::class);
+        $highlightId = $this->validId($request->string('highlight')->toString(), Distribution::class);
 
         $baseQuery = Distribution::query()
             ->where('status', DistributionStatus::Submitted->value)
@@ -78,7 +80,7 @@ class DistributionReportService
             ->with(['store:id,name,alamat,nib,market_id', 'store.market:id,name'])
             ->orderByDesc('distribution_date')
             ->orderByDesc('id')
-            ->paginate(10)
+            ->paginate(10, ['*'], 'page', $this->highlightPage($baseQuery, $highlightId))
             ->withQueryString();
 
         return [
@@ -90,11 +92,42 @@ class DistributionReportService
                 'search' => $search,
                 'distributor' => $distributorId,
                 'market' => $marketId,
+                'highlight' => $highlightId,
             ],
             'months' => $this->monthOptions($month),
             'distributors' => Distributor::orderBy('name')->get(['id', 'name']),
             'markets' => Market::orderBy('name')->get(['id', 'name']),
         ];
+    }
+
+    /**
+     * Tentukan halaman yang memuat baris yang perlu di-highlight.
+     *
+     * @param  Builder<Distribution>  $baseQuery
+     */
+    private function highlightPage(Builder $baseQuery, ?int $highlightId): int
+    {
+        if ($highlightId === null) {
+            return Paginator::resolveCurrentPage();
+        }
+
+        $highlighted = (clone $baseQuery)->whereKey($highlightId)->first();
+
+        if ($highlighted === null) {
+            return Paginator::resolveCurrentPage();
+        }
+
+        $before = (clone $baseQuery)
+            ->where(function (Builder $query) use ($highlighted): void {
+                $query->where('distribution_date', '>', $highlighted->distribution_date->toDateString())
+                    ->orWhere(function (Builder $query) use ($highlighted): void {
+                        $query->where('distribution_date', $highlighted->distribution_date->toDateString())
+                            ->where('id', '>', $highlighted->id);
+                    });
+            })
+            ->count();
+
+        return intdiv($before, 10) + 1;
     }
 
     /**

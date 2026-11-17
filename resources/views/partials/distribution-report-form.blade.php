@@ -29,7 +29,7 @@
 
                 @if ($stores->isEmpty())
                     <div class="mx-5 mt-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                        Anda belum memiliki data toko penerima.
+                        Anda belum memiliki data toko.
                         <a href="{{ route('distributor.stores.create') }}" class="font-semibold underline">
                             Tambah toko terlebih dahulu
                         </a>.

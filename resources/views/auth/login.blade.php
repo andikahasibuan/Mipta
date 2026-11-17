@@ -53,20 +53,8 @@
             @enderror
         </div>
 
-        <div class="flex items-center justify-between">
-            <label for="remember" class="flex items-center gap-2 text-sm text-slate-600">
-                <input
-                    id="remember"
-                    name="remember"
-                    type="checkbox"
-                    value="1"
-                    @checked(old('remember'))
-                    class="h-4 w-4 rounded border-slate-300 text-[#018F98] focus:ring-2 focus:ring-[#7DD3D8]"
-                >
-                Ingat saya
-            </label>
-
-            <span class="text-sm font-medium text-[#018F98]">Lupa kata sandi?</span>
+        <div class="flex items-center justify-end">
+            <span class="text-sm font-medium text-[#018F98]">Hubungi Admin</span>
         </div>
 
         <button

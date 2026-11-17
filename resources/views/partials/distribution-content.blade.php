@@ -146,7 +146,7 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($distributions as $distribution)
-                    <tr>
+                    <tr @if (($filters['highlight'] ?? null) === $distribution->id) data-highlighted-row class="notification-row-highlight" @endif>
                         <td class="whitespace-nowrap px-3 py-4 text-center align-middle font-mono text-xs text-slate-500">
                             {{ $loop->iteration }}
                         </td>

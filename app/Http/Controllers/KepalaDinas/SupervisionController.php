@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class SupervisionController extends Controller
 {
     /**
-     * Tampilkan halaman monitoring kondisi pasar.
+     * Tampilkan halaman monitoring laporan pengawasan.
      */
     public function index(Request $request, FieldSupervisionService $supervision): View
     {

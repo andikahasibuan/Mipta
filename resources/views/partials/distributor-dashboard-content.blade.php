@@ -80,7 +80,7 @@
                 <thead class="bg-slate-200 text-[11px] uppercase tracking-widest text-slate-700">
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 text-center align-middle font-semibold">NO</th>
-                        <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Tanggal Penyaluran</th>
+                        <th scope="col" class="w-[16%] px-5 py-3 align-middle font-semibold">Tanggal Penyaluran</th>
                         <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                         <th scope="col" class="w-[16%] px-5 py-3 text-center align-middle font-semibold">Jumlah Disalurkan (Karton)</th>
                         <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Alamat</th>

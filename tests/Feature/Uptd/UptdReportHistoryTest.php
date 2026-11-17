@@ -46,7 +46,7 @@ it('menampilkan riwayat laporan milik kontributor sendiri', function () {
         ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.reports.index'))
         ->assertOk()
-        ->assertSee('Laporan Kondisi Lapangan')
+        ->assertSee('Laporan Pengawasan')
         ->assertSee('Kontributor UPTD 01')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Keterangan')
@@ -131,7 +131,7 @@ it('menampilkan nilai lama pada formulir edit laporan', function () {
         ->assertSee('Batal');
 });
 
-it('memperbarui laporan kondisi lapangan milik kontributor', function () {
+it('memperbarui laporan pengawasan milik kontributor', function () {
     [$contributor, $market] = uptdHistoryAccount();
 
     $report = FieldDistributionReport::factory()->create([
@@ -149,7 +149,7 @@ it('memperbarui laporan kondisi lapangan milik kontributor', function () {
             'description' => 'Kondisi diperbarui.',
         ])
         ->assertRedirect(route('uptd.reports.index'))
-        ->assertSessionHas('success', 'Laporan kondisi lapangan berhasil diperbarui.');
+        ->assertSessionHas('success', 'Laporan pengawasan berhasil diperbarui.');
 
     $report->refresh();
 
@@ -159,7 +159,73 @@ it('memperbarui laporan kondisi lapangan milik kontributor', function () {
         ->and($report->uptd_contributor_id)->toBe($contributor->id);
 });
 
-it('menolak pembaruan laporan kondisi lapangan yang tidak valid', function (array $overrides, string $field) {
+it('mengirim notifikasi perubahan laporan pengawasan ke admin dan kepala dinas', function () {
+    [$contributor, $market] = uptdHistoryAccount();
+    $shared = sharedUptdAccount();
+
+    $admin = User::factory()->create(['role' => Role::Admin]);
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+    $inactiveAdmin = User::factory()->inactive()->create(['role' => Role::Admin]);
+    $distributor = User::factory()->distributor()->create();
+
+    $report = FieldDistributionReport::factory()->create([
+        'market_id' => $market->id,
+        'uptd_contributor_id' => $contributor->id,
+        'condition' => FieldCondition::Normal,
+        'description' => 'Kondisi lama.',
+    ]);
+
+    $this->actingAs($shared)
+        ->withSession(uptdContributorSession($contributor))
+        ->put(route('uptd.reports.update', $report), [
+            'report_date' => now()->toDateString(),
+            'condition' => FieldCondition::PerluPerhatian->value,
+            'description' => 'Kondisi diperbarui.',
+        ])
+        ->assertRedirect(route('uptd.reports.index'))
+        ->assertSessionHas('success', 'Laporan pengawasan berhasil diperbarui.');
+
+    $expectedMessage = sprintf(
+        'Laporan pengawasan tanggal %s telah diperbarui oleh Kontributor UPTD 01.',
+        now()->format('d/m/Y'),
+    );
+
+    $this->assertDatabaseCount('notifications', 2);
+
+    expect($admin->notifications()->first()?->data['title'])->toBe('Laporan pengawasan diperbarui')
+        ->and($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($kepalaDinas->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($inactiveAdmin->notifications()->count())->toBe(0)
+        ->and($distributor->notifications()->count())->toBe(0)
+        ->and($shared->notifications()->count())->toBe(0);
+});
+
+it('tidak mengirim notifikasi saat laporan pengawasan diedit tanpa perubahan', function () {
+    [$contributor, $market] = uptdHistoryAccount();
+
+    User::factory()->create(['role' => Role::Admin]);
+
+    $report = FieldDistributionReport::factory()->create([
+        'market_id' => $market->id,
+        'uptd_contributor_id' => $contributor->id,
+        'report_date' => '2026-05-20',
+        'condition' => FieldCondition::Normal,
+        'description' => 'Tidak berubah.',
+    ]);
+
+    $this->actingAs(sharedUptdAccount())
+        ->withSession(uptdContributorSession($contributor))
+        ->put(route('uptd.reports.update', $report), [
+            'report_date' => '2026-05-20',
+            'condition' => FieldCondition::Normal->value,
+            'description' => 'Tidak berubah.',
+        ])
+        ->assertRedirect(route('uptd.reports.index'));
+
+    $this->assertDatabaseCount('notifications', 0);
+});
+
+it('menolak pembaruan laporan pengawasan yang tidak valid', function (array $overrides, string $field) {
     [$contributor, $market] = uptdHistoryAccount();
 
     $report = FieldDistributionReport::factory()->create([
@@ -241,12 +307,13 @@ it('menolak mengedit atau memperbarui laporan milik kontributor lain', function 
     expect($report->fresh()->description)->toBe('Laporan kontributor lain.');
 });
 
-it('menghapus laporan dan mengirim notifikasi ke admin aktif', function () {
+it('menghapus laporan dan mengirim notifikasi ke admin dan kepala dinas aktif', function () {
     [$contributor, $market] = uptdHistoryAccount();
     $shared = sharedUptdAccount();
     $admin = User::factory()->create(['role' => Role::Admin, 'is_active' => true]);
     $inactiveAdmin = User::factory()->create(['role' => Role::Admin, 'is_active' => false]);
     $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+    $distributor = User::factory()->distributor()->create();
 
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
@@ -260,19 +327,20 @@ it('menghapus laporan dan mengirim notifikasi ke admin aktif', function () {
         ->withSession(uptdContributorSession($contributor))
         ->delete(route('uptd.reports.destroy', $report))
         ->assertRedirect(route('uptd.reports.index'))
-        ->assertSessionHas('success', 'Laporan kondisi lapangan berhasil dihapus.');
+        ->assertSessionHas('success', 'Laporan pengawasan berhasil dihapus.');
 
     $this->assertDatabaseMissing('field_distribution_reports', ['id' => $report->id]);
-    $this->assertDatabaseCount('notifications', 1);
+    $this->assertDatabaseCount('notifications', 2);
 
     $expectedMessage = sprintf(
-        'Laporan kondisi lapangan tanggal 20/05/2026 di Pasar Raya Padang telah dihapus oleh Kontributor UPTD 01.',
+        'Laporan pengawasan tanggal 20/05/2026 telah dihapus oleh Kontributor UPTD 01.',
     );
 
-    expect($admin->notifications()->first()?->data['title'])->toBe('Laporan kondisi lapangan dihapus')
+    expect($admin->notifications()->first()?->data['title'])->toBe('Laporan pengawasan telah dihapus')
         ->and($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($kepalaDinas->notifications()->first()?->data['message'])->toBe($expectedMessage)
         ->and($inactiveAdmin->notifications()->count())->toBe(0)
-        ->and($kepalaDinas->notifications()->count())->toBe(0)
+        ->and($distributor->notifications()->count())->toBe(0)
         ->and($shared->notifications()->count())->toBe(0);
 });
 

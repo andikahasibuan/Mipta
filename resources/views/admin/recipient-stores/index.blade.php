@@ -97,7 +97,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($stores as $store)
-                        <tr>
+                        <tr @if (($filters['highlight'] ?? null) === $store->id) data-highlighted-row class="notification-row-highlight" @endif>
                             <td class="whitespace-nowrap px-3 py-3 font-mono text-xs text-slate-600">
                                 {{ $loop->iteration }}
                             </td>

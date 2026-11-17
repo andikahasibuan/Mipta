@@ -73,9 +73,17 @@ Route::middleware(['auth', 'role:uptd_pasar'])->group(function () {
     Route::post('uptd/contributors', [UptdAreaContributorController::class, 'select'])->name('uptd.contributors.select');
 });
 
-Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])
-    ->middleware(['auth', 'role:admin,kepala_dinas'])
-    ->name('notifications.read-all');
+Route::middleware(['auth', 'role:admin,kepala_dinas'])->group(function () {
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/feed', [NotificationController::class, 'feed'])->name('notifications.feed');
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'read'])
+        ->whereUuid('notification')
+        ->name('notifications.read');
+    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])
+        ->whereUuid('notification')
+        ->name('notifications.destroy');
+});
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

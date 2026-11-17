@@ -13,7 +13,7 @@ it('mengarahkan tamu dari halaman pengawasan ke halaman login', function () {
     $this->get(route('admin.supervision.index'))->assertRedirect(route('login'));
 });
 
-it('menampilkan laporan kondisi lapangan dari database', function () {
+it('menampilkan laporan pengawasan dari database', function () {
     $contributor = UptdContributor::factory()->create([
         'name' => 'Andi Pratama',
     ]);
@@ -211,9 +211,9 @@ it('membatasi card total dan pasar dengan filter tetapi tidak card perlu perhati
             && $summary['needs_attention_markets'] === 1);
 });
 
-it('menampilkan keadaan kosong saat belum ada laporan kondisi lapangan', function () {
+it('menampilkan keadaan kosong saat belum ada laporan pengawasan', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.supervision.index'))
         ->assertOk()
-        ->assertSee('Belum ada laporan kondisi lapangan');
+        ->assertSee('Belum ada laporan pengawasan');
 });

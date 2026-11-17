@@ -47,7 +47,7 @@ class Market extends Model
     }
 
     /**
-     * Laporan kondisi lapangan yang tercatat untuk pasar ini.
+     * Laporan pengawasan yang tercatat untuk pasar ini.
      */
     public function fieldReports(): HasMany
     {

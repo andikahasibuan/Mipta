@@ -13,8 +13,7 @@ it('menampilkan halaman login untuk tamu', function () {
         ->assertSee('Selamat Datang')
         ->assertSee('Silahkan masuk menggunakan akun yang telah terdaftar')
         ->assertSee('Email atau Username')
-        ->assertSee('Ingat saya')
-        ->assertSee('Lupa kata sandi?')
+        ->assertSee('Hubungi Admin')
         ->assertSee('data-password-toggle="password"', false)
         ->assertSee('Masuk');
 });
@@ -135,7 +134,7 @@ it('mengabaikan tujuan awal di luar area peran setelah login', function () {
     ])->assertRedirect(route('kepala-dinas.dashboard'));
 });
 
-it('mengingat sesi login saat opsi ingat saya dipilih', function () {
+it('tidak membuat cookie ingat saya saat login', function () {
     User::factory()->create([
         'email' => 'admin@mipta.test',
         'password' => 'admin123',
@@ -144,10 +143,9 @@ it('mengingat sesi login saat opsi ingat saya dipilih', function () {
     $this->post(route('login'), [
         'identifier' => 'admin@mipta.test',
         'password' => 'admin123',
-        'remember' => '1',
     ])
         ->assertRedirect(route('admin.dashboard'))
-        ->assertCookie(auth()->guard('web')->getRecallerName());
+        ->assertCookieMissing(auth()->guard('web')->getRecallerName());
 
     $this->assertAuthenticated();
 });
@@ -189,7 +187,6 @@ it('menolak akun yang dinonaktifkan', function () {
     $this->post(route('login'), [
         'identifier' => 'nonaktif@mipta.test',
         'password' => 'admin123',
-        'remember' => '1',
     ])
         ->assertSessionHasErrors('identifier')
         ->assertCookieMissing(auth()->guard('web')->getRecallerName());
@@ -200,13 +197,13 @@ it('menolak akun yang dinonaktifkan', function () {
     $this->assertGuest();
 });
 
-it('membatasi percobaan login yang gagal', function () {
-    User::factory()->create([
+it('mengunci login selama 10 menit setelah tiga kali gagal', function () {
+    $admin = User::factory()->create([
         'email' => 'admin@mipta.test',
         'password' => 'admin123',
     ]);
 
-    foreach (range(1, 5) as $attempt) {
+    foreach (range(1, 3) as $attempt) {
         $this->post(route('login'), [
             'identifier' => 'admin@mipta.test',
             'password' => 'password-salah',
@@ -218,9 +215,96 @@ it('membatasi percobaan login yang gagal', function () {
         'password' => 'admin123',
     ])->assertSessionHasErrors('identifier');
 
-    expect(session('errors')->first('identifier'))->toContain('Terlalu banyak percobaan masuk.');
+    expect(session('errors')->first('identifier'))
+        ->toContain('Terlalu banyak percobaan masuk.')
+        ->toContain('10 menit');
 
     $this->assertGuest();
+
+    $this->travel(11)->minutes();
+
+    $this->post(route('login'), [
+        'identifier' => 'admin@mipta.test',
+        'password' => 'admin123',
+    ])->assertRedirect(route('admin.dashboard'));
+
+    $this->assertAuthenticatedAs($admin);
+});
+
+it('mengunci akun meskipun percobaan berikutnya memakai email atau username berbeda', function () {
+    User::factory()->create([
+        'email' => 'admin@mipta.test',
+        'username' => 'admin.mipta',
+        'password' => 'admin123',
+    ]);
+
+    foreach (range(1, 3) as $attempt) {
+        $this->post(route('login'), [
+            'identifier' => 'admin@mipta.test',
+            'password' => 'password-salah',
+        ])->assertSessionHasErrors('identifier');
+    }
+
+    $this->post(route('login'), [
+        'identifier' => 'admin.mipta',
+        'password' => 'admin123',
+    ])->assertSessionHasErrors('identifier');
+
+    expect(session('errors')->first('identifier'))
+        ->toContain('Terlalu banyak percobaan masuk.')
+        ->toContain('10 menit');
+
+    $this->assertGuest();
+});
+
+it('mengunci ip setelah tiga percobaan dengan username yang tidak terdaftar', function () {
+    User::factory()->create([
+        'username' => 'admin.mipta',
+        'password' => 'admin123',
+    ]);
+
+    foreach (range(1, 3) as $attempt) {
+        $this->post(route('login'), [
+            'identifier' => "tidak-terdaftar-{$attempt}",
+            'password' => 'password-salah',
+        ])->assertSessionHasErrors('identifier');
+    }
+
+    $this->post(route('login'), [
+        'identifier' => 'admin.mipta',
+        'password' => 'admin123',
+    ])->assertSessionHasErrors('identifier');
+
+    expect(session('errors')->first('identifier'))
+        ->toContain('Terlalu banyak percobaan masuk.')
+        ->toContain('10 menit');
+
+    $this->assertGuest();
+});
+
+it('tidak mengunci pengguna lain pada ip yang sama saat satu akun gagal berkali-kali', function () {
+    User::factory()->create([
+        'username' => 'admin.pertama',
+        'password' => 'admin123',
+    ]);
+    $kedua = User::factory()->create([
+        'username' => 'admin.kedua',
+        'password' => 'admin456',
+    ]);
+
+    foreach (range(1, 3) as $attempt) {
+        $this->post(route('login'), [
+            'identifier' => 'admin.pertama',
+            'password' => 'password-salah',
+        ])->assertSessionHasErrors('identifier');
+    }
+
+    $this->post(route('login'), [
+        'identifier' => 'admin.kedua',
+        'password' => 'admin456',
+    ])->assertRedirect(route('admin.dashboard'));
+
+    $this->assertAuthenticatedAs($kedua);
 });
 
 it('mengakhiri sesi saat logout', function () {

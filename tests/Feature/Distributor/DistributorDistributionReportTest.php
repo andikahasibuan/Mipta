@@ -70,7 +70,7 @@ it('menampilkan arahan menambah toko saat distributor belum punya toko', functio
     $this->actingAs($user)
         ->get(route('distributor.distribution-reports.create'))
         ->assertOk()
-        ->assertSee('Anda belum memiliki data toko penerima')
+        ->assertSee('Anda belum memiliki data toko.')
         ->assertSee(route('distributor.stores.create'), false);
 });
 
@@ -92,6 +92,37 @@ it('mengirim laporan penyaluran', function () {
         'cartons' => 250,
         'status' => DistributionStatus::Submitted->value,
     ]);
+});
+
+it('mengirim notifikasi laporan penyaluran baru ke admin dan kepala dinas', function () {
+    [, $user, , $store] = reportDistributorAccount('PT Rajawali Nusantara');
+
+    $admin = User::factory()->create(['role' => Role::Admin]);
+    $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
+    $inactiveAdmin = User::factory()->inactive()->create(['role' => Role::Admin]);
+    $uptd = User::factory()->create(['role' => Role::UptdPasar]);
+    $otherDistributor = User::factory()->distributor()->create();
+
+    $distributionDate = now()->toDateString();
+
+    $this->actingAs($user)
+        ->post(route('distributor.distribution-reports.store'), [
+            'distribution_date' => $distributionDate,
+            'recipient_store_id' => $store->id,
+            'cartons' => 250,
+        ])
+        ->assertRedirect(route('distributor.dashboard'));
+
+    $expectedMessage = 'Ada laporan baru dari PT Rajawali Nusantara.';
+
+    $this->assertDatabaseCount('notifications', 2);
+
+    expect($admin->notifications()->first()?->data['title'])->toBe('Laporan penyaluran baru')
+        ->and($admin->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($kepalaDinas->notifications()->first()?->data['message'])->toBe($expectedMessage)
+        ->and($inactiveAdmin->notifications()->count())->toBe(0)
+        ->and($uptd->notifications()->count())->toBe(0)
+        ->and($otherDistributor->notifications()->count())->toBe(0);
 });
 
 it('memvalidasi input laporan penyaluran', function () {
