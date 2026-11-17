@@ -2,7 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\Distribution;
+use App\Models\FieldDistributionReport;
+use App\Models\RecipientStore;
+use App\Policies\DistributionPolicy;
+use App\Policies\FieldDistributionReportPolicy;
+use App\Policies\RecipientStorePolicy;
 use App\Services\NotificationFeedService;
+use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as ViewInstance;
@@ -22,6 +31,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Distribution::class, DistributionPolicy::class);
+        Gate::policy(RecipientStore::class, RecipientStorePolicy::class);
+        Gate::policy(FieldDistributionReport::class, FieldDistributionReportPolicy::class);
+
+        if (config('app.trusted_proxies') !== []) {
+            TrustProxies::at(config('app.trusted_proxies'));
+        }
+
+        if ($this->app->environment('production')) {
+            config([
+                'app.debug' => false,
+                'session.encrypt' => true,
+                'session.secure' => true,
+            ]);
+
+            URL::forceScheme('https');
+        }
+
         View::composer('layouts.partials.header', function (ViewInstance $view): void {
             $user = auth()->user();
 

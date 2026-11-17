@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreMarketRequest;
+use App\Http\Requests\Admin\UpdateMarketRequest;
 use App\Models\Market;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -49,12 +51,9 @@ class MarketController extends Controller
     /**
      * Simpan pasar baru.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreMarketRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
-            'lokasi' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
-        ], $this->validationMessages());
+        $validated = $request->validated();
 
         Market::create([
             'name' => $validated['name'],
@@ -78,12 +77,9 @@ class MarketController extends Controller
     /**
      * Perbarui data pasar.
      */
-    public function update(Request $request, Market $market): RedirectResponse
+    public function update(UpdateMarketRequest $request, Market $market): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
-            'lokasi' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
-        ], $this->validationMessages());
+        $validated = $request->validated();
 
         $market->update([
             'name' => $validated['name'],
@@ -92,19 +88,6 @@ class MarketController extends Controller
         ]);
 
         return redirect()->route('admin.markets.index')->with('success', 'Pasar berhasil diperbarui.');
-    }
-
-    /**
-     * Pesan validasi data pasar.
-     *
-     * @return array<string, string>
-     */
-    private function validationMessages(): array
-    {
-        return [
-            'name.regex' => 'Nama pasar hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
-            'lokasi.regex' => 'Lokasi hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
-        ];
     }
 
     /**

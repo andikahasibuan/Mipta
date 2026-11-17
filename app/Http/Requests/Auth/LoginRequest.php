@@ -21,6 +21,16 @@ class LoginRequest extends FormRequest
     private const MAX_ATTEMPTS = 3;
 
     /**
+     * Jumlah maksimal percobaan gagal dari satu IP untuk akun yang tidak terdaftar.
+     */
+    private const UNKNOWN_ACCOUNT_IP_MAX_ATTEMPTS = 3;
+
+    /**
+     * Jumlah maksimal percobaan gagal dari satu IP untuk akun yang valid.
+     */
+    private const ACCOUNT_IP_MAX_ATTEMPTS = 20;
+
+    /**
      * Durasi penguncian login dalam detik (10 menit).
      */
     private const LOCKOUT_SECONDS = 600;
@@ -75,19 +85,22 @@ class LoginRequest extends FormRequest
 
         if ($this->isUptdContributorLogin($field, $identifier, $user)) {
             RateLimiter::hit($this->accountThrottleKey($user, $identifier), self::LOCKOUT_SECONDS);
-            RateLimiter::hit($this->ipThrottleKey(), self::LOCKOUT_SECONDS);
+            RateLimiter::hit(
+                $user === null ? $this->unknownIpThrottleKey() : $this->accountIpThrottleKey(),
+                self::LOCKOUT_SECONDS,
+            );
 
             throw ValidationException::withMessages([
-                'identifier' => 'Akun kontributor UPTD harus masuk melalui akun bersama UPTD.',
+                'identifier' => 'Email/username atau password salah.',
             ]);
         }
 
         if (! Auth::attempt([$field => $identifier, 'password' => $password, 'is_active' => true])) {
             RateLimiter::hit($this->accountThrottleKey($user, $identifier), self::LOCKOUT_SECONDS);
-
-            if ($user === null) {
-                RateLimiter::hit($this->ipThrottleKey(), self::LOCKOUT_SECONDS);
-            }
+            RateLimiter::hit(
+                $user === null ? $this->unknownIpThrottleKey() : $this->accountIpThrottleKey(),
+                self::LOCKOUT_SECONDS,
+            );
 
             if ($user && ! $user->is_active && Hash::check($password, $user->password)) {
                 throw ValidationException::withMessages([
@@ -101,6 +114,7 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->accountThrottleKey($user, $identifier));
+        RateLimiter::clear($this->accountIpThrottleKey());
     }
 
     /**
@@ -110,8 +124,17 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(?User $user, string $identifier): void
     {
-        foreach ([$this->accountThrottleKey($user, $identifier), $this->ipThrottleKey()] as $key) {
-            if (! RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
+        $checks = [
+            [$this->accountThrottleKey($user, $identifier), self::MAX_ATTEMPTS],
+            [$this->unknownIpThrottleKey(), self::UNKNOWN_ACCOUNT_IP_MAX_ATTEMPTS],
+        ];
+
+        if ($user !== null) {
+            $checks[] = [$this->accountIpThrottleKey(), self::ACCOUNT_IP_MAX_ATTEMPTS];
+        }
+
+        foreach ($checks as [$key, $maxAttempts]) {
+            if (! RateLimiter::tooManyAttempts($key, $maxAttempts)) {
                 continue;
             }
 
@@ -152,10 +175,18 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Kunci pembatas percobaan untuk IP klien.
+     * Kunci pembatas percobaan untuk IP klien dengan akun tidak terdaftar.
      */
-    private function ipThrottleKey(): string
+    private function unknownIpThrottleKey(): string
     {
         return 'login-ip|'.$this->ip();
+    }
+
+    /**
+     * Kunci pembatas percobaan IP untuk akun yang valid.
+     */
+    private function accountIpThrottleKey(): string
+    {
+        return 'login-ip-account|'.$this->ip();
     }
 }

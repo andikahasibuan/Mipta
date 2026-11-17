@@ -20,6 +20,10 @@ class EnsureDistributorIsLinked
             abort(403, 'Akun distributor belum dikaitkan ke PT.');
         }
 
+        if (! $user->is_active || ! $user->distributor?->is_active) {
+            abort(403, 'Akun atau perusahaan distributor sedang tidak aktif.');
+        }
+
         return $next($request);
     }
 }

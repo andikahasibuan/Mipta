@@ -203,7 +203,7 @@ it('memvalidasi format nama, alamat, dan NIB toko dari admin', function () {
     $this->assertDatabaseCount('recipient_stores', 0);
 });
 
-it('menghapus laporan penyaluran saat toko penerima dihapus', function () {
+it('menolak menghapus toko penerima yang memiliki riwayat penyaluran', function () {
     $store = RecipientStore::factory()->create();
     $distribution = Distribution::factory()->create([
         'recipient_store_id' => $store->id,
@@ -211,11 +211,23 @@ it('menghapus laporan penyaluran saat toko penerima dihapus', function () {
     ]);
 
     $this->actingAs(User::factory()->create())
+        ->from(route('admin.recipient-stores.index'))
+        ->delete(route('admin.recipient-stores.destroy', $store))
+        ->assertRedirect(route('admin.recipient-stores.index'))
+        ->assertSessionHasErrors('delete');
+
+    $this->assertDatabaseHas('recipient_stores', ['id' => $store->id]);
+    $this->assertDatabaseHas('distributions', ['id' => $distribution->id]);
+});
+
+it('menghapus toko penerima yang belum memiliki riwayat penyaluran', function () {
+    $store = RecipientStore::factory()->create();
+
+    $this->actingAs(User::factory()->create())
         ->delete(route('admin.recipient-stores.destroy', $store))
         ->assertRedirect(route('admin.recipient-stores.index'));
 
     $this->assertDatabaseMissing('recipient_stores', ['id' => $store->id]);
-    $this->assertDatabaseMissing('distributions', ['id' => $distribution->id]);
 });
 
 it('menampilkan keadaan kosong saat belum ada toko penerima', function () {
@@ -357,4 +369,49 @@ it('membatasi halaman toko penerima hanya untuk admin', function () {
     $this->actingAs(User::factory()->create(['role' => Role::Distributor]))
         ->get(route('admin.recipient-stores.index'))
         ->assertForbidden();
+});
+
+it('menolak memindahkan toko yang sudah memiliki riwayat penyaluran', function () {
+    $market = Market::factory()->create();
+    $otherMarket = Market::factory()->create();
+    $store = RecipientStore::factory()->create([
+        'market_id' => $market->id,
+        'nib' => '1234567890123',
+    ]);
+    Distribution::factory()->create([
+        'recipient_store_id' => $store->id,
+        'market_id' => $store->market_id,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->from(route('admin.recipient-stores.index'))
+        ->put(route('admin.recipient-stores.update', $store), [
+            'market_id' => $otherMarket->id,
+            'distributor_id' => $store->distributor_id,
+            'name' => $store->name,
+            'alamat' => $store->alamat,
+            'nib' => $store->nib,
+            'is_active' => '1',
+        ])
+        ->assertRedirect(route('admin.recipient-stores.index'))
+        ->assertSessionHasErrors('market_id');
+
+    expect($store->fresh()->market_id)->toBe($market->id);
+});
+
+it('menolak NIB toko yang sudah digunakan', function () {
+    $market = Market::factory()->create();
+    RecipientStore::factory()->create([
+        'market_id' => $market->id,
+        'nib' => '1234567890123',
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.recipient-stores.store'), [
+            'market_id' => $market->id,
+            'name' => 'Toko Baru',
+            'alamat' => 'Jln. Baru No. 1',
+            'nib' => '1234567890123',
+        ])
+        ->assertSessionHasErrors('nib');
 });

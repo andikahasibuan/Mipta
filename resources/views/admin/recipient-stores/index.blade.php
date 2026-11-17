@@ -126,7 +126,7 @@
                                 <x-ui.row-actions
                                     :edit="route('admin.recipient-stores.edit', $store)"
                                     :delete="route('admin.recipient-stores.destroy', $store)"
-                                    :confirm="'Menghapus toko penerima juga akan menghapus seluruh laporan penyaluran yang terkait. Lanjutkan?'"
+                                    :confirm="'Yakin ingin menghapus toko penerima ini?'"
                                 />
                             </td>
                         </tr>

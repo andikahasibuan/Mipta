@@ -123,4 +123,28 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Trusted Hosts and Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Membatasi Host header yang diterima aplikasi dan menentukan proxy yang
+    | boleh meneruskan header X-Forwarded-* saat aplikasi berjalan di balik
+    | load balancer.
+    |
+    */
+
+    'trusted_hosts' => array_values(array_unique(array_filter(array_merge(
+        ['localhost', '127.0.0.1'],
+        array_map('trim', explode(',', (string) env(
+            'APP_TRUSTED_HOSTS',
+            (string) (parse_url((string) env('APP_URL', ''), PHP_URL_HOST) ?: ''),
+        ))),
+    )))),
+
+    'trusted_proxies' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('TRUSTED_PROXIES', '')),
+    ))),
+
 ];

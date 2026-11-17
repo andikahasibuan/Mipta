@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Distributor;
 
 use App\Enums\DistributionStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Distributor\DistributionReportRequest;
 use App\Models\Distribution;
 use App\Models\RecipientStore;
 use App\Notifications\DistributionReportCreated;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 class DistributionReportController extends Controller
@@ -31,9 +33,9 @@ class DistributionReportController extends Controller
     /**
      * Simpan laporan penyaluran baru.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(DistributionReportRequest $request): RedirectResponse
     {
-        $validated = $this->validateReport($request);
+        $validated = $request->validated();
         $store = $this->ownedStore($request, (int) $validated['recipient_store_id']);
         $distributorName = $request->user()->distributor->name;
 
@@ -66,7 +68,7 @@ class DistributionReportController extends Controller
      */
     public function edit(Request $request, Distribution $distribution): View
     {
-        $this->ensureOwned($request, $distribution);
+        $this->ensureOwned($distribution);
 
         return view('distributor.distribution-reports.edit', $this->formData($request, $distribution));
     }
@@ -74,11 +76,9 @@ class DistributionReportController extends Controller
     /**
      * Perbarui laporan penyaluran yang sudah terkirim.
      */
-    public function update(Request $request, Distribution $distribution): RedirectResponse
+    public function update(DistributionReportRequest $request, Distribution $distribution): RedirectResponse
     {
-        $this->ensureOwned($request, $distribution);
-
-        $validated = $this->validateReport($request);
+        $validated = $request->validated();
         $store = $this->ownedStore($request, (int) $validated['recipient_store_id']);
 
         $distribution->fill([
@@ -121,20 +121,6 @@ class DistributionReportController extends Controller
     }
 
     /**
-     * Validasi input laporan penyaluran.
-     *
-     * @return array{distribution_date: string, recipient_store_id: int, cartons: int}
-     */
-    private function validateReport(Request $request): array
-    {
-        return $request->validate([
-            'distribution_date' => ['required', 'date', 'before_or_equal:today'],
-            'recipient_store_id' => ['required', 'integer', 'exists:recipient_stores,id'],
-            'cartons' => ['required', 'integer', 'min:1'],
-        ]);
-    }
-
-    /**
      * Pastikan toko yang dipilih milik distributor yang sedang login.
      */
     private function ownedStore(Request $request, int $storeId): RecipientStore
@@ -156,9 +142,9 @@ class DistributionReportController extends Controller
     /**
      * Pastikan laporan milik distributor yang sedang login.
      */
-    private function ensureOwned(Request $request, Distribution $distribution): void
+    private function ensureOwned(Distribution $distribution): void
     {
-        abort_unless($distribution->distributor_id === $request->user()->distributor_id, 404);
+        abort_unless(Gate::allows('update', $distribution), 404);
     }
 
     /**

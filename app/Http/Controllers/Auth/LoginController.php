@@ -81,7 +81,9 @@ class LoginController extends Controller
             return $fallback;
         }
 
-        return $intended;
+        $query = parse_url($intended, PHP_URL_QUERY);
+
+        return is_string($query) && $query !== '' ? $path.'?'.$query : $path;
     }
 
     /**

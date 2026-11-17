@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreRecipientStoreRequest;
+use App\Http\Requests\Admin\UpdateRecipientStoreRequest;
 use App\Models\Distributor;
 use App\Models\Market;
 use App\Models\RecipientStore;
@@ -95,15 +97,9 @@ class RecipientStoreController extends Controller
     /**
      * Simpan toko penerima baru.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreRecipientStoreRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'market_id' => ['required', 'integer', 'exists:markets,id'],
-            'distributor_id' => ['nullable', 'integer', 'exists:distributors,id'],
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ]+$/'],
-            'alamat' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
-            'nib' => ['required', 'digits:13'],
-        ], $this->storeValidationMessages());
+        $validated = $request->validated();
 
         RecipientStore::create([
             'market_id' => $validated['market_id'],
@@ -132,15 +128,15 @@ class RecipientStoreController extends Controller
     /**
      * Perbarui data toko penerima.
      */
-    public function update(Request $request, RecipientStore $store): RedirectResponse
+    public function update(UpdateRecipientStoreRequest $request, RecipientStore $store): RedirectResponse
     {
-        $validated = $request->validate([
-            'market_id' => ['required', 'integer', 'exists:markets,id'],
-            'distributor_id' => ['nullable', 'integer', 'exists:distributors,id'],
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ]+$/'],
-            'alamat' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
-            'nib' => ['required', 'digits:13'],
-        ], $this->storeValidationMessages());
+        $validated = $request->validated();
+
+        if ($store->distributions()->exists() && $this->movesStore($store, $validated)) {
+            return back()->withErrors([
+                'market_id' => 'Pasar atau distributor toko tidak dapat diubah karena toko sudah memiliki riwayat penyaluran.',
+            ])->withInput();
+        }
 
         $store->update([
             'market_id' => $validated['market_id'],
@@ -159,22 +155,25 @@ class RecipientStoreController extends Controller
      */
     public function destroy(RecipientStore $store): RedirectResponse
     {
+        if ($store->distributions()->exists()) {
+            return back()->withErrors([
+                'delete' => 'Toko penerima tidak dapat dihapus karena masih memiliki riwayat penyaluran.',
+            ]);
+        }
+
         $store->delete();
 
         return redirect()->route('admin.recipient-stores.index')->with('success', 'Toko penerima berhasil dihapus.');
     }
 
     /**
-     * Pesan validasi data toko penerima.
+     * Periksa apakah pasar atau distributor toko berubah.
      *
-     * @return array<string, string>
+     * @param  array<string, mixed>  $validated
      */
-    private function storeValidationMessages(): array
+    private function movesStore(RecipientStore $store, array $validated): bool
     {
-        return [
-            'name.regex' => 'Nama toko hanya boleh berisi huruf, angka, dan spasi.',
-            'alamat.regex' => 'Detail alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-).',
-            'nib.digits' => 'NIB harus terdiri dari tepat 13 angka.',
-        ];
+        return (int) $validated['market_id'] !== $store->market_id
+            || (int) ($validated['distributor_id'] ?? 0) !== (int) ($store->distributor_id ?? 0);
     }
 }

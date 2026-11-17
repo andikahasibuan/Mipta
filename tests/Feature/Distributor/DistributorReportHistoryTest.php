@@ -15,20 +15,23 @@ uses(RefreshDatabase::class);
  *
  * @return array{0: Distributor, 1: User, 2: Market, 3: RecipientStore}
  */
-function reportHistoryAccount(string $name = 'PT Riwayat Penyaluran'): array
+function reportHistoryAccount(string $name = 'PT Riwayat Penyaluran', string $nib = '9876543210987'): array
 {
     $distributor = Distributor::factory()->create(['name' => $name]);
     $user = User::factory()->create([
         'role' => Role::Distributor,
         'distributor_id' => $distributor->id,
     ]);
-    $market = Market::factory()->create(['name' => 'Pasar Riwayat']);
+    $market = Market::firstOrCreate(
+        ['name' => 'Pasar Riwayat'],
+        ['lokasi' => 'Jln. Riwayat'],
+    );
     $store = RecipientStore::factory()->create([
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
         'name' => 'Toko Riwayat',
         'alamat' => 'Jln. Riwayat No. 2',
-        'nib' => '9876543210987',
+        'nib' => $nib,
     ]);
 
     return [$distributor, $user, $market, $store];
@@ -36,7 +39,7 @@ function reportHistoryAccount(string $name = 'PT Riwayat Penyaluran'): array
 
 it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', function () {
     [$distributor, $user, $market, $store] = reportHistoryAccount();
-    [, $otherUser] = reportHistoryAccount('PT Distributor Lain');
+    [, $otherUser] = reportHistoryAccount('PT Distributor Lain', '9876543210988');
 
     $report = Distribution::factory()->create([
         'distributor_id' => $distributor->id,
@@ -177,7 +180,7 @@ it('menghapus laporan terkirim milik sendiri', function () {
 
 it('menolak menghapus riwayat laporan milik distributor lain', function () {
     [, $user] = reportHistoryAccount();
-    [, $otherUser, $otherMarket] = reportHistoryAccount('PT Distributor Lain');
+    [, $otherUser, $otherMarket] = reportHistoryAccount('PT Distributor Lain', '9876543210988');
 
     $otherReport = Distribution::factory()->create([
         'distributor_id' => $otherUser->distributor_id,

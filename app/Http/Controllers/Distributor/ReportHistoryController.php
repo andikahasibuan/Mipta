@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ReportHistoryController extends Controller
 {
@@ -32,7 +33,7 @@ class ReportHistoryController extends Controller
      */
     public function destroy(Request $request, Distribution $distribution): RedirectResponse
     {
-        abort_unless($distribution->distributor_id === $request->user()->distributor_id, 404);
+        abort_unless(Gate::allows('delete', $distribution), 404);
 
         $distributionDate = $distribution->distribution_date->format('d/m/Y');
         $distributionId = $distribution->id;

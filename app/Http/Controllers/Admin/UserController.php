@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\User;
+use App\Services\SessionRevoker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function __construct(private readonly SessionRevoker $sessions) {}
+
     /**
      * Tampilkan halaman pengguna sesuai tab peran yang dipilih.
      */
@@ -67,22 +70,9 @@ class UserController extends Controller
     /**
      * Simpan pengguna baru.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')],
-            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
-        ], [
-            'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
-            'username.unique' => 'Username sudah digunakan.',
-            'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
-        ]);
+        $validated = $request->validated();
 
         User::create([
             'name' => $validated['name'],
@@ -112,24 +102,11 @@ class UserController extends Controller
     /**
      * Perbarui data pengguna.
      */
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $this->ensureManageableUser($user);
 
-        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($user->id)],
-            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => ['nullable', 'string', 'min:8'],
-            'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
-        ], [
-            'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
-            'username.unique' => 'Username sudah digunakan.',
-            'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',
-        ]);
+        $validated = $request->validated();
 
         $data = [
             'name' => $validated['name'],
@@ -167,6 +144,10 @@ class UserController extends Controller
 
         $user->update($data);
 
+        if (! empty($validated['password']) || ! $data['is_active']) {
+            $this->sessions->revokeFor($user, $user->is($request->user()) ? $request->session()->getId() : null);
+        }
+
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil diperbarui.');
     }
 
@@ -185,6 +166,7 @@ class UserController extends Controller
             return back()->withErrors(['delete' => 'Anda tidak dapat menghapus akun yang sedang digunakan untuk login.']);
         }
 
+        $this->sessions->revokeFor($user);
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
@@ -210,6 +192,7 @@ class UserController extends Controller
     {
         return User::query()
             ->where('role', Role::Admin->value)
+            ->where('is_active', true)
             ->whereKeyNot($user->getKey())
             ->exists();
     }

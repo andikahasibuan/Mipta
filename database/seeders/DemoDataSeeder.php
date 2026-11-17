@@ -24,6 +24,18 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            $this->command?->warn('DemoDataSeeder hanya dapat dijalankan pada environment local atau testing.');
+
+            return;
+        }
+
+        if (User::where('username', 'kepala.dinas')->exists() || Market::where('name', 'Pasar Raya Padang')->exists()) {
+            $this->command?->warn('DemoDataSeeder dilewati karena data aplikasi sudah tersedia.');
+
+            return;
+        }
+
         $markets = [
             ['name' => 'Pasar Raya Padang', 'lokasi' => 'Jln. Merdeka'],
             ['name' => 'Pasar Bandar Buat', 'lokasi' => 'Jln. Pattimura'],
@@ -50,8 +62,8 @@ class DemoDataSeeder extends Seeder
             ],
             [
                 'name' => 'Dewi Anggraini',
-                'username' => 'kepala.dinas',
-                'email' => 'kepala.dinas@mipta.test',
+                'username' => 'demo.kepala.dinas',
+                'email' => 'demo.kepala.dinas@mipta.test',
                 'role' => Role::KepalaDinas,
             ],
         ];

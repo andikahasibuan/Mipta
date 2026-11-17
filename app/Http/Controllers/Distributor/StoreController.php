@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Distributor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Distributor\StoreRecipientStoreRequest;
+use App\Http\Requests\Distributor\UpdateRecipientStoreRequest;
 use App\Models\Market;
 use App\Models\RecipientStore;
 use App\Notifications\RecipientStoreCreated;
@@ -12,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class StoreController extends Controller
 {
@@ -62,14 +65,9 @@ class StoreController extends Controller
     /**
      * Simpan toko penerima baru milik distributor.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreRecipientStoreRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'market_id' => ['required', 'integer', 'exists:markets,id'],
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ]+$/'],
-            'alamat' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
-            'nib' => ['required', 'digits:13'],
-        ], $this->storeValidationMessages());
+        $validated = $request->validated();
 
         $distributorName = $request->user()->distributor->name;
         $marketName = Market::query()->whereKey($validated['market_id'])->value('name') ?? '—';
@@ -103,7 +101,7 @@ class StoreController extends Controller
      */
     public function edit(Request $request, RecipientStore $store): View
     {
-        $this->ensureOwnedBy($request, $store);
+        $this->ensureOwnedBy($store);
 
         return view('distributor.stores.edit', [
             'store' => $store,
@@ -114,16 +112,15 @@ class StoreController extends Controller
     /**
      * Perbarui data toko penerima milik distributor.
      */
-    public function update(Request $request, RecipientStore $store): RedirectResponse
+    public function update(UpdateRecipientStoreRequest $request, RecipientStore $store): RedirectResponse
     {
-        $this->ensureOwnedBy($request, $store);
+        $validated = $request->validated();
 
-        $validated = $request->validate([
-            'market_id' => ['required', 'integer', 'exists:markets,id'],
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9 ]+$/'],
-            'alamat' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9 .,\/-]+$/'],
-            'nib' => ['required', 'digits:13'],
-        ], $this->storeValidationMessages());
+        if ($store->distributions()->exists() && (int) $validated['market_id'] !== $store->market_id) {
+            return back()->withErrors([
+                'market_id' => 'Pasar toko tidak dapat diubah karena toko sudah memiliki riwayat penyaluran.',
+            ])->withInput();
+        }
 
         $store->fill([
             'market_id' => $validated['market_id'],
@@ -157,22 +154,8 @@ class StoreController extends Controller
     /**
      * Pastikan toko benar-benar milik distributor yang sedang login.
      */
-    private function ensureOwnedBy(Request $request, RecipientStore $store): void
+    private function ensureOwnedBy(RecipientStore $store): void
     {
-        abort_unless($store->distributor_id === $request->user()->distributor_id, 404);
-    }
-
-    /**
-     * Pesan validasi data toko penerima.
-     *
-     * @return array<string, string>
-     */
-    private function storeValidationMessages(): array
-    {
-        return [
-            'name.regex' => 'Nama toko hanya boleh berisi huruf, angka, dan spasi.',
-            'alamat.regex' => 'Detail alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/-).',
-            'nib.digits' => 'NIB harus terdiri dari tepat 13 angka.',
-        ];
+        abort_unless(Gate::allows('update', $store), 404);
     }
 }

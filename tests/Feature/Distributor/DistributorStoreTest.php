@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\Distribution;
 use App\Models\Distributor;
 use App\Models\Market;
 use App\Models\RecipientStore;
@@ -378,4 +379,51 @@ it('membatasi halaman manajemen toko hanya untuk distributor', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('distributor.stores.index'))
         ->assertForbidden();
+});
+
+it('menolak memindahkan toko yang sudah memiliki riwayat penyaluran', function () {
+    [$distributor, $user] = storeDistributorAccount();
+    $market = Market::factory()->create();
+    $otherMarket = Market::factory()->create();
+    $store = RecipientStore::factory()->create([
+        'distributor_id' => $distributor->id,
+        'market_id' => $market->id,
+        'nib' => '1234567890123',
+    ]);
+    Distribution::factory()->create([
+        'distributor_id' => $distributor->id,
+        'recipient_store_id' => $store->id,
+        'market_id' => $store->market_id,
+    ]);
+
+    $this->actingAs($user)
+        ->from(route('distributor.stores.index'))
+        ->put(route('distributor.stores.update', $store), [
+            'market_id' => $otherMarket->id,
+            'name' => $store->name,
+            'alamat' => $store->alamat,
+            'nib' => $store->nib,
+        ])
+        ->assertRedirect(route('distributor.stores.index'))
+        ->assertSessionHasErrors('market_id');
+
+    expect($store->fresh()->market_id)->toBe($market->id);
+});
+
+it('menolak NIB toko yang sudah digunakan', function () {
+    [$distributor, $user] = storeDistributorAccount();
+    $market = Market::factory()->create();
+    RecipientStore::factory()->create([
+        'market_id' => $market->id,
+        'nib' => '1234567890123',
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('distributor.stores.store'), [
+            'market_id' => $market->id,
+            'name' => 'Toko Baru',
+            'alamat' => 'Jln. Baru No. 1',
+            'nib' => '1234567890123',
+        ])
+        ->assertSessionHasErrors('nib');
 });

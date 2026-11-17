@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreDistributorRequest;
+use App\Http\Requests\Admin\UpdateDistributorRequest;
 use App\Models\Distributor;
+use App\Services\SessionRevoker;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class DistributorController extends Controller
 {
+    public function __construct(private readonly SessionRevoker $sessions) {}
+
     /**
      * Tampilkan daftar distributor.
      */
@@ -52,19 +55,9 @@ class DistributorController extends Controller
     /**
      * Simpan distributor baru beserta akun login perusahaannya.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreDistributorRequest $request): RedirectResponse
     {
-        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/', Rule::unique('distributors', 'name')],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')],
-            'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,13}$/'],
-            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
-            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', 'min:8'],
-        ], $this->accountMessages());
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated): void {
             $distributor = Distributor::create([
@@ -103,29 +96,10 @@ class DistributorController extends Controller
     /**
      * Perbarui data distributor beserta akun login perusahaannya.
      */
-    public function update(Request $request, Distributor $distributor): RedirectResponse
+    public function update(UpdateDistributorRequest $request, Distributor $distributor): RedirectResponse
     {
         $account = $distributor->account;
-
-        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
-
-        $emailRule = Rule::unique('users', 'email');
-        $usernameRule = Rule::unique('users', 'username');
-
-        if ($account !== null) {
-            $emailRule->ignore($account->id);
-            $usernameRule->ignore($account->id);
-        }
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/', Rule::unique('distributors', 'name')->ignore($distributor->id)],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', $usernameRule],
-            'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'telepon' => ['required', 'string', 'regex:/^[0-9]{10,13}$/'],
-            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
-            'email' => ['nullable', 'string', 'email', 'max:255', $emailRule],
-            'password' => [$account === null ? 'required' : 'nullable', 'string', 'min:8'],
-        ], $this->accountMessages());
+        $validated = $request->validated();
 
         DB::transaction(function () use ($distributor, $validated, $account): void {
             $distributor->update([
@@ -156,6 +130,10 @@ class DistributorController extends Controller
             }
         });
 
+        if ($account !== null && ! empty($validated['password'])) {
+            $this->sessions->revokeFor($account);
+        }
+
         return redirect()->route('admin.distributors.index')
             ->with('success', 'Distributor dan akun perusahaan berhasil diperbarui.');
     }
@@ -170,36 +148,15 @@ class DistributorController extends Controller
         }
 
         DB::transaction(function () use ($distributor): void {
-            $distributor->account?->delete();
+            if ($distributor->account !== null) {
+                $this->sessions->revokeFor($distributor->account);
+                $distributor->account->delete();
+            }
+
             $distributor->delete();
         });
 
         return redirect()->route('admin.distributors.index')
             ->with('success', 'Distributor dan akun perusahaan berhasil dihapus.');
-    }
-
-    /**
-     * Pesan validasi untuk akun login distributor.
-     *
-     * @return array<string, string>
-     */
-    private function accountMessages(): array
-    {
-        return [
-            'name.required' => 'Nama perusahaan distributor wajib diisi.',
-            'name.regex' => 'Nama perusahaan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
-            'name.unique' => 'Nama distributor sudah digunakan.',
-            'username.required' => 'Username distributor wajib diisi.',
-            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
-            'username.unique' => 'Username sudah digunakan.',
-            'penanggung_jawab.required' => 'Nama penanggung jawab wajib diisi.',
-            'penanggung_jawab.regex' => 'Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
-            'telepon.required' => 'No. handphone penanggung jawab wajib diisi.',
-            'telepon.regex' => 'No. handphone hanya boleh berisi angka (10 sampai 13 digit).',
-            'alamat_kantor.regex' => 'Alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
-            'email.unique' => 'Email perusahaan sudah digunakan akun lain.',
-            'password.required' => 'Password wajib diisi untuk membuat akun distributor.',
-            'password.min' => 'Password minimal 8 karakter.',
-        ];
     }
 }

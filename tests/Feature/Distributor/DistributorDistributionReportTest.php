@@ -16,20 +16,23 @@ uses(RefreshDatabase::class);
  *
  * @return array{0: Distributor, 1: User, 2: Market, 3: RecipientStore}
  */
-function reportDistributorAccount(string $name = 'PT Distributor Laporan'): array
+function reportDistributorAccount(string $name = 'PT Distributor Laporan', string $nib = '1234567890123'): array
 {
     $distributor = Distributor::factory()->create(['name' => $name]);
     $user = User::factory()->create([
         'role' => Role::Distributor,
         'distributor_id' => $distributor->id,
     ]);
-    $market = Market::factory()->create(['name' => 'Pasar Raya Padang']);
+    $market = Market::firstOrCreate(
+        ['name' => 'Pasar Raya Padang'],
+        ['lokasi' => 'Jln. Merdeka'],
+    );
     $store = RecipientStore::factory()->create([
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
         'name' => 'Toko Contoh',
         'alamat' => 'Jln. Merdeka No. 1',
-        'nib' => '1234567890123',
+        'nib' => $nib,
     ]);
 
     return [$distributor, $user, $market, $store];
@@ -141,7 +144,7 @@ it('memvalidasi input laporan penyaluran', function () {
 
 it('menolak toko milik distributor lain', function () {
     [, $user] = reportDistributorAccount();
-    [, , , $otherStore] = reportDistributorAccount('PT Distributor Lain');
+    [, , , $otherStore] = reportDistributorAccount('PT Distributor Lain', '1234567890124');
 
     $this->actingAs($user)
         ->post(route('distributor.distribution-reports.store'), [
@@ -211,7 +214,7 @@ it('memperbarui laporan terkirim dan statusnya tetap terkirim', function () {
 it('tidak mengizinkan edit laporan milik distributor lain', function () {
     [, $user, $market] = reportDistributorAccount();
 
-    [, $otherUser] = reportDistributorAccount('PT Distributor Lain');
+    [, $otherUser] = reportDistributorAccount('PT Distributor Lain', '1234567890124');
     $otherReport = Distribution::factory()->create([
         'distributor_id' => $otherUser->distributor_id,
         'market_id' => $market->id,

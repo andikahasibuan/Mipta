@@ -21,6 +21,10 @@ class EnsureUptdIsLinked
             abort(403, 'Akun ini bukan kontributor UPTD Pasar.');
         }
 
+        if (! $user->is_active) {
+            abort(403, 'Akun UPTD Pasar sedang tidak aktif.');
+        }
+
         if (! $user->isSharedUptdAccount()) {
             abort(403, 'Akun kontributor harus masuk melalui akun bersama UPTD Pasar.');
         }

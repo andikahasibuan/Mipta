@@ -22,6 +22,11 @@ class ContributorController extends Controller
     private const MAX_LOGIN_ATTEMPTS = 3;
 
     /**
+     * Jumlah maksimal percobaan gagal dari satu IP.
+     */
+    private const MAX_IP_LOGIN_ATTEMPTS = 20;
+
+    /**
      * Durasi penguncian login identitas dalam detik (10 menit).
      */
     private const LOGIN_LOCKOUT_SECONDS = 600;
@@ -124,13 +129,15 @@ class ContributorController extends Controller
         ]);
 
         $throttleKey = $this->accountThrottleKey($contributor);
+        $ipThrottleKey = $this->ipThrottleKey($request);
 
-        $this->ensureIsNotRateLimited($request, $throttleKey);
+        $this->ensureIsNotRateLimited($request, $throttleKey, $ipThrottleKey);
 
         $username = Str::lower(trim($validated['username']));
 
         if ($username !== $contributor->username || ! is_string($contributor->password) || ! Hash::check($validated['password'], $contributor->password)) {
             RateLimiter::hit($throttleKey, self::LOGIN_LOCKOUT_SECONDS);
+            RateLimiter::hit($ipThrottleKey, self::LOGIN_LOCKOUT_SECONDS);
 
             throw ValidationException::withMessages([
                 'username' => 'Username atau password tidak sesuai.',
@@ -138,6 +145,7 @@ class ContributorController extends Controller
         }
 
         RateLimiter::clear($throttleKey);
+        RateLimiter::clear($ipThrottleKey);
 
         $request->session()->forget('uptd_pending_contributor');
         $request->session()->regenerate();
@@ -183,20 +191,27 @@ class ContributorController extends Controller
     /**
      * Pastikan percobaan login identitas belum melewati batas.
      */
-    private function ensureIsNotRateLimited(Request $request, string $throttleKey): void
+    private function ensureIsNotRateLimited(Request $request, string $throttleKey, string $ipThrottleKey): void
     {
-        if (! RateLimiter::tooManyAttempts($throttleKey, self::MAX_LOGIN_ATTEMPTS)) {
-            return;
+        $checks = [
+            [$throttleKey, self::MAX_LOGIN_ATTEMPTS],
+            [$ipThrottleKey, self::MAX_IP_LOGIN_ATTEMPTS],
+        ];
+
+        foreach ($checks as [$key, $maxAttempts]) {
+            if (! RateLimiter::tooManyAttempts($key, $maxAttempts)) {
+                continue;
+            }
+
+            event(new Lockout($request));
+
+            $seconds = RateLimiter::availableIn($key);
+            $minutes = max(1, (int) ceil($seconds / 60));
+
+            throw ValidationException::withMessages([
+                'username' => "Terlalu banyak percobaan masuk. Coba lagi dalam {$minutes} menit.",
+            ]);
         }
-
-        event(new Lockout($request));
-
-        $seconds = RateLimiter::availableIn($throttleKey);
-        $minutes = max(1, (int) ceil($seconds / 60));
-
-        throw ValidationException::withMessages([
-            'username' => "Terlalu banyak percobaan masuk. Coba lagi dalam {$minutes} menit.",
-        ]);
     }
 
     /**
@@ -205,6 +220,14 @@ class ContributorController extends Controller
     private function accountThrottleKey(UptdContributor $contributor): string
     {
         return 'uptd-contributor-account|'.$contributor->getKey();
+    }
+
+    /**
+     * Kunci pembatas percobaan login identitas berdasarkan IP.
+     */
+    private function ipThrottleKey(Request $request): string
+    {
+        return 'uptd-contributor-ip|'.$request->ip();
     }
 
     /**

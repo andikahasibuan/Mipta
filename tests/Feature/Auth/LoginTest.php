@@ -115,7 +115,7 @@ it('menolak login langsung memakai identitas kontributor UPTD', function () {
     ])->assertSessionHasErrors('identifier');
 
     expect(session('errors')->first('identifier'))
-        ->toContain('Akun kontributor UPTD harus masuk melalui akun bersama UPTD.');
+        ->toContain('Email/username atau password salah.');
 
     $this->assertGuest();
 });
@@ -134,7 +134,7 @@ it('menolak login langsung akun pengguna lama yang terikat ke pasar', function (
     ])->assertSessionHasErrors('identifier');
 
     expect(session('errors')->first('identifier'))
-        ->toContain('Akun kontributor UPTD harus masuk melalui akun bersama UPTD.');
+        ->toContain('Email/username atau password salah.');
 
     $this->assertGuest();
 });
@@ -353,4 +353,36 @@ it('mengakhiri sesi saat logout', function () {
         ->assertRedirect(route('login'));
 
     $this->assertGuest();
+});
+
+it('mengabaikan intended url yang mengarah ke host lain', function () {
+    $admin = User::factory()->create([
+        'username' => 'admin.redirect',
+        'password' => 'admin123',
+    ]);
+
+    $this->withSession([
+        'url.intended' => 'https://evil.test/admin/users',
+    ])->post(route('login'), [
+        'identifier' => $admin->username,
+        'password' => 'admin123',
+    ])->assertRedirect(url('/admin/users'));
+
+    $this->assertAuthenticatedAs($admin);
+});
+
+it('tetap mengikuti intended url internal setelah login', function () {
+    $admin = User::factory()->create([
+        'username' => 'admin.internal',
+        'password' => 'admin123',
+    ]);
+
+    $this->withSession([
+        'url.intended' => url('/admin/users?role=kepala_dinas'),
+    ])->post(route('login'), [
+        'identifier' => $admin->username,
+        'password' => 'admin123',
+    ])->assertRedirect(url('/admin/users?role=kepala_dinas'));
+
+    $this->assertAuthenticatedAs($admin);
 });

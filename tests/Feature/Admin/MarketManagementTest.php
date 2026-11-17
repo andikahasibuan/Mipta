@@ -162,3 +162,16 @@ it('menolak menghapus pasar yang masih memiliki kontributor UPTD', function () {
 
     $this->assertDatabaseHas('markets', ['id' => $market->id]);
 });
+
+it('menolak nama pasar duplikat', function () {
+    Market::factory()->create(['name' => 'Pasar Raya Padang']);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('admin.markets.store'), [
+            'name' => 'Pasar Raya Padang',
+            'lokasi' => 'Jln. Merdeka',
+        ])
+        ->assertSessionHasErrors('name');
+
+    expect(Market::where('name', 'Pasar Raya Padang')->count())->toBe(1);
+});

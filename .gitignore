@@ -6,6 +6,7 @@
 .phpactor.json
 .phpunit.result.cache
 opencode.json
+.env.production.example
 /.agents
 /.codex
 /.cursor/

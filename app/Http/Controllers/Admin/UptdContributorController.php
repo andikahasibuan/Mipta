@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreUptdContributorRequest;
+use App\Http\Requests\Admin\UpdateUptdContributorRequest;
 use App\Models\Market;
 use App\Models\UptdContributor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class UptdContributorController extends Controller
 {
@@ -57,21 +57,9 @@ class UptdContributorController extends Controller
     /**
      * Simpan profil kontributor UPTD Pasar baru.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreUptdContributorRequest $request): RedirectResponse
     {
-        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')],
-            'password' => ['required', 'string', 'min:8'],
-            'market_id' => [
-                'required',
-                'integer',
-                Rule::exists('markets', 'id'),
-                Rule::unique('uptd_contributors', 'market_id'),
-            ],
-        ], $this->validationMessages());
+        $validated = $request->validated();
 
         UptdContributor::create([
             'name' => $validated['name'],
@@ -102,21 +90,9 @@ class UptdContributorController extends Controller
     /**
      * Perbarui profil kontributor UPTD Pasar.
      */
-    public function update(Request $request, UptdContributor $contributor): RedirectResponse
+    public function update(UpdateUptdContributorRequest $request, UptdContributor $contributor): RedirectResponse
     {
-        $request->merge(['username' => Str::lower($request->string('username')->toString())]);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')->ignore($contributor->id)],
-            'password' => ['nullable', 'string', 'min:8'],
-            'market_id' => [
-                'required',
-                'integer',
-                Rule::exists('markets', 'id'),
-                Rule::unique('uptd_contributors', 'market_id')->ignore($contributor->id),
-            ],
-        ], $this->validationMessages());
+        $validated = $request->validated();
 
         $attributes = [
             'name' => $validated['name'],
@@ -142,23 +118,5 @@ class UptdContributorController extends Controller
         $contributor->delete();
 
         return redirect()->route('admin.users.uptd-contributors.index')->with('success', 'Kontributor UPTD berhasil dihapus.');
-    }
-
-    /**
-     * Pesan validasi profil kontributor UPTD.
-     *
-     * @return array<string, string>
-     */
-    private function validationMessages(): array
-    {
-        return [
-            'name.regex' => 'Nama hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal 8 karakter.',
-            'market_id.required' => 'Pasar terkait wajib dipilih.',
-            'market_id.exists' => 'Pasar yang dipilih tidak valid.',
-            'market_id.unique' => 'Pasar ini sudah memiliki kontributor UPTD.',
-        ];
     }
 }

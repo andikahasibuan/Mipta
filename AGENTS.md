@@ -2,10 +2,10 @@
 
 ## Project state
 
-- Laravel 13.39 application: PHP 8.5 runtime (`composer.json` requires `^8.3`), Pest 5, Tailwind CSS 4, Vite 8.
-- This is still a fresh skeleton: the only route is `GET /` → `resources/views/welcome.blade.php`, the only model is `App\Models\User`, and there are no API routes, auth scaffolding, or domain features. Don't assume application code exists; search before building.
-- `.env` points at MySQL (`DB_DATABASE=mipta` on `127.0.0.1:3306`, user `root`, empty password; migrations already run). Tests still use in-memory SQLite via `phpunit.xml` (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`).
-- No `.git` directory and no CI workflows in this workspace; run verification locally instead of relying on a pipeline.
+- Laravel 13.42 application: PHP 8.5 runtime (`composer.json` requires `^8.3`), Pest 5, Tailwind CSS 4, Vite 8.
+- The application has role-based areas for admin, kepala dinas, distributor, and UPTD Pasar. Routes are split under `routes/` (`auth.php`, `admin.php`, `kepala-dinas.php`, `distributor.php`, `uptd.php`, `notifications.php`), and domain models live in `app/Models`. Search before building.
+- `.env` points at MySQL (`DB_DATABASE=mipta` on `127.0.0.1:3306`, user `root`, empty password; migrations already run). Tests use in-memory SQLite via `phpunit.xml` (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`).
+- The workspace is a Git repository with no CI workflows; run verification locally instead of relying on a pipeline.
 
 ## Commands
 

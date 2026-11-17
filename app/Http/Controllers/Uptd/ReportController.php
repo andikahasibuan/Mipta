@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Uptd;
 
 use App\Enums\FieldCondition;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Uptd\ReportRequest;
 use App\Models\FieldDistributionReport;
 use App\Models\UptdContributor;
 use App\Notifications\FieldDistributionReportCreated;
@@ -15,7 +16,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 
 class ReportController extends Controller
 {
@@ -45,9 +46,9 @@ class ReportController extends Controller
     /**
      * Simpan laporan pengawasan milik kontributor UPTD Pasar.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(ReportRequest $request): RedirectResponse
     {
-        $validated = $this->validateReport($request);
+        $validated = $request->validated();
         $contributor = $this->contributor($request)->loadMissing('market');
 
         DB::transaction(function () use ($contributor, $validated): void {
@@ -80,7 +81,7 @@ class ReportController extends Controller
     {
         $contributor = $this->contributor($request);
 
-        $this->ensureOwnedBy($contributor, $report);
+        $this->ensureOwnedBy($contributor, $report, 'update');
 
         $contributor->loadMissing('market');
 
@@ -94,13 +95,13 @@ class ReportController extends Controller
     /**
      * Perbarui laporan pengawasan milik kontributor UPTD Pasar.
      */
-    public function update(Request $request, FieldDistributionReport $report): RedirectResponse
+    public function update(ReportRequest $request, FieldDistributionReport $report): RedirectResponse
     {
         $contributor = $this->contributor($request)->loadMissing('market');
 
-        $this->ensureOwnedBy($contributor, $report);
+        $this->ensureOwnedBy($contributor, $report, 'update');
 
-        $validated = $this->validateReport($request);
+        $validated = $request->validated();
 
         $report->fill([
             'report_date' => $validated['report_date'],
@@ -134,7 +135,7 @@ class ReportController extends Controller
     {
         $contributor = $this->contributor($request);
 
-        $this->ensureOwnedBy($contributor, $report);
+        $this->ensureOwnedBy($contributor, $report, 'delete');
 
         $report->loadMissing(['contributor:id,name', 'market:id,name']);
 
@@ -156,25 +157,11 @@ class ReportController extends Controller
     }
 
     /**
-     * Validasi input laporan pengawasan.
-     *
-     * @return array{report_date: string, condition: string, description: string}
-     */
-    private function validateReport(Request $request): array
-    {
-        return $request->validate([
-            'report_date' => ['required', 'date', 'before_or_equal:today'],
-            'condition' => ['required', Rule::enum(FieldCondition::class)],
-            'description' => ['required', 'string', 'max:120'],
-        ]);
-    }
-
-    /**
      * Pastikan laporan milik kontributor yang sedang dipilih.
      */
-    private function ensureOwnedBy(UptdContributor $contributor, FieldDistributionReport $report): void
+    private function ensureOwnedBy(UptdContributor $contributor, FieldDistributionReport $report, string $ability): void
     {
-        abort_unless($report->uptd_contributor_id === $contributor->id, 404);
+        abort_unless(Gate::allows($ability, [$report, $contributor]), 404);
     }
 
     /**
