@@ -5,7 +5,6 @@
         ['label' => 'Data Master', 'route' => 'admin.markets.index', 'icon' => 'table-cells', 'active' => ['admin.markets.*', 'admin.recipient-stores.*']],
         ['label' => 'Penyaluran', 'route' => 'admin.distribution.index', 'icon' => 'document-text'],
         ['label' => 'Pengawasan', 'route' => 'admin.supervision.index', 'icon' => 'shield-check'],
-        ['label' => 'Pusat Bantuan', 'route' => 'help', 'icon' => 'question-mark-circle'],
     ];
 @endphp
 

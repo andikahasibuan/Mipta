@@ -38,7 +38,25 @@
         </ul>
     </nav>
 
-    <div data-sidebar-logout-section class="border-t border-white/15 px-3 py-4">
+    <div data-sidebar-help-section class="mt-auto border-t border-white/15 px-3 py-3">
+        @php($isHelpActive = request()->routeIs('help'))
+        <a
+            href="{{ route('help') }}"
+            @if ($isHelpActive) aria-current="page" @endif
+            aria-label="Pusat Bantuan"
+            title="Pusat Bantuan"
+            @class([
+                'flex items-center gap-2.5 rounded-md px-4 py-3 text-sm transition',
+                'bg-[#FDBA12]/40 font-semibold text-white' => $isHelpActive,
+                'text-[#E6F7F8] hover:bg-[#FDBA12]/40 hover:font-semibold hover:text-white' => ! $isHelpActive,
+            ])
+        >
+            <x-heroicon-o-question-mark-circle class="h-6 w-6 shrink-0" data-icon="question-mark-circle" />
+            <span data-sidebar-label class="min-w-0 truncate">Pusat Bantuan</span>
+        </a>
+    </div>
+
+    <div data-sidebar-logout-section class="px-3 py-4">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button

@@ -80,6 +80,7 @@
 }
 
 [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] a,
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-section] a,
 [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] button {
     justify-content: center;
     gap: 0;

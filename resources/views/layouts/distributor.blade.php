@@ -6,7 +6,6 @@
         ['label' => 'Laporan', 'route' => 'distributor.distribution-reports.create', 'icon' => 'document-text', 'active' => ['distributor.distribution-reports.create', 'distributor.distribution-reports.edit']],
         ['label' => 'Riwayat', 'route' => 'distributor.report-history.index', 'icon' => 'clock'],
         ['label' => 'Profil', 'route' => 'distributor.profile.edit', 'icon' => 'user-circle'],
-        ['label' => 'Pusat Bantuan', 'route' => 'help', 'icon' => 'question-mark-circle'],
     ];
 @endphp
 
