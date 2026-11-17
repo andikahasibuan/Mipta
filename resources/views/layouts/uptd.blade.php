@@ -5,6 +5,7 @@
         ['label' => 'Laporan', 'route' => 'uptd.reports.create', 'icon' => 'document-text'],
         ['label' => 'Riwayat', 'route' => 'uptd.reports.index', 'icon' => 'clock', 'active' => ['uptd.reports.index', 'uptd.reports.edit']],
         ['label' => 'Ganti Kontributor', 'route' => 'uptd.contributors.index', 'icon' => 'arrows-right-left'],
+        ['label' => 'Pusat Bantuan', 'route' => 'help', 'icon' => 'question-mark-circle'],
     ];
 @endphp
 

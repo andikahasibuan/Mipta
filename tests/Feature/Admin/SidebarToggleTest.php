@@ -35,17 +35,17 @@ it('menandai label menu agar dapat disembunyikan saat sidebar ciut', function ()
     preg_match('/<aside[^>]*id="app-sidebar".*?<\/aside>/s', $html, $matches);
     $sidebar = $matches[0] ?? '';
 
-    foreach (['Dashboard', 'Pengguna', 'Data Master', 'Penyaluran', 'Pengawasan', 'Logout'] as $label) {
+    foreach (['Dashboard', 'Pengguna', 'Data Master', 'Penyaluran', 'Pengawasan', 'Pusat Bantuan', 'Logout'] as $label) {
         expect($sidebar)->toMatch('/data-sidebar-label[^>]*>\s*'.preg_quote($label, '/').'\s*</');
     }
 });
 
-it('menyembunyikan pusat bantuan dari sidebar admin', function () {
+it('menampilkan pusat bantuan di sidebar admin', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertDontSee('Pusat Bantuan')
-        ->assertDontSee('Hubungi Admin');
+        ->assertSee('Pusat Bantuan')
+        ->assertSee('href="'.route('help').'"', false);
 });
 
 it('menampilkan pusat bantuan untuk distributor, kepala dinas, dan uptd', function () {
@@ -55,7 +55,7 @@ it('menampilkan pusat bantuan untuk distributor, kepala dinas, dan uptd', functi
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSee('Pusat Bantuan')
-        ->assertSee('Hubungi Admin');
+        ->assertSee('href="'.route('help').'"', false);
 
     $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
 

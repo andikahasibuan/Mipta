@@ -38,27 +38,6 @@
         </ul>
     </nav>
 
-    @unless (auth()->user()->role?->isAdmin())
-        <div data-sidebar-help-section class="px-3" style="padding-bottom: 0;">
-            <div data-sidebar-help class="rounded-lg p-5">
-                <div data-sidebar-help-content class="flex items-start gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FDBA12]/20 text-[#FDBA12]">
-                        <x-heroicon-o-shield-check class="h-5 w-5" />
-                    </span>
-                    <div data-sidebar-help-text class="min-w-0">
-                        <p class="text-base font-semibold text-white">Pusat Bantuan</p>
-                        <a
-                            href="mailto:husain@hayoo.com"
-                            class="inline-flex items-center py-1 text-sm font-semibold text-[#FDBA12] transition hover:underline"
-                        >
-                            Hubungi Admin
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endunless
-
     <div data-sidebar-logout-section class="border-t border-white/15 px-3 py-4">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
