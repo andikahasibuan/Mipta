@@ -10,7 +10,13 @@
         <x-heroicon-o-pencil-square class="h-4 w-4" />
     </a>
 
-    <form method="POST" action="{{ $delete }}" onsubmit="return confirm('{{ $confirm }}')">
+    <form
+    method="POST"
+    action="{{ $delete }}"
+    data-confirm-form
+    data-confirm-title="Konfirmasi Penghapusan"
+    data-confirm-message="{{ $confirm }}"
+>
         @csrf
         @method('DELETE')
         <button

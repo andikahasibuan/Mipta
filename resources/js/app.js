@@ -1,18 +1,17 @@
+
 import Chart from 'chart.js/auto';
 import '@fontsource-variable/plus-jakarta-sans';
 
 // Chart.js tersedia untuk grafik di halaman admin.
 window.Chart = Chart;
 
-// Sembunyikan atau tampilkan sidebar. Status kembali terbuka pada setiap muat halaman.
+// Sembunyikan atau tampilkan sidebar.
 const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
 
 const setSidebarCollapsed = (collapsed) => {
     document.documentElement.dataset.sidebarState = collapsed ? 'collapsed' : 'expanded';
 
-    if (!sidebarToggle) {
-        return;
-    }
+    if (!sidebarToggle) return;
 
     const label = collapsed ? 'Tampilkan menu' : 'Sembunyikan menu';
 
@@ -27,7 +26,7 @@ if (sidebarToggle) {
     });
 }
 
-// Tutup dropdown (profil & notifikasi) saat klik di luar atau menekan Escape.
+// Tutup dropdown saat klik di luar atau menekan Escape.
 const dropdownSelector = '[data-profile-menu][open], [data-notification-menu][open]';
 
 const closeDropdowns = () => {
@@ -50,7 +49,7 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// Tutup pesan flash tanpa memuat ulang halaman.
+// Tutup pesan flash.
 document.querySelectorAll('[data-flash-dismiss]').forEach((button) => {
     button.addEventListener('click', () => {
         button.closest('[data-flash-message]')?.remove();
@@ -67,7 +66,7 @@ const notificationPollInterval = 30000;
 let isFetchingNotifications = false;
 
 const refreshNotifications = async () => {
-    if (! notificationMenu || ! notificationFeedUrl || isFetchingNotifications || document.hidden) {
+    if (!notificationMenu || !notificationFeedUrl || isFetchingNotifications || document.hidden) {
         return;
     }
 
@@ -79,14 +78,16 @@ const refreshNotifications = async () => {
             cache: 'no-store',
         });
 
-        if (! response.ok) {
-            return;
-        }
+        if (!response.ok) return;
 
         const data = await response.json();
         const unreadCount = Number(data.unread_count ?? 0);
 
-        if (notificationContent && typeof data.content_html === 'string' && notificationContent.innerHTML !== data.content_html) {
+        if (
+            notificationContent &&
+            typeof data.content_html === 'string' &&
+            notificationContent.innerHTML !== data.content_html
+        ) {
             notificationContent.innerHTML = data.content_html;
         }
 
@@ -95,7 +96,7 @@ const refreshNotifications = async () => {
             notificationBadge.classList.toggle('hidden', unreadCount === 0);
         }
     } catch {
-        // Abaikan gangguan jaringan; polling berikutnya akan mencoba lagi.
+        // Polling berikutnya akan mencoba kembali.
     } finally {
         isFetchingNotifications = false;
     }
@@ -105,15 +106,11 @@ if (notificationMenu) {
     setInterval(refreshNotifications, notificationPollInterval);
 
     notificationMenu.addEventListener('toggle', () => {
-        if (notificationMenu.open) {
-            refreshNotifications();
-        }
+        if (notificationMenu.open) refreshNotifications();
     });
 
     document.addEventListener('visibilitychange', () => {
-        if (! document.hidden) {
-            refreshNotifications();
-        }
+        if (!document.hidden) refreshNotifications();
     });
 }
 
@@ -124,13 +121,11 @@ document.querySelectorAll('[data-highlighted-row]').forEach((row) => {
     }, 2000);
 });
 
-// Tampilkan atau sembunyikan isi password pada form password.
+// Tampilkan atau sembunyikan isi password.
 document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
     const input = document.getElementById(toggle.dataset.passwordToggle);
 
-    if (! input) {
-        return;
-    }
+    if (!input) return;
 
     const showIcon = toggle.querySelector('[data-password-icon-show]');
     const hideIcon = toggle.querySelector('[data-password-icon-hide]');
@@ -146,3 +141,169 @@ document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
         hideIcon?.classList.toggle('hidden', !shouldShow);
     });
 });
+
+// Popup konfirmasi custom MIPTA.
+const confirmationModal = document.querySelector('#confirmation-modal');
+const confirmationTitle = document.querySelector('#confirmation-title');
+const confirmationMessage = document.querySelector('#confirmation-message');
+const confirmationCancel = document.querySelector('#confirmation-cancel');
+const confirmationAccept = document.querySelector('#confirmation-accept');
+
+let pendingConfirmationForm = null;
+let previousFocusedElement = null;
+
+const closeConfirmationModal = () => {
+    if (!confirmationModal) return;
+
+    confirmationModal.classList.add('hidden');
+    confirmationModal.classList.remove('flex');
+    confirmationModal.setAttribute('aria-hidden', 'true');
+
+    pendingConfirmationForm = null;
+    previousFocusedElement?.focus();
+};
+
+if (confirmationModal) {
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('form[data-confirm-form]');
+
+        if (!form) return;
+
+        if (form.dataset.confirmed === 'true') {
+            delete form.dataset.confirmed;
+            return;
+        }
+
+        event.preventDefault();
+
+        pendingConfirmationForm = form;
+        previousFocusedElement = document.activeElement;
+
+        confirmationTitle.textContent =
+            form.dataset.confirmTitle || 'Konfirmasi Penghapusan';
+
+        confirmationMessage.textContent =
+            form.dataset.confirmMessage || 'Apakah kamu yakin ingin menghapus data ini?';
+
+        confirmationModal.classList.remove('hidden');
+        confirmationModal.classList.add('flex');
+        confirmationModal.setAttribute('aria-hidden', 'false');
+
+        confirmationCancel?.focus();
+    });
+
+    confirmationCancel?.addEventListener('click', closeConfirmationModal);
+
+    confirmationAccept?.addEventListener('click', () => {
+        if (!pendingConfirmationForm) return;
+
+        const form = pendingConfirmationForm;
+        form.dataset.confirmed = 'true';
+
+        closeConfirmationModal();
+        form.requestSubmit();
+    });
+
+    confirmationModal.addEventListener('click', (event) => {
+        if (event.target === confirmationModal) {
+            closeConfirmationModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (
+            event.key === 'Escape' &&
+            !confirmationModal.classList.contains('hidden')
+        ) {
+            closeConfirmationModal();
+        }
+    });
+}
+
+// Popup notifikasi berhasil dan gagal.
+const notificationModal = document.querySelector('#notification-modal');
+const notificationTitle = document.querySelector('#notification-title');
+const notificationMessage = document.querySelector('#notification-message');
+const notificationIconWrapper = document.querySelector('#notification-icon-wrapper');
+const notificationSuccessIcon = document.querySelector('#notification-success-icon');
+const notificationErrorIcon = document.querySelector('#notification-error-icon');
+const notificationClose = document.querySelector('#notification-close');
+
+const notificationMarker = document.querySelector('[data-popup-notification]');
+
+let notificationPreviousFocus = null;
+
+const closeNotificationModal = () => {
+    if (!notificationModal) return;
+
+    notificationModal.classList.add('hidden');
+    notificationModal.classList.remove('flex');
+    notificationModal.setAttribute('aria-hidden', 'true');
+
+    notificationPreviousFocus?.focus();
+};
+
+if (notificationModal && notificationMarker) {
+    const type = notificationMarker.dataset.popupType || 'success';
+    const isError = type === 'error';
+
+    notificationTitle.textContent =
+        notificationMarker.dataset.popupTitle || (isError ? 'Gagal!' : 'Berhasil!');
+
+    notificationMessage.textContent =
+        notificationMarker.dataset.popupMessage || 'Proses telah selesai.';
+
+    if (isError) {
+        notificationIconWrapper.classList.remove('bg-[#E0F2F3]', 'text-[#018F98]');
+        notificationIconWrapper.classList.add('bg-red-50', 'text-red-500');
+
+        notificationSuccessIcon.classList.add('hidden');
+        notificationErrorIcon.classList.remove('hidden');
+
+        notificationClose.classList.remove('bg-[#018F98]', 'hover:bg-[#01777E]');
+        notificationClose.classList.add('bg-red-500', 'hover:bg-red-600');
+    } else {
+        notificationIconWrapper.classList.remove('bg-red-50', 'text-red-500');
+        notificationIconWrapper.classList.add('bg-[#E0F2F3]', 'text-[#018F98]');
+
+        notificationSuccessIcon.classList.remove('hidden');
+        notificationErrorIcon.classList.add('hidden');
+
+        notificationClose.classList.remove('bg-red-500', 'hover:bg-red-600');
+        notificationClose.classList.add('bg-[#018F98]', 'hover:bg-[#01777E]');
+
+        // Jalankan ulang animasi centang.
+        const checkPath = notificationSuccessIcon.querySelector('.notification-check-path');
+
+        if (checkPath) {
+            checkPath.style.animation = 'none';
+            void checkPath.getBoundingClientRect();
+            checkPath.style.animation = '';
+        }
+    }
+
+    notificationPreviousFocus = document.activeElement;
+
+    notificationModal.classList.remove('hidden');
+    notificationModal.classList.add('flex');
+    notificationModal.setAttribute('aria-hidden', 'false');
+
+    notificationClose?.focus();
+
+    notificationClose?.addEventListener('click', closeNotificationModal);
+
+    notificationModal.addEventListener('click', (event) => {
+        if (event.target === notificationModal) {
+            closeNotificationModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (
+            event.key === 'Escape' &&
+            !notificationModal.classList.contains('hidden')
+        ) {
+            closeNotificationModal();
+        }
+    });
+}
