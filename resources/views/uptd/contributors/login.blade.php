@@ -87,7 +87,12 @@
                     </div>
 
                     <div class="flex items-center justify-end">
-                        <span class="text-sm font-medium text-[#018F98]">Hubungi Admin</span>
+                        <a
+                            href="{{ route('help') }}"
+                            class="text-sm font-medium text-[#018F98] transition hover:underline"
+                        >
+                            Hubungi Admin
+                        </a>
                     </div>
 
                     <button
