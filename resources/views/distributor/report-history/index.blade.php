@@ -70,27 +70,34 @@
                         <th scope="col" class="w-[12%] px-5 py-3 text-center align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
+
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($reports as $report)
                         <tr>
                             <td class="whitespace-nowrap px-3 py-4 text-center align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
+
                             <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
                                 {{ $report->distribution_date->format('d/m/Y') }}
                             </td>
+
                             <td class="break-words px-5 py-4 align-middle text-slate-900">
                                 {{ $titleOrDash($report->store?->name) }}
                             </td>
+
                             <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
                                 {{ $formatNumber($report->cartons) }}
                             </td>
+
                             <td class="break-words px-5 py-4 align-middle text-slate-700">
                                 {{ $titleOrDash($report->store?->alamat_lengkap) }}
                             </td>
+
                             <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
                                 {{ $report->store?->nib ?: '—' }}
                             </td>
+
                             <td class="whitespace-nowrap px-5 py-4 text-center align-middle">
                                 <div class="flex items-center justify-center gap-2">
                                     <a
@@ -105,10 +112,13 @@
                                     <form
                                         method="POST"
                                         action="{{ route('distributor.report-history.destroy', $report) }}"
-                                        onsubmit="return confirm('Yakin ingin menghapus riwayat laporan ini? Admin dan Kepala Dinas akan menerima notifikasi penghapusan.')"
+                                        data-confirm-form
+                                        data-confirm-title="Hapus Riwayat Laporan?"
+                                        data-confirm-message="Yakin ingin menghapus riwayat laporan ini? Admin dan Kepala Dinas akan menerima notifikasi penghapusan."
                                     >
                                         @csrf
                                         @method('DELETE')
+
                                         <button
                                             type="submit"
                                             aria-label="Hapus"

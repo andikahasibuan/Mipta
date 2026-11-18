@@ -58,10 +58,13 @@
                     <form
                         method="POST"
                         action="{{ route('notifications.destroy', $notification) }}"
-                        onsubmit="return confirm('Yakin ingin menghapus notifikasi ini?')"
+                        data-confirm-form
+                        data-confirm-title="Hapus Notifikasi?"
+                        data-confirm-message="Yakin ingin menghapus notifikasi ini?"
                     >
                         @csrf
                         @method('DELETE')
+
                         <button
                             type="submit"
                             aria-label="Hapus"

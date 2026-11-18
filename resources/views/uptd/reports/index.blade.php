@@ -80,21 +80,26 @@
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
+
                 <tbody class="divide-y divide-slate-100 text-center">
                     @forelse ($reports as $report)
                         <tr>
                             <td class="whitespace-nowrap px-3 py-4 align-middle font-mono text-xs text-slate-500">
                                 {{ $loop->iteration }}
                             </td>
+
                             <td class="break-words px-5 py-4 align-middle capitalize text-slate-700">
                                 {{ $report->contributor?->name ?? '—' }}
                             </td>
+
                             <td class="break-words px-5 py-4 align-middle capitalize text-slate-700">
                                 {{ $report->market?->name ?? '—' }}
                             </td>
+
                             <td class="break-words px-5 py-4 text-left align-middle text-slate-600">
                                 {{ \Illuminate\Support\Str::limit($report->description, 120, '') }}
                             </td>
+
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <span @class([
                                     'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold',
@@ -104,6 +109,7 @@
                                     {{ $report->condition->label() }}
                                 </span>
                             </td>
+
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <div class="flex items-center justify-center gap-2">
                                     <a
@@ -118,10 +124,13 @@
                                     <form
                                         method="POST"
                                         action="{{ route('uptd.reports.destroy', $report) }}"
-                                        onsubmit="return confirm('Yakin ingin menghapus laporan ini? Admin akan menerima notifikasi penghapusan.')"
+                                        data-confirm-form
+                                        data-confirm-title="Hapus Laporan?"
+                                        data-confirm-message="Yakin ingin menghapus laporan ini? Admin akan menerima notifikasi penghapusan."
                                     >
                                         @csrf
                                         @method('DELETE')
+
                                         <button
                                             type="submit"
                                             aria-label="Hapus"
