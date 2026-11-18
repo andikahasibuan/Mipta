@@ -101,6 +101,56 @@ class DistributionReportService
     }
 
     /**
+     * Ambil seluruh data laporan penyaluran untuk keperluan ekspor (tanpa paginasi).
+     *
+     * @return array{
+     *     distributions: Collection<int, Distribution>,
+     *     summary: array{reports: int, cartons: int, recipient_stores: int},
+     *     month_label: string
+     * }
+     */
+    public function export(Request $request): array
+    {
+        $month = $this->validMonth($request->string('month')->toString());
+        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+
+        $search = trim($request->string('search')->toString());
+        $distributorId = $this->validId($request->string('distributor')->toString(), Distributor::class);
+        $marketId = $this->validId($request->string('market')->toString(), Market::class);
+
+        $baseQuery = Distribution::query()
+            ->where('status', DistributionStatus::Submitted->value)
+            ->whereBetween('distribution_date', [
+                $start->toDateString(),
+                $start->copy()->endOfMonth()->toDateString(),
+            ])
+            ->when($distributorId, fn ($query, int $id) => $query->where('distributor_id', $id))
+            ->when($marketId, fn ($query, int $id) => $query->where('market_id', $id))
+            ->when($search !== '', fn ($query) => $this->search($query, $search));
+
+        $summary = [
+            'reports' => (clone $baseQuery)->count(),
+            'cartons' => (int) (clone $baseQuery)->sum('cartons'),
+            'recipient_stores' => (clone $baseQuery)
+                ->whereNotNull('recipient_store_id')
+                ->distinct()
+                ->count('recipient_store_id'),
+        ];
+
+        $distributions = $baseQuery
+            ->with(['store:id,name,alamat,nib,market_id', 'store.market:id,name'])
+            ->orderByDesc('distribution_date')
+            ->orderByDesc('id')
+            ->get();
+
+        return [
+            'distributions' => $distributions,
+            'summary' => $summary,
+            'month_label' => $this->monthLabel($month),
+        ];
+    }
+
+    /**
      * Tentukan halaman yang memuat baris yang perlu di-highlight.
      *
      * @param  Builder<Distribution>  $baseQuery
@@ -117,11 +167,13 @@ class DistributionReportService
             return Paginator::resolveCurrentPage();
         }
 
+        $highlightDate = Carbon::parse($highlighted->distribution_date)->toDateString();
+
         $before = (clone $baseQuery)
-            ->where(function (Builder $query) use ($highlighted): void {
-                $query->where('distribution_date', '>', $highlighted->distribution_date->toDateString())
-                    ->orWhere(function (Builder $query) use ($highlighted): void {
-                        $query->where('distribution_date', $highlighted->distribution_date->toDateString())
+            ->where(function (Builder $query) use ($highlighted, $highlightDate): void {
+                $query->where('distribution_date', '>', $highlightDate)
+                    ->orWhere(function (Builder $query) use ($highlighted, $highlightDate): void {
+                        $query->where('distribution_date', $highlightDate)
                             ->where('id', '>', $highlighted->id);
                     });
             })

@@ -48,5 +48,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('recipient-stores/{store}', [RecipientStoreController::class, 'destroy'])->name('recipient-stores.destroy');
 
     Route::get('distribution', [DistributionController::class, 'index'])->name('distribution.index');
+    // Tambahan Rute Ekspor Penyaluran (Admin)
+    Route::get('distribution/export/excel', [DistributionController::class, 'exportExcel'])->name('distribution.export.excel');
+    Route::get('distribution/export/pdf', [DistributionController::class, 'exportPdf'])->name('distribution.export.pdf');
+
     Route::get('supervision', [SupervisionController::class, 'index'])->name('supervision.index');
+    // Tambahan Rute Ekspor Pengawasan (Admin)
+    Route::get('supervision/export/excel', [SupervisionController::class, 'exportExcel'])->name('supervision.export.excel');
+    Route::get('supervision/export/pdf', [SupervisionController::class, 'exportPdf'])->name('supervision.export.pdf');
 });
