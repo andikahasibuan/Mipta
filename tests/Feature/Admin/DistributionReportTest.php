@@ -107,14 +107,14 @@ it('menampilkan tanda minus saat data toko tidak tersedia', function () {
         ->assertSee('—');
 });
 
-it('menampilkan tombol ekspor nonaktif pada laporan penyaluran', function () {
-    $response = $this->actingAs(User::factory()->create())
-        ->get(route('admin.distribution.index'));
-
-    $response->assertOk()
-        ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF']);
-
-    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
+it('menampilkan tautan ekspor pada laporan penyaluran', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.distribution.index'))
+        ->assertOk()
+        ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])
+        ->assertSee(route('admin.distribution.export.excel'), false)
+        ->assertSee(route('admin.distribution.export.pdf'), false)
+        ->assertDontSee('aria-disabled="true"', false);
 });
 
 it('tidak menampilkan aksi hapus pada laporan penyaluran admin', function () {

@@ -34,7 +34,7 @@ class SupervisionController extends Controller
         $filename = 'laporan-pengawasan-'.Str::slug($data['month_label']).'.pdf';
 
         return Pdf::loadView('exports.supervision-pdf', $data)
-            ->setPaper('a4', 'landscape')
+            ->setPaper('a4', 'portrait')
             ->download($filename);
     }
 }

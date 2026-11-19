@@ -18,9 +18,9 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'penanggung_jawab' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'penanggung_jawab' => ['nullable', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.\'-]+$/'],
             'telepon' => ['nullable', 'string', 'regex:/^[0-9]{10,13}$/'],
-            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.,\/\'-]+$/'],
             'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()->id)],
         ];
     }
@@ -31,9 +31,9 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'penanggung_jawab.regex' => 'Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
+            'penanggung_jawab.regex' => 'Nama penanggung jawab harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
             'telepon.regex' => 'Nomor telepon hanya boleh berisi angka (10 sampai 13 digit).',
-            'alamat_kantor.regex' => 'Alamat kantor hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
+            'alamat_kantor.regex' => 'Alamat kantor harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan akun lain.',
         ];

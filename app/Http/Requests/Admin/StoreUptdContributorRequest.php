@@ -19,8 +19,8 @@ class StoreUptdContributorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')],
+            'name' => ['required', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.\'-]+$/'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^(?=.*[a-z])[a-z0-9._-]+$/', Rule::unique('uptd_contributors', 'username')],
             'password' => ['required', 'string', 'min:8'],
             'market_id' => [
                 'required',
@@ -37,8 +37,8 @@ class StoreUptdContributorRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.regex' => 'Nama hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'name.regex' => 'Nama harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
+            'username.regex' => 'Username harus mengandung huruf, tanpa spasi, dan hanya boleh berisi huruf kecil, angka, titik, garis bawah, dan tanda hubung.',
             'username.unique' => 'Username sudah digunakan.',
             'password.required' => 'Password wajib diisi.',
             'password.min' => 'Password minimal 8 karakter.',

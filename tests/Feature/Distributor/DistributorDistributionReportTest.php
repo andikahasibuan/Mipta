@@ -84,7 +84,7 @@ it('mengirim laporan penyaluran', function () {
         ->post(route('distributor.distribution-reports.store'), [
             'distribution_date' => now()->toDateString(),
             'recipient_store_id' => $store->id,
-            'cartons' => 250,
+            'cartons' => 90,
         ])
         ->assertRedirect(route('distributor.dashboard'));
 
@@ -92,7 +92,7 @@ it('mengirim laporan penyaluran', function () {
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
         'recipient_store_id' => $store->id,
-        'cartons' => 250,
+        'cartons' => 90,
         'status' => DistributionStatus::Submitted->value,
     ]);
 });
@@ -112,7 +112,7 @@ it('mengirim notifikasi laporan penyaluran baru ke admin dan kepala dinas', func
         ->post(route('distributor.distribution-reports.store'), [
             'distribution_date' => $distributionDate,
             'recipient_store_id' => $store->id,
-            'cartons' => 250,
+            'cartons' => 90,
         ])
         ->assertRedirect(route('distributor.dashboard'));
 

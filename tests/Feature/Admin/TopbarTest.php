@@ -7,19 +7,26 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('menampilkan profil pengguna yang sedang login di topbar', function () {
+it('menampilkan profil bulat pengguna yang sedang login di topbar', function () {
     $admin = User::factory()->create([
         'name' => 'Iqbal Shyhab',
         'username' => 'iqbal.shyhab',
     ]);
 
-    $this->actingAs($admin)
-        ->get(route('admin.dashboard'))
-        ->assertOk()
-        ->assertSeeInOrder(['IS', 'iqbal.shyhab', 'Admin'])
+    $response = $this->actingAs($admin)
+        ->get(route('admin.dashboard'));
+
+    $response->assertOk()
         ->assertSeeInOrder(['Masuk sebagai', $admin->email, 'Logout'])
         ->assertSee('aria-label="Menu profil"', false)
         ->assertSee('action="'.route('logout').'"', false);
+
+    preg_match('/<summary[^>]*aria-label="Menu profil".*?<\/summary>/s', $response->getContent(), $matches);
+    $profileSummary = $matches[0] ?? '';
+
+    expect($profileSummary)
+        ->toContain('IS')
+        ->not->toContain($admin->username);
 });
 
 it('menampilkan username kontributor UPTD yang dipilih di topbar', function () {
@@ -39,14 +46,15 @@ it('menampilkan username kontributor UPTD yang dipilih di topbar', function () {
     $response->assertOk()
         ->assertSeeInOrder(['Masuk sebagai', $contributor->username, 'Logout'])
         ->assertSee($contributor->username)
-        ->assertDontSee($shared->username);
+        ->assertDontSee($shared->username)
+        ->assertSee('aria-label="Menu profil"', false);
 
     preg_match('/<summary[^>]*aria-label="Menu profil".*?<\/summary>/s', $response->getContent(), $matches);
     $profileSummary = $matches[0] ?? '';
 
     expect($profileSummary)
-        ->toContain($contributor->username)
-        ->toContain('UPTD Pasar')
+        ->toContain($contributor->initials())
+        ->not->toContain($contributor->username)
         ->not->toContain($shared->username);
 });
 

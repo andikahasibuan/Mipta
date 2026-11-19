@@ -19,11 +19,11 @@ class StoreDistributorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/', Rule::unique('distributors', 'name')],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')],
-            'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
+            'name' => ['required', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.\'-]+$/', Rule::unique('distributors', 'name')],
+            'username' => ['required', 'string', 'max:255', 'regex:/^(?=.*[a-z])[a-z0-9._-]+$/', Rule::unique('users', 'username')],
+            'penanggung_jawab' => ['required', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.\'-]+$/'],
             'telepon' => ['required', 'string', 'regex:/^[0-9]{10,13}$/'],
-            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+            'alamat_kantor' => ['nullable', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.,\/\'-]+$/'],
             'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
         ];
@@ -36,16 +36,16 @@ class StoreDistributorRequest extends FormRequest
     {
         return [
             'name.required' => 'Nama perusahaan distributor wajib diisi.',
-            'name.regex' => 'Nama perusahaan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
+            'name.regex' => 'Nama perusahaan harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
             'name.unique' => 'Nama distributor sudah digunakan.',
             'username.required' => 'Username distributor wajib diisi.',
-            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'username.regex' => 'Username harus mengandung huruf, tanpa spasi, dan hanya boleh berisi huruf kecil, angka, titik, garis bawah, dan tanda hubung.',
             'username.unique' => 'Username sudah digunakan.',
             'penanggung_jawab.required' => 'Nama penanggung jawab wajib diisi.',
-            'penanggung_jawab.regex' => 'Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
+            'penanggung_jawab.regex' => 'Nama penanggung jawab harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
             'telepon.required' => 'No. handphone penanggung jawab wajib diisi.',
             'telepon.regex' => 'No. handphone hanya boleh berisi angka (10 sampai 13 digit).',
-            'alamat_kantor.regex' => 'Alamat hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
+            'alamat_kantor.regex' => 'Alamat harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
             'email.unique' => 'Email perusahaan sudah digunakan akun lain.',
             'password.required' => 'Password wajib diisi untuk membuat akun distributor.',
             'password.min' => 'Password minimal 8 karakter.',

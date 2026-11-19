@@ -27,7 +27,19 @@ class DistributionReportRequest extends FormRequest
         return [
             'distribution_date' => ['required', 'date', 'before_or_equal:today'],
             'recipient_store_id' => ['required', 'integer', 'exists:recipient_stores,id'],
-            'cartons' => ['required', 'integer', 'min:1'],
+            'cartons' => ['required', 'integer', 'min:1', 'max:100'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'cartons.max' => 'Jumlah penyaluran maksimal 100 karton.',
+            'cartons.min' => 'Jumlah penyaluran minimal 1 karton.',
+            'cartons.integer' => 'Jumlah penyaluran harus berupa angka bulat.',
         ];
     }
 }

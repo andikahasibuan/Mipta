@@ -1,8 +1,8 @@
 @php
     $selectedUptdContributor = request()->attributes->get('uptd_contributor');
     $authUser = auth()->user();
-    $profileUsername = $selectedUptdContributor?->username ?? $authUser?->username;
     $profileAccount = $selectedUptdContributor?->username ?? $authUser?->email ?? $authUser?->username;
+    $profileInitials = $selectedUptdContributor?->initials() ?: ($authUser?->initials() ?? '');
 @endphp
 
 <header
@@ -34,7 +34,7 @@
                         <x-heroicon-o-bell class="h-5 w-5" />
 
                         <span data-notification-badge @class([
-                            'absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white',
+                            'absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white ring-2 ring-white pointer-events-none',
                             'hidden' => $unreadNotificationCount === 0,
                         ])>
                             {{ $unreadNotificationCount > 9 ? '9+' : $unreadNotificationCount }}
@@ -63,8 +63,8 @@
             {{-- IKON PROFIL TANPA NAMA DAN KOLOM --}}
             <details class="relative" data-profile-menu>
                 <summary aria-label="Menu profil" title="Profil"
-                    class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full bg-[#018F98] text-white shadow-sm transition hover:bg-[#01777E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50 [&::-webkit-details-marker]:hidden">
-                    <x-heroicon-o-user-circle class="h-6 w-6" />
+                    class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full bg-[#018F98] text-sm font-semibold leading-none text-white shadow-sm transition hover:bg-[#01777E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#018F98]/50 [&::-webkit-details-marker]:hidden">
+                    {{ $profileInitials }}
                 </summary>
 
                 {{-- MENU LOGOUT --}}

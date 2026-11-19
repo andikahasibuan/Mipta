@@ -4,38 +4,79 @@
     <meta charset="UTF-8">
     <title>Laporan Penyaluran - {{ $month_label }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 11px; color: #1e293b; }
-        .header { margin-bottom: 16px; border-bottom: 2px solid #018F98; padding-bottom: 8px; }
-        .header h1 { margin: 0; font-size: 16px; color: #018F98; }
-        .header p { margin: 4px 0 0; font-size: 11px; color: #475569; }
-        .summary { margin-bottom: 14px; }
-        .summary span { display: inline-block; margin-right: 18px; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
-        th { background-color: #e2e8f0; font-size: 10px; text-transform: uppercase; }
-        .text-center { text-align: center; }
+        @page {
+            margin: 10mm;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .period {
+            margin: 4px 0 12px;
+            font-size: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        th,
+        td {
+            padding: 5px 6px;
+            border: 1px solid #000;
+            text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+
+        th {
+            background: #fff;
+            font-size: 8px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        .text-center {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Laporan Penyaluran</h1>
-        <p>Periode: {{ $month_label }} &bull; Dicetak pada: {{ now()->format('d/m/Y H:i') }}</p>
-    </div>
-
-    <div class="summary">
-        <span>Jumlah Laporan: {{ number_format($summary['reports'], 0, ',', '.') }}</span>
-        <span>Total Penyaluran: {{ number_format($summary['cartons'], 0, ',', '.') }} Karton</span>
-        <span>Toko Penerima: {{ number_format($summary['recipient_stores'], 0, ',', '.') }}</span>
-    </div>
+    <h1>Laporan Penyaluran MinyaKita</h1>
+    <p class="period">Periode: {{ $month_label }}</p>
 
     <table>
         <thead>
             <tr>
                 <th class="text-center" style="width: 5%;">NO</th>
-                <th style="width: 14%;">Tanggal Penyaluran</th>
-                <th style="width: 22%;">Nama Toko</th>
-                <th class="text-center" style="width: 15%;">Jumlah (Karton)</th>
-                <th style="width: 28%;">Alamat</th>
+                <th class="text-center" style="width: 12%;">Tanggal Penyaluran</th>
+                <th class="text-center" style="width: 18%;">Nama Toko</th>
+                <th class="text-center" style="width: 12%;">Jumlah (Karton)</th>
+                <th class="text-center" style="width: 32%;">Alamat</th>
                 <th class="text-center" style="width: 16%;">Nomor NIB</th>
             </tr>
         </thead>
@@ -43,7 +84,7 @@
             @forelse ($distributions as $distribution)
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
-                    <td>{{ \Illuminate\Support\Carbon::parse($distribution->distribution_date)->format('d/m/Y') }}</td>
+                    <td class="text-center">{{ \Illuminate\Support\Carbon::parse($distribution->distribution_date)->format('d/m/Y') }}</td>
                     <td>{{ filled($distribution->store?->name) ? \Illuminate\Support\Str::title($distribution->store->name) : '—' }}</td>
                     <td class="text-center">{{ number_format($distribution->cartons, 0, ',', '.') }}</td>
                     <td>{{ filled($distribution->store?->alamat_lengkap) ? \Illuminate\Support\Str::title($distribution->store->alamat_lengkap) : '—' }}</td>

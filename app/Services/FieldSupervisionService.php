@@ -7,6 +7,7 @@ use App\Models\FieldDistributionReport;
 use App\Models\Market;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
@@ -91,6 +92,57 @@ class FieldSupervisionService
                 'highlight' => $highlightId,
             ],
             'conditions' => FieldCondition::cases(),
+        ];
+    }
+
+    /**
+     * Ambil seluruh data laporan pengawasan untuk keperluan ekspor (tanpa paginasi).
+     *
+     * @return array{
+     *     reports: Collection<int, FieldDistributionReport>,
+     *     summary: array{reports: int, reported_markets: int, total_markets: int, needs_attention_markets: int},
+     *     month_label: string
+     * }
+     */
+    public function export(Request $request): array
+    {
+        $search = trim($request->string('q')->toString());
+        $month = $request->string('month')->toString();
+
+        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
+            $month = now()->format('Y-m');
+        }
+
+        $condition = FieldCondition::tryFrom($request->string('condition')->toString());
+
+        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $periodStart = $start->toDateString();
+        $periodEnd = $start->copy()->endOfMonth()->toDateString();
+
+        $baseQuery = FieldDistributionReport::query()
+            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
+                ->whereHas('contributor', fn ($query) => $query->where('name', 'like', "%{$search}%"))
+                ->orWhereHas('market', fn ($query) => $query->where('name', 'like', "%{$search}%"))))
+            ->when($condition, fn ($query, FieldCondition $condition) => $query->where('condition', $condition->value))
+            ->whereBetween('report_date', [$periodStart, $periodEnd]);
+
+        $summary = [
+            'reports' => (clone $baseQuery)->count(),
+            'reported_markets' => (clone $baseQuery)->distinct()->count('market_id'),
+            'total_markets' => Market::count(),
+            'needs_attention_markets' => $this->needsAttentionMarkets($periodStart, $periodEnd),
+        ];
+
+        $reports = $baseQuery
+            ->with(['market:id,name', 'contributor:id,name'])
+            ->orderByDesc('report_date')
+            ->orderByDesc('id')
+            ->get();
+
+        return [
+            'reports' => $reports,
+            'summary' => $summary,
+            'month_label' => $this->monthLabel($month),
         ];
     }
 

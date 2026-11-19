@@ -22,8 +22,8 @@ class UpdateMarketRequest extends FormRequest
         $market = $this->route('market');
 
         return [
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.\'-]+$/', Rule::unique('markets', 'name')->ignore($market->id)],
-            'lokasi' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9\s.,\/\'-]+$/'],
+            'name' => ['required', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.\'-]+$/', Rule::unique('markets', 'name')->ignore($market->id)],
+            'lokasi' => ['required', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.,\/\'-]+$/'],
         ];
     }
 
@@ -33,9 +33,9 @@ class UpdateMarketRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.regex' => 'Nama pasar hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
+            'name.regex' => 'Nama pasar harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
             'name.unique' => 'Nama pasar sudah digunakan.',
-            'lokasi.regex' => 'Lokasi hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
+            'lokasi.regex' => 'Lokasi harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/\'-).',
         ];
     }
 }

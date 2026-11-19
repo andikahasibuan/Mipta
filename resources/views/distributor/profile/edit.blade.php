@@ -43,7 +43,7 @@
 
             <div class="px-6 py-6">
                 <div class="flex items-start gap-4">
-                    <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#018F98] text-xl font-semibold text-white">
+                    <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#018F98] text-xl font-semibold text-white shadow-sm">
                         {{ $account->initials() }}
                     </span>
 
@@ -128,7 +128,7 @@
                                             maxlength="255"
                                             autocomplete="email"
                                         @elseif ($field['name'] === 'penanggung_jawab')
-                                            pattern="[A-Za-z .'-]+"
+                                            pattern="(?=.*[A-Za-z])[A-Za-z0-9 .'-]+"
                                             title="Nama penanggung jawab hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung."
                                         @elseif ($field['name'] === 'telepon')
                                             inputmode="numeric"
@@ -137,7 +137,7 @@
                                             pattern="[0-9]{10,13}"
                                             title="Nomor telepon hanya boleh berisi angka (10 sampai 13 digit)."
                                         @elseif ($field['name'] === 'alamat_kantor')
-                                            pattern="[A-Za-z0-9 .,/'-]+"
+                                            pattern="(?=.*[A-Za-z])[A-Za-z0-9 .,/'-]+"
                                             title="Alamat kantor hanya boleh berisi huruf, angka, spasi, dan tanda baca (.,/'-)."
                                         @endif
                                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"

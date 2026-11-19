@@ -248,7 +248,7 @@ it('menolak pembaruan laporan pengawasan yang tidak valid', function (array $ove
     expect($report->fresh()->description)->toBe('Kondisi awal.');
 })->with([
     'tanggal kosong' => [['report_date' => ''], 'report_date'],
-    'tanggal masa depan' => [['report_date' => now()->addDay()->toDateString()], 'report_date'],
+    'tanggal masa depan' => [['report_date' => now()->addDays(3)->toDateString()], 'report_date'],
     'kondisi tidak valid' => [['condition' => 'rusak'], 'condition'],
     'deskripsi kosong' => [['description' => ''], 'description'],
 ]);

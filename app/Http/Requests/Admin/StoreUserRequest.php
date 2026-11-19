@@ -20,8 +20,8 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s.\'-]+$/'],
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users', 'username')],
+            'name' => ['required', 'string', 'max:255', 'regex:/^(?=.*[A-Za-z])[A-Za-z0-9\s.\'-]+$/'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^(?=.*[a-z])[a-z0-9._-]+$/', Rule::unique('users', 'username')],
             'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', Rule::enum(Role::class), Rule::notIn([Role::Distributor->value])],
@@ -34,8 +34,8 @@ class StoreUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, apostrof, dan tanda hubung.',
-            'username.regex' => 'Username tidak boleh mengandung spasi dan hanya boleh berisi huruf, angka, titik, garis bawah, dan tanda hubung.',
+            'name.regex' => 'Nama harus mengandung huruf dan hanya boleh berisi huruf, angka, spasi, titik, apostrof, dan tanda hubung.',
+            'username.regex' => 'Username harus mengandung huruf, tanpa spasi, dan hanya boleh berisi huruf kecil, angka, titik, garis bawah, dan tanda hubung.',
             'username.unique' => 'Username sudah digunakan.',
             'email.unique' => 'Email sudah digunakan.',
             'role.not_in' => 'Akun distributor dikelola melalui menu Distributor.',

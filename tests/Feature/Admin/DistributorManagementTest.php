@@ -379,7 +379,7 @@ it('menolak nama perusahaan, nama penanggung jawab, dan no handphone yang mengan
     $this->post(route('admin.distributors.store'), [
         'name' => 'PT !@#$%',
         'username' => 'pt.tidak.valid',
-        'penanggung_jawab' => 'Budi 123',
+        'penanggung_jawab' => '12345',
         'telepon' => '0812-3456-7890',
         'email' => 'tidak.valid@example.com',
         'password' => 'password123',

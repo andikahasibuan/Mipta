@@ -34,7 +34,7 @@ class DistributionController extends Controller
         $filename = 'laporan-penyaluran-'.Str::slug($data['month_label']).'.pdf';
 
         return Pdf::loadView('exports.distribution-pdf', $data)
-            ->setPaper('a4', 'landscape')
+            ->setPaper('a4', 'portrait')
             ->download($filename);
     }
 }

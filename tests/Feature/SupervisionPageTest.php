@@ -39,15 +39,14 @@ it('menampilkan laporan pengawasan dari database', function () {
         ->assertSee(now()->format('d/m/Y'));
 });
 
-it('menampilkan dua tombol ekspor nonaktif pada laporan pengawasan', function () {
-    $response = $this->actingAs(User::factory()->create())
-        ->get(route('admin.supervision.index'));
-
-    $response->assertOk()
+it('menampilkan tautan ekspor pada laporan pengawasan', function () {
+    $this->actingAs(User::factory()->create())
+        ->get(route('admin.supervision.index'))
+        ->assertOk()
         ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])
-        ->assertDontSee('akan tersedia segera');
-
-    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
+        ->assertSee(route('admin.supervision.export.excel'), false)
+        ->assertSee(route('admin.supervision.export.pdf'), false)
+        ->assertDontSee('aria-disabled="true"', false);
 });
 
 it('memfilter laporan berdasarkan teks, kondisi, pasar, dan bulan', function () {

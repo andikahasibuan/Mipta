@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable(['market_id', 'name', 'username', 'password', 'is_active'])]
 #[Hidden(['password'])]
@@ -31,6 +32,19 @@ class UptdContributor extends Model
     public function fieldReports(): HasMany
     {
         return $this->hasMany(FieldDistributionReport::class, 'uptd_contributor_id');
+    }
+
+    /**
+     * Inisial nama kontributor (maksimal dua kata pertama).
+     */
+    public function initials(): string
+    {
+        return Str::of($this->name)
+            ->explode(' ')
+            ->filter()
+            ->take(2)
+            ->map(fn (string $word) => mb_strtoupper(mb_substr($word, 0, 1)))
+            ->implode('');
     }
 
     /**

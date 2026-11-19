@@ -37,7 +37,7 @@
                         type="text"
                         value="{{ old('name') }}"
                         required
-                        pattern="[A-Za-z0-9 ]+"
+                        pattern="(?=.*[A-Za-z])[A-Za-z0-9 .'-]+"
                         title="Nama toko hanya boleh berisi huruf, angka, dan spasi."
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
@@ -53,7 +53,7 @@
                         name="alamat"
                         type="text"
                         value="{{ old('alamat') }}"
-                        pattern="[A-Za-z0-9 .,/-]+"
+                        pattern="(?=.*[A-Za-z])[A-Za-z0-9 .,/'-]+"
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     <p class="mt-1 text-xs text-slate-500">Tambahkan detail alamat bila diperlukan.</p>

@@ -149,24 +149,22 @@ it('menampilkan keadaan kosong laporan pengawasan untuk kepala dinas', function 
         ->assertSee('Belum ada laporan pengawasan');
 });
 
-it('menampilkan dua tombol ekspor nonaktif pada laporan penyaluran kepala dinas', function () {
-    $response = $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
-        ->get(route('kepala-dinas.distribution.index'));
-
-    $response->assertOk()
+it('menampilkan tautan ekspor pada laporan penyaluran kepala dinas', function () {
+    $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
+        ->get(route('kepala-dinas.distribution.index'))
+        ->assertOk()
         ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])
-        ->assertDontSee('akan tersedia segera');
-
-    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
+        ->assertSee(route('kepala-dinas.distribution.export.excel'), false)
+        ->assertSee(route('kepala-dinas.distribution.export.pdf'), false)
+        ->assertDontSee('aria-disabled="true"', false);
 });
 
-it('menampilkan dua tombol ekspor nonaktif pada laporan pengawasan kepala dinas', function () {
-    $response = $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
-        ->get(route('kepala-dinas.supervision.index'));
-
-    $response->assertOk()
+it('menampilkan tautan ekspor pada laporan pengawasan kepala dinas', function () {
+    $this->actingAs(User::factory()->create(['role' => Role::KepalaDinas]))
+        ->get(route('kepala-dinas.supervision.index'))
+        ->assertOk()
         ->assertSeeInOrder(['Ekspor Excel', 'Ekspor PDF'])
-        ->assertDontSee('akan tersedia segera');
-
-    expect(substr_count($response->getContent(), 'aria-disabled="true"'))->toBe(2);
+        ->assertSee(route('kepala-dinas.supervision.export.excel'), false)
+        ->assertSee(route('kepala-dinas.supervision.export.pdf'), false)
+        ->assertDontSee('aria-disabled="true"', false);
 });

@@ -21,7 +21,7 @@
                         type="text"
                         value="{{ old('name', $contributor->name) }}"
                         required
-                        pattern="[A-Za-z0-9 .'-]+"
+                        pattern="(?=.*[A-Za-z])[A-Za-z0-9 .'-]+"
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
                     >
                     @error('name')
@@ -37,7 +37,7 @@
                         type="text"
                         value="{{ old('username', $contributor->username) }}"
                         required
-                        pattern="[A-Za-z0-9._-]+"
+                        pattern="(?=.*[a-z])[a-z0-9._-]+"
                         autocapitalize="none"
                         spellcheck="false"
                         class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#018F98] focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"

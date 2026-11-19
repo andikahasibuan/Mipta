@@ -90,13 +90,20 @@
 
 <div class="mt-4 grid gap-4 xl:grid-cols-3">
     <div class="rounded-xl border border-slate-200 bg-white p-5 xl:col-span-2">
-        <div class="flex items-baseline justify-between gap-3">
-            <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Perkembangan Bulanan</p>
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Perkembangan Bulanan</p>
+                <p class="mt-1 text-xs text-slate-500">Total karton per hari</p>
+            </div>
             <p class="text-xs text-slate-400">{{ $summary['month_label'] }}</p>
         </div>
 
         <div class="mt-4 h-80">
-            <canvas id="monthly-chart"></canvas>
+            <canvas
+                id="monthly-chart"
+                role="img"
+                aria-label="Grafik perkembangan penyaluran MinyaKita per hari"
+            ></canvas>
         </div>
     </div>
 
@@ -148,17 +155,20 @@
             const chartData = @json($chart);
             const numberFormat = new Intl.NumberFormat('id-ID');
             const tickColor = '#94a3b8';
-            const tickFont = { family: 'Instrument Sans', size: 12 };
+            const chartFont = {
+                family: getComputedStyle(document.body).fontFamily,
+                size: 12,
+            };
 
             new Chart(canvas, {
                 type: 'line',
                 data: {
                     labels: chartData.labels,
                     datasets: [{
-                        label: 'Penyaluran Minyakita',
+                        label: 'Penyaluran MinyaKita (karton)',
                         data: chartData.values,
                         borderColor: '#018F98',
-                        backgroundColor: 'rgba(81, 145, 228, 0.12)',
+                        backgroundColor: 'rgba(1, 143, 152, 0.12)',
                         pointBackgroundColor: '#018F98',
                         pointBorderColor: '#018F98',
                         pointRadius: 3,
@@ -182,7 +192,7 @@
                                 usePointStyle: true,
                                 boxWidth: 8,
                                 color: '#64748b',
-                                font: tickFont,
+                                font: chartFont,
                             },
                         },
                         tooltip: {
@@ -197,15 +207,24 @@
                             ticks: {
                                 color: tickColor,
                                 maxTicksLimit: 7,
-                                font: tickFont,
+                                font: chartFont,
                             },
                         },
                         y: {
                             beginAtZero: true,
                             grid: { color: 'rgba(148, 163, 184, 0.2)' },
+                            title: {
+                                display: true,
+                                text: 'Karton',
+                                color: tickColor,
+                                font: {
+                                    ...chartFont,
+                                    weight: '600',
+                                },
+                            },
                             ticks: {
                                 color: tickColor,
-                                font: tickFont,
+                                font: chartFont,
                                 callback: (value) => numberFormat.format(value),
                             },
                         },

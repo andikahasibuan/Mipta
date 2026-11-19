@@ -13,7 +13,7 @@
         <div class="flex md:h-dvh md:overflow-hidden">
             <div class="relative z-10 hidden h-full max-w-[70vw] shrink-0 overflow-hidden bg-[#016B72] shadow-[6px_0_16px_-6px_rgba(15,23,42,0.35)] md:flex md:justify-center">
                 <img
-                    src="{{ asset('images/auth/gambar-login.webp') }}"
+                    src="{{ asset('images/auth/gambar-login.png') }}"
                     alt="Wali Kota Padang Fadly Amran dan Wakil Wali Kota Padang Maigus Nasir"
                     class="h-full w-auto max-w-none"
                 >
