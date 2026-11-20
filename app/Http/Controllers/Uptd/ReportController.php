@@ -55,7 +55,7 @@ class ReportController extends Controller
             $report = FieldDistributionReport::create([
                 'market_id' => $contributor->market_id,
                 'uptd_contributor_id' => $contributor->id,
-                'report_date' => $validated['report_date'],
+                'report_date' => now()->toDateString(),
                 'condition' => $validated['condition'],
                 'description' => $validated['description'],
             ]);
@@ -104,7 +104,6 @@ class ReportController extends Controller
         $validated = $request->validated();
 
         $report->fill([
-            'report_date' => $validated['report_date'],
             'condition' => $validated['condition'],
             'description' => $validated['description'],
         ]);

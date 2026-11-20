@@ -107,7 +107,7 @@
                             <td class="px-5 py-3 text-left capitalize text-slate-700">
                                 {{ $store->alamat_lengkap ?: '—' }}
                             </td>
-                            <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
+                            <td class="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
                                 {{ $store->nib ?? '—' }}
                             </td>
                             <td class="px-5 py-3 text-left capitalize text-slate-700">

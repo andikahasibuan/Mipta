@@ -16,13 +16,12 @@ class UptdReportHistoryService
      *
      * @return array{
      *     reports: LengthAwarePaginator,
-     *     filters: array{q: string, month: string, condition: string|null},
+     *     filters: array{month: string, condition: string|null},
      *     conditions: array<int, FieldCondition>
      * }
      */
     public function paginate(Request $request, UptdContributor $contributor): array
     {
-        $search = trim($request->string('q')->toString());
         $month = $request->string('month')->toString();
 
         if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
@@ -36,7 +35,6 @@ class UptdReportHistoryService
         $reports = FieldDistributionReport::query()
             ->where('uptd_contributor_id', $contributor->id)
             ->with(['market:id,name', 'contributor:id,name'])
-            ->when($search !== '', fn ($query) => $query->where('description', 'like', "%{$search}%"))
             ->when($condition, fn ($query, FieldCondition $condition) => $query->where('condition', $condition->value))
             ->whereBetween('report_date', [
                 $start->toDateString(),
@@ -50,7 +48,6 @@ class UptdReportHistoryService
         return [
             'reports' => $reports,
             'filters' => [
-                'q' => $search,
                 'month' => $month,
                 'condition' => $condition?->value,
             ],

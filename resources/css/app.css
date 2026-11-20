@@ -87,23 +87,13 @@
     padding-inline: 0;
 }
 
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-label],
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-text] {
+[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-label] {
     display: none;
 }
 
 [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-section],
 [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] {
     padding-inline: 0.5rem;
-}
-
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help] {
-    padding: 0.5rem;
-}
-
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-content] {
-    justify-content: center;
-    gap: 0;
 }
 
 [data-sidebar-state='collapsed'] [data-sidebar-icon-collapse] {

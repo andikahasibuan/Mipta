@@ -37,7 +37,7 @@
         <div class="flex flex-wrap items-center gap-2">
             <a
                 href="{{ route($area.'.distribution.export.excel', request()->query()) }}"
-                class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#01777E] focus:outline-none focus:ring-2 focus:ring-[#018F98]/40"
+                class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#018F98] hover:bg-[#018F98] hover:text-white active:border-[#018F98] active:bg-[#018F98] active:text-white focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 <x-heroicon-o-document-arrow-down class="h-4 w-4" />
                 Ekspor Excel
@@ -45,7 +45,7 @@
 
             <a
                 href="{{ route($area.'.distribution.export.pdf', request()->query()) }}"
-                class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-[#018F98] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#01777E] focus:outline-none focus:ring-2 focus:ring-[#018F98]/40"
+                class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#018F98] hover:bg-[#018F98] hover:text-white active:border-[#018F98] active:bg-[#018F98] active:text-white focus:outline-none focus:ring-2 focus:ring-[#018F98]/30"
             >
                 <x-heroicon-o-document-text class="h-4 w-4" />
                 Ekspor PDF
@@ -137,7 +137,7 @@
                     <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                     <th scope="col" class="w-[16%] px-5 py-3 text-center align-middle font-semibold">Jumlah Disalurkan (Karton)</th>
                     <th scope="col" class="w-[28%] px-5 py-3 align-middle font-semibold">Alamat</th>
-                    <th scope="col" class="w-[16%] px-5 py-3 text-center align-middle font-semibold">Nomor NIB</th>
+                    <th scope="col" class="w-[23%] px-5 py-3 text-center align-middle font-semibold">Nomor NIB</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">

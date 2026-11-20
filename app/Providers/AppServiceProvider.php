@@ -8,6 +8,7 @@ use App\Models\RecipientStore;
 use App\Policies\DistributionPolicy;
 use App\Policies\FieldDistributionReportPolicy;
 use App\Policies\RecipientStorePolicy;
+use App\Services\HelpCenterService;
 use App\Services\NotificationFeedService;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Gate;
@@ -62,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
                 'notifications' => $summary['notifications'],
                 'unreadNotificationCount' => $summary['unread_count'],
             ]);
+        });
+
+        View::composer('layouts.partials.sidebar', function (ViewInstance $view): void {
+            $view->with('helpWhatsappUrl', app(HelpCenterService::class)->whatsappUrl());
         });
     }
 }

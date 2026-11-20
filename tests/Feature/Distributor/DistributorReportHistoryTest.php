@@ -65,6 +65,7 @@ it('menampilkan riwayat laporan milik distributor dengan kolom lengkap', functio
         ->assertSee('Toko Riwayat')
         ->assertSee('Pasar Riwayat, Jln. Riwayat No. 2')
         ->assertSee('9876543210987')
+        ->assertSee(now()->startOfMonth()->format('d/m/Y'))
         ->assertSee(route('distributor.report-history.destroy', $report), false)
         ->assertSee(route('distributor.distribution-reports.edit', $report), false)
         ->assertSee('value="'.now()->format('Y-m').'" selected', false);

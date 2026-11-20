@@ -48,7 +48,6 @@ class NotificationTimeFormatter
 
         return $date->copy()
             ->setTimezone(self::TIMEZONE)
-            ->locale('id')
-            ->translatedFormat('j F Y H:i').' WIB';
+            ->format('d/m/Y H:i').' WIB';
     }
 }

@@ -156,8 +156,7 @@ class ContributorController extends Controller
             'market' => $contributor->market?->name,
         ]);
 
-        return redirect()->route('uptd.dashboard')
-            ->with('success', 'Identitas kontributor berhasil dipilih.');
+        return redirect()->route('uptd.dashboard');
     }
 
     /**

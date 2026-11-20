@@ -40,7 +40,7 @@
                             <th scope="col" class="w-[6%] px-3 py-3 font-semibold">NO</th>
                             <th scope="col" class="w-[28%] px-5 py-3 font-semibold">Pasar</th>
                             <th scope="col" class="w-[26%] px-5 py-3 font-semibold">Kontributor</th>
-                            <th scope="col" class="w-[23%] px-5 py-3 font-semibold">Tanggal</th>
+                            <th scope="col" class="w-[23%] px-5 py-3 font-semibold">Tanggal Pengawasan</th>
                             <th scope="col" class="w-[15%] px-5 py-3 text-center font-semibold">Kondisi</th>
                         </tr>
                     </thead>
@@ -57,7 +57,7 @@
                                     {{ $report->contributor?->name ?? $contributor->name }}
                                 </td>
                                 <td class="whitespace-nowrap px-5 py-4 align-middle text-slate-600">
-                                    {{ $report->report_date->locale('id')->translatedFormat('j F Y') }}
+                                    {{ $report->report_date->format('d/m/Y') }}
                                 </td>
                                 <td class="px-5 py-4 text-center align-middle">
                                     <span @class([

@@ -25,7 +25,6 @@ class DistributionReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'distribution_date' => ['required', 'date', 'before_or_equal:today'],
             'recipient_store_id' => ['required', 'integer', 'exists:recipient_stores,id'],
             'cartons' => ['required', 'integer', 'min:1', 'max:100'],
         ];

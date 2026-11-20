@@ -34,9 +34,18 @@ class ReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'report_date' => ['required', 'date', 'before_or_equal:today'],
             'condition' => ['required', Rule::enum(FieldCondition::class)],
-            'description' => ['required', 'string', 'max:120'],
+            'description' => ['required', 'string', 'max:120', 'regex:/\p{L}/u'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'description.regex' => 'Keterangan harus berisi teks, tidak boleh hanya angka atau simbol.',
         ];
     }
 }

@@ -60,6 +60,7 @@ it('menampilkan formulir laporan penyaluran', function () {
         ->assertSee('data-alamat="Pasar Raya Padang, Jln. Merdeka No. 1"', false)
         ->assertSee('data-nib="1234567890123"', false)
         ->assertSee('action="'.route('distributor.distribution-reports.store').'"', false)
+        ->assertSee('value="'.now()->toDateString().'"', false)
         ->assertDontSee('MIPTA / MANAJEMEN LAPORAN PENYALURAN');
 });
 
@@ -77,12 +78,12 @@ it('menampilkan arahan menambah toko saat distributor belum punya toko', functio
         ->assertSee(route('distributor.stores.create'), false);
 });
 
-it('mengirim laporan penyaluran', function () {
+it('mengirim laporan penyaluran dengan tanggal hari ini dan mengabaikan tanggal mundur', function () {
     [$distributor, $user, $market, $store] = reportDistributorAccount();
 
     $this->actingAs($user)
         ->post(route('distributor.distribution-reports.store'), [
-            'distribution_date' => now()->toDateString(),
+            'distribution_date' => now()->subDays(3)->toDateString(),
             'recipient_store_id' => $store->id,
             'cartons' => 90,
         ])
@@ -95,6 +96,9 @@ it('mengirim laporan penyaluran', function () {
         'cartons' => 90,
         'status' => DistributionStatus::Submitted->value,
     ]);
+
+    expect(Distribution::query()->firstOrFail()->distribution_date->toDateString())
+        ->toBe(now()->toDateString());
 });
 
 it('mengirim notifikasi laporan penyaluran baru ke admin dan kepala dinas', function () {
@@ -133,11 +137,10 @@ it('memvalidasi input laporan penyaluran', function () {
 
     $this->actingAs($user)
         ->post(route('distributor.distribution-reports.store'), [
-            'distribution_date' => now()->addDay()->toDateString(),
             'recipient_store_id' => '',
             'cartons' => 0,
         ])
-        ->assertSessionHasErrors(['distribution_date', 'recipient_store_id', 'cartons']);
+        ->assertSessionHasErrors(['recipient_store_id', 'cartons']);
 
     $this->assertDatabaseCount('distributions', 0);
 });
@@ -157,14 +160,15 @@ it('menolak toko milik distributor lain', function () {
     $this->assertDatabaseCount('distributions', 0);
 });
 
-it('menampilkan form edit dan memperbarui laporan', function () {
+it('menampilkan form edit dan memperbarui laporan tanpa mengubah tanggal', function () {
     [$distributor, $user, $market, $store] = reportDistributorAccount();
+    $originalDate = now()->subWeek()->toDateString();
 
     $report = Distribution::factory()->create([
         'distributor_id' => $distributor->id,
         'market_id' => $market->id,
         'recipient_store_id' => $store->id,
-        'distribution_date' => now()->toDateString(),
+        'distribution_date' => $originalDate,
         'cartons' => 50,
     ]);
 
@@ -173,7 +177,8 @@ it('menampilkan form edit dan memperbarui laporan', function () {
         ->assertOk()
         ->assertSee('Laporan Penyaluran')
         ->assertSee($store->name)
-        ->assertSee('value="50"', false);
+        ->assertSee('value="50"', false)
+        ->assertSee('value="'.$originalDate.'"', false);
 
     $this->put(route('distributor.distribution-reports.update', $report), [
         'distribution_date' => now()->toDateString(),
@@ -184,6 +189,7 @@ it('menampilkan form edit dan memperbarui laporan', function () {
         ->assertSessionHas('success', 'Laporan penyaluran berhasil diperbarui.');
 
     expect($report->fresh()->cartons)->toBe(75)
+        ->and($report->fresh()->distribution_date->toDateString())->toBe($originalDate)
         ->and($report->fresh()->status)->toBe(DistributionStatus::Submitted);
 });
 

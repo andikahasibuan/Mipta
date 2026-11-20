@@ -149,6 +149,7 @@ it('menampilkan card terbaru lebih dulu dengan format waktu yang sesuai', functi
         ->assertOk()
         ->assertSeeInOrder(['PT Hari Ini', 'PT Kemarin', 'PT Satu Bulan', 'PT Dua Bulan'])
         ->assertSee('09:15')
+        ->assertSee('17/11/2026 09:15 WIB', false)
         ->assertSee('1 hari yang lalu')
         ->assertSee('1 bulan yang lalu')
         ->assertSee('2 bulan yang lalu');

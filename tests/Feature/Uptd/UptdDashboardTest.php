@@ -133,9 +133,10 @@ it('menampilkan lima laporan pengawasan terbaru per halaman secara berurutan', f
         ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['20 Mei 2026', '19 Mei 2026', '18 Mei 2026', '17 Mei 2026', '16 Mei 2026'])
-        ->assertDontSee('15 Mei 2026')
-        ->assertDontSee('21 Mei 2026')
+        ->assertSeeInOrder(['20/05/2026', '19/05/2026', '18/05/2026', '17/05/2026', '16/05/2026'])
+        ->assertDontSee('15/05/2026')
+        ->assertDontSee('21/05/2026')
+        ->assertSee('Tanggal Pengawasan')
         ->assertSee('Menampilkan 5 dari 6 laporan')
         ->assertSee('page=2', false)
         ->assertSee('Perlu Perhatian')
@@ -143,8 +144,8 @@ it('menampilkan lima laporan pengawasan terbaru per halaman secara berurutan', f
 
     $this->get(route('uptd.dashboard', ['page' => 2]))
         ->assertOk()
-        ->assertSee('15 Mei 2026')
-        ->assertDontSee('20 Mei 2026')
+        ->assertSee('15/05/2026')
+        ->assertDontSee('20/05/2026')
         ->assertSee('Menampilkan 1 dari 6 laporan');
 });
 

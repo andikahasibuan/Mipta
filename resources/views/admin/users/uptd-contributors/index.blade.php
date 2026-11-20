@@ -75,7 +75,7 @@
                                 <span class="text-sm capitalize text-slate-600">{{ $contributor->market?->name }}</span>
                             </td>
                             <td class="px-5 py-4 text-left align-middle">
-                                <span class="font-mono text-xs text-slate-600">{{ $contributor->username }}</span>
+                                <span class="text-xs text-slate-600">{{ $contributor->username }}</span>
                             </td>
                             <td class="whitespace-nowrap px-5 py-4 align-middle">
                                 <span @class([

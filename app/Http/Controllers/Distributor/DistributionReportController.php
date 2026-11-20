@@ -45,7 +45,7 @@ class DistributionReportController extends Controller
                 'market_id' => $store->market_id,
                 'uptd_user_id' => null,
                 'recipient_store_id' => $store->id,
-                'distribution_date' => $validated['distribution_date'],
+                'distribution_date' => now()->toDateString(),
                 'cartons' => $validated['cartons'],
                 'status' => DistributionStatus::Submitted,
             ]);
@@ -84,7 +84,6 @@ class DistributionReportController extends Controller
         $distribution->fill([
             'market_id' => $store->market_id,
             'recipient_store_id' => $store->id,
-            'distribution_date' => $validated['distribution_date'],
             'cartons' => $validated['cartons'],
         ]);
 

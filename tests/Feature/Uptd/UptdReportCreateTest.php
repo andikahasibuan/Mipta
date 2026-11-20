@@ -28,17 +28,19 @@ it('menampilkan formulir laporan pengawasan', function () {
         ->assertSee('Perlu Perhatian')
         ->assertSee('Simpan Laporan')
         ->assertSee('Batal')
-        ->assertDontSee('Batal / Kembali');
+        ->assertDontSee('Batal / Kembali')
+        ->assertSee('value="'.now()->toDateString().'"', false);
 });
 
-it('menyimpan laporan pengawasan milik kontributor yang login', function () {
+it('menyimpan laporan pengawasan dengan tanggal hari ini dan mengabaikan tanggal mundur', function () {
     $market = Market::factory()->create();
     $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
+    $today = now()->toDateString();
 
     $this->actingAs(sharedUptdAccount())
         ->withSession(uptdContributorSession($contributor))
         ->post(route('uptd.reports.store'), [
-            'report_date' => '2026-05-20',
+            'report_date' => now()->subDays(3)->toDateString(),
             'condition' => FieldCondition::Normal->value,
             'description' => 'Kondisi pasar normal dan penyaluran lancar.',
         ])
@@ -49,14 +51,14 @@ it('menyimpan laporan pengawasan milik kontributor yang login', function () {
 
     expect($report->market_id)->toBe($market->id)
         ->and($report->uptd_contributor_id)->toBe($contributor->id)
-        ->and($report->report_date->toDateString())->toBe('2026-05-20')
+        ->and($report->report_date->toDateString())->toBe($today)
         ->and($report->condition)->toBe(FieldCondition::Normal)
         ->and($report->description)->toBe('Kondisi pasar normal dan penyaluran lancar.');
 
     $this->get(route('uptd.dashboard'))
         ->assertOk()
         ->assertSee('Laporan pengawasan berhasil disimpan.')
-        ->assertSee('20 Mei 2026');
+        ->assertSee(now()->format('d/m/Y'));
 });
 
 it('mengirim notifikasi laporan pengawasan baru ke admin dan kepala dinas', function () {
@@ -75,7 +77,6 @@ it('mengirim notifikasi laporan pengawasan baru ke admin dan kepala dinas', func
     $this->actingAs($shared)
         ->withSession(uptdContributorSession($contributor))
         ->post(route('uptd.reports.store'), [
-            'report_date' => '2026-05-20',
             'condition' => FieldCondition::Normal->value,
             'description' => 'Laporan pengawasan baru.',
         ])
@@ -98,7 +99,6 @@ it('menolak laporan pengawasan yang tidak valid', function (array $overrides, st
     $contributor = UptdContributor::factory()->create(['market_id' => $market->id]);
 
     $payload = array_merge([
-        'report_date' => now()->toDateString(),
         'condition' => FieldCondition::Normal->value,
         'description' => 'Kondisi pasar normal.',
     ], $overrides);
@@ -110,10 +110,10 @@ it('menolak laporan pengawasan yang tidak valid', function (array $overrides, st
 
     expect(FieldDistributionReport::count())->toBe(0);
 })->with([
-    'tanggal kosong' => [['report_date' => ''], 'report_date'],
-    'tanggal masa depan' => [['report_date' => now()->addDays(3)->toDateString()], 'report_date'],
     'kondisi tidak valid' => [['condition' => 'rusak'], 'condition'],
     'deskripsi kosong' => [['description' => ''], 'description'],
+    'deskripsi hanya angka' => [['description' => '12345'], 'description'],
+    'deskripsi hanya simbol' => [['description' => '!!!'], 'description'],
 ]);
 
 it('mengarahkan tamu dari penyimpanan laporan ke login', function () {

@@ -33,6 +33,7 @@ it('menampilkan riwayat laporan milik kontributor sendiri', function () {
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
         'uptd_contributor_id' => $contributor->id,
+        'report_date' => now()->startOfMonth()->toDateString(),
         'description' => 'Kondisi pasar tertib dan penyaluran lancar.',
     ]);
 
@@ -47,6 +48,8 @@ it('menampilkan riwayat laporan milik kontributor sendiri', function () {
         ->get(route('uptd.reports.index'))
         ->assertOk()
         ->assertSee('Laporan Pengawasan')
+        ->assertSee('Tanggal Pengawasan')
+        ->assertSee($report->report_date->format('d/m/Y'))
         ->assertSee('Kontributor UPTD 01')
         ->assertSee('Pasar Raya Padang')
         ->assertSee('Keterangan')
@@ -54,13 +57,14 @@ it('menampilkan riwayat laporan milik kontributor sendiri', function () {
         ->assertSee('Aksi')
         ->assertSee('Terapkan Filter')
         ->assertSee('Semua Kondisi')
+        ->assertDontSee('Cari deskripsi kondisi...')
         ->assertSee('Kondisi pasar tertib dan penyaluran lancar.')
         ->assertDontSee('Laporan milik kontributor lain.')
         ->assertSee(route('uptd.reports.edit', $report), false)
         ->assertSee(route('uptd.reports.destroy', $report), false);
 });
 
-it('memfilter riwayat laporan berdasarkan bulan, kondisi, dan deskripsi', function () {
+it('memfilter riwayat laporan berdasarkan bulan dan kondisi', function () {
     [$contributor, $market] = uptdHistoryAccount();
 
     $currentReport = FieldDistributionReport::factory()->create([
@@ -100,14 +104,6 @@ it('memfilter riwayat laporan berdasarkan bulan, kondisi, dan deskripsi', functi
         ->assertOk()
         ->assertSee('Pasar bersih dan tertib.')
         ->assertDontSee('Pasar kotor dan rusak.');
-
-    $this->get(route('uptd.reports.index', [
-        'month' => $previousMonth->format('Y-m'),
-        'q' => 'kotor',
-    ]))
-        ->assertOk()
-        ->assertSee('Pasar kotor dan rusak.')
-        ->assertDontSee('Pasar bersih dan tertib.');
 });
 
 it('menampilkan nilai lama pada formulir edit laporan', function () {
@@ -137,6 +133,7 @@ it('memperbarui laporan pengawasan milik kontributor', function () {
     $report = FieldDistributionReport::factory()->create([
         'market_id' => $market->id,
         'uptd_contributor_id' => $contributor->id,
+        'report_date' => '2026-05-20',
         'condition' => FieldCondition::Normal,
         'description' => 'Kondisi lama.',
     ]);
@@ -155,6 +152,7 @@ it('memperbarui laporan pengawasan milik kontributor', function () {
 
     expect($report->condition)->toBe(FieldCondition::PerluPerhatian)
         ->and($report->description)->toBe('Kondisi diperbarui.')
+        ->and($report->report_date->toDateString())->toBe('2026-05-20')
         ->and($report->market_id)->toBe($market->id)
         ->and($report->uptd_contributor_id)->toBe($contributor->id);
 });
@@ -235,7 +233,6 @@ it('menolak pembaruan laporan pengawasan yang tidak valid', function (array $ove
     ]);
 
     $payload = array_merge([
-        'report_date' => now()->toDateString(),
         'condition' => FieldCondition::Normal->value,
         'description' => 'Kondisi aman.',
     ], $overrides);
@@ -247,10 +244,10 @@ it('menolak pembaruan laporan pengawasan yang tidak valid', function (array $ove
 
     expect($report->fresh()->description)->toBe('Kondisi awal.');
 })->with([
-    'tanggal kosong' => [['report_date' => ''], 'report_date'],
-    'tanggal masa depan' => [['report_date' => now()->addDays(3)->toDateString()], 'report_date'],
     'kondisi tidak valid' => [['condition' => 'rusak'], 'condition'],
     'deskripsi kosong' => [['description' => ''], 'description'],
+    'deskripsi hanya angka' => [['description' => '12345'], 'description'],
+    'deskripsi hanya simbol' => [['description' => '!!!'], 'description'],
 ]);
 
 it('membatasi deskripsi laporan maksimal 120 karakter', function () {

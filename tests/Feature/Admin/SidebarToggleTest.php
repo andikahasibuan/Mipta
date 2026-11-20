@@ -3,9 +3,18 @@
 use App\Enums\Role;
 use App\Models\UptdContributor;
 use App\Models\User;
+use App\Services\HelpCenterService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    config([
+        'help.admin.whatsapp' => '081234567890',
+        'help.admin.service_hours' => 'Senin - Jumat, 08.00 - 16.00 WIB',
+        'help.admin.whatsapp_message' => 'Halo Admin MIPTA, saya butuh bantuan.',
+    ]);
+});
 
 it('menampilkan tombol untuk menyembunyikan sidebar', function () {
     $admin = User::factory()->create();
@@ -35,34 +44,39 @@ it('menandai label menu agar dapat disembunyikan saat sidebar ciut', function ()
     preg_match('/<aside[^>]*id="app-sidebar".*?<\/aside>/s', $html, $matches);
     $sidebar = $matches[0] ?? '';
 
-    foreach (['Dashboard', 'Pengguna', 'Data Master', 'Penyaluran', 'Pengawasan', 'Pusat Bantuan', 'Logout'] as $label) {
+    foreach (['Dashboard', 'Pengguna', 'Data Master', 'Penyaluran', 'Pengawasan', 'Logout'] as $label) {
         expect($sidebar)->toMatch('/data-sidebar-label[^>]*>\s*'.preg_quote($label, '/').'\s*</');
     }
 });
 
-it('menampilkan pusat bantuan di sidebar admin', function () {
+it('menyembunyikan pusat bantuan dari sidebar admin', function () {
+    $helpUrl = app(HelpCenterService::class)->whatsappUrl();
+
     $this->actingAs(User::factory()->create())
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('Pusat Bantuan')
-        ->assertSee('href="'.route('help').'"', false);
+        ->assertDontSee('Pusat Bantuan')
+        ->assertDontSee('href="'.$helpUrl.'"', false);
 });
 
-it('menampilkan pusat bantuan untuk distributor, kepala dinas, dan uptd', function () {
+it('mengarahkan pusat bantuan ke whatsapp untuk distributor, kepala dinas, dan uptd', function () {
+    $helpUrl = app(HelpCenterService::class)->whatsappUrl();
+
     $distributor = User::factory()->distributor()->create();
 
     $this->actingAs($distributor)
         ->get(route('distributor.dashboard'))
         ->assertOk()
         ->assertSee('Pusat Bantuan')
-        ->assertSee('href="'.route('help').'"', false);
+        ->assertSee('href="'.$helpUrl.'"', false);
 
     $kepalaDinas = User::factory()->create(['role' => Role::KepalaDinas]);
 
     $this->actingAs($kepalaDinas)
         ->get(route('kepala-dinas.dashboard'))
         ->assertOk()
-        ->assertSee('Pusat Bantuan');
+        ->assertSee('Pusat Bantuan')
+        ->assertSee('href="'.$helpUrl.'"', false);
 
     $shared = User::factory()->create(['role' => Role::UptdPasar]);
     $contributor = UptdContributor::factory()->create();
@@ -71,5 +85,6 @@ it('menampilkan pusat bantuan untuk distributor, kepala dinas, dan uptd', functi
         ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.dashboard'))
         ->assertOk()
-        ->assertSee('Pusat Bantuan');
+        ->assertSee('Pusat Bantuan')
+        ->assertSee('href="'.$helpUrl.'"', false);
 });
