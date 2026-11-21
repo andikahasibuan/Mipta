@@ -21,6 +21,18 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
         if (app()->environment('production')) {
+            $reverbOptions = config('broadcasting.connections.reverb.options', []);
+            $reverbHost = $reverbOptions['host'] ?? null;
+            $connectSources = "'self'";
+
+            if (filled($reverbHost)) {
+                $reverbScheme = ($reverbOptions['scheme'] ?? 'https') === 'https' ? 'wss' : 'ws';
+                $reverbPort = (int) ($reverbOptions['port'] ?? 443);
+                $defaultPort = $reverbScheme === 'wss' ? 443 : 80;
+
+                $connectSources .= " {$reverbScheme}://{$reverbHost}".($reverbPort !== $defaultPort ? ":{$reverbPort}" : '');
+            }
+
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
             $response->headers->set(
                 'Content-Security-Policy',
@@ -29,7 +41,7 @@ class SecurityHeaders
                 ."style-src 'self' 'unsafe-inline'; "
                 ."img-src 'self' data:; "
                 ."font-src 'self' data:; "
-                ."connect-src 'self'; "
+                ."connect-src {$connectSources}; "
                 ."frame-ancestors 'none'; "
                 ."base-uri 'self'; "
                 ."form-action 'self'",

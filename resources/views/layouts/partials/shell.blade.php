@@ -9,20 +9,27 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>@yield('title', 'MIPTA')</title>
 
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased">
-        <div class="flex h-screen overflow-hidden">
+    <body class="h-dvh overflow-hidden bg-slate-50 text-slate-800 antialiased">
+        <div class="flex h-dvh overflow-hidden">
+            <div
+                data-sidebar-backdrop
+                aria-hidden="true"
+                class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm lg:hidden"
+            ></div>
+
             @include('layouts.partials.sidebar', ['menus' => $menus])
 
             <main class="flex min-h-0 min-w-0 flex-1 flex-col">
                 @include('layouts.partials.header', ['activeMenuLabel' => $activeMenuLabel])
 
-                <div id="app-content" class="flex-1 overflow-y-auto bg-slate-50 p-6 lg:p-8">
+                <div id="app-content" class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
                     @yield('content')
                 </div>
             </main>

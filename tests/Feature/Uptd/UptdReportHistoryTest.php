@@ -121,7 +121,7 @@ it('menampilkan nilai lama pada formulir edit laporan', function () {
         ->withSession(uptdContributorSession($contributor))
         ->get(route('uptd.reports.edit', $report))
         ->assertOk()
-        ->assertSee('value="2026-05-20"', false)
+        ->assertSee('value="20/05/2026"', false)
         ->assertSee('Kondisi pasar perlu perbaikan.')
         ->assertSee('Perbarui Laporan')
         ->assertSee('Batal');
