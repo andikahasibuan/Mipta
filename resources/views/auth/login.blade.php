@@ -5,7 +5,7 @@
 @section('content')
     <div class="text-center">
         <img
-            src="{{ asset('images/mipta-logo.png') }}"
+            src="{{ asset('images/mipta-logo-emas.png') }}"
             alt="MIPTA"
             class="mx-auto block w-28"
         >
