@@ -5,6 +5,7 @@
 
 @theme {
     --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 @layer base {
@@ -57,63 +58,65 @@
     }
 }
 
-/* Sidebar ciut: hanya menampilkan logo dan ikon menu. */
-#app-sidebar {
-    transition: width 200ms ease-in-out;
-}
+/* Sidebar ciut: hanya menampilkan logo dan ikon menu (khusus desktop). */
+@media (min-width: 64rem) {
+    #app-sidebar {
+        transition: width 200ms ease-in-out;
+    }
 
-[data-sidebar-state='collapsed'] #app-sidebar {
-    width: 5rem;
-}
+    [data-sidebar-state='collapsed'] #app-sidebar {
+        width: 5rem;
+    }
 
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logo-wrapper] {
-    padding-inline: 0;
-}
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logo-wrapper] {
+        padding-inline: 0;
+    }
 
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logo] {
-    height: 3.5rem;
-    width: 3.5rem;
-}
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logo] {
+        height: 3.5rem;
+        width: 3.5rem;
+    }
 
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] {
-    padding-inline: 0.5rem;
-}
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] {
+        padding-inline: 0.5rem;
+    }
 
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] a,
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-section] a,
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] button {
-    justify-content: center;
-    gap: 0;
-    padding-inline: 0;
-}
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-nav] a,
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-section] a,
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] button {
+        justify-content: center;
+        gap: 0;
+        padding-inline: 0;
+    }
 
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-label] {
-    display: none;
-}
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-label] {
+        display: none;
+    }
 
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-section],
-[data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] {
-    padding-inline: 0.5rem;
-}
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-help-section],
+    [data-sidebar-state='collapsed'] #app-sidebar [data-sidebar-logout-section] {
+        padding-inline: 0.5rem;
+    }
 
-[data-sidebar-state='collapsed'] [data-sidebar-icon-collapse] {
-    display: none;
-}
+    [data-sidebar-state='collapsed'] [data-sidebar-icon-collapse] {
+        display: none;
+    }
 
-[data-sidebar-state='collapsed'] [data-sidebar-icon-expand] {
-    display: block;
-}
+    [data-sidebar-state='collapsed'] [data-sidebar-icon-expand] {
+        display: block;
+    }
 
-/* Saat sidebar ciut, perbesar sedikit isi konten agar proporsional dengan ruang ekstra. */
-[data-sidebar-state='collapsed'] #app-content {
-    --spacing: 0.27rem;
-    --text-xs: 0.8125rem;
-    --text-sm: 0.9375rem;
-    --text-base: 1.0625rem;
-    --text-lg: 1.1875rem;
-    --text-xl: 1.375rem;
-    --text-2xl: 1.625rem;
-    --text-4xl: 2.5rem;
+    /* Saat sidebar ciut, perbesar sedikit isi konten agar proporsional dengan ruang ekstra. */
+    [data-sidebar-state='collapsed'] #app-content {
+        --spacing: 0.27rem;
+        --text-xs: 0.8125rem;
+        --text-sm: 0.9375rem;
+        --text-base: 1.0625rem;
+        --text-lg: 1.1875rem;
+        --text-xl: 1.375rem;
+        --text-2xl: 1.625rem;
+        --text-4xl: 2.5rem;
+    }
 }
 
 /* Bayangan halus untuk setiap kartu di area konten. */

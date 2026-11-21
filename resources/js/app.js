@@ -1,5 +1,6 @@
-
 import Chart from 'chart.js/auto';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 import '@fontsource/plus-jakarta-sans/400.css';
 import '@fontsource/plus-jakarta-sans/500.css';
 import '@fontsource/plus-jakarta-sans/600.css';
@@ -27,6 +28,68 @@ if (sidebarToggle) {
     sidebarToggle.addEventListener('click', () => {
         setSidebarCollapsed(document.documentElement.dataset.sidebarState !== 'collapsed');
     });
+}
+
+// Sidebar sebagai drawer pada layar kecil.
+const sidebarDrawer = document.querySelector('[data-sidebar-drawer]');
+const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
+const sidebarOpenButton = document.querySelector('[data-sidebar-open]');
+const desktopSidebarQuery = window.matchMedia('(min-width: 64rem)');
+
+const setSidebarDrawerOpen = (open) => {
+    if (!sidebarDrawer) return;
+
+    if (desktopSidebarQuery.matches) {
+        sidebarDrawer.removeAttribute('inert');
+        sidebarDrawer.removeAttribute('aria-hidden');
+        sidebarBackdrop?.classList.add('hidden');
+        sidebarOpenButton?.setAttribute('aria-expanded', 'false');
+
+        return;
+    }
+
+    sidebarDrawer.classList.toggle('-translate-x-full', !open);
+    sidebarDrawer.classList.toggle('translate-x-0', open);
+    sidebarDrawer.toggleAttribute('inert', !open);
+
+    if (open) {
+        sidebarDrawer.removeAttribute('aria-hidden');
+    } else {
+        sidebarDrawer.setAttribute('aria-hidden', 'true');
+    }
+
+    sidebarBackdrop?.classList.toggle('hidden', !open);
+    sidebarOpenButton?.setAttribute('aria-expanded', String(open));
+};
+
+const syncSidebarDrawer = () => {
+    setSidebarDrawerOpen(false);
+};
+
+if (sidebarDrawer) {
+    syncSidebarDrawer();
+
+    sidebarOpenButton?.addEventListener('click', () => {
+        setSidebarDrawerOpen(true);
+    });
+
+    sidebarBackdrop?.addEventListener('click', () => {
+        setSidebarDrawerOpen(false);
+    });
+
+    sidebarDrawer.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+            setSidebarDrawerOpen(false);
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            setSidebarDrawerOpen(false);
+        }
+    });
+
+    desktopSidebarQuery.addEventListener('change', syncSidebarDrawer);
 }
 
 // Tutup dropdown saat klik di luar atau menekan Escape.
@@ -62,9 +125,10 @@ document.querySelectorAll('[data-flash-dismiss]').forEach((button) => {
 // Perbarui notifikasi topbar tanpa memuat ulang halaman.
 const notificationMenu = document.querySelector('[data-notification-menu]');
 const notificationFeedUrl = notificationMenu?.dataset.notificationFeedUrl;
+const notificationUserId = notificationMenu?.dataset.notificationUserId;
 const notificationContent = notificationMenu?.querySelector('[data-notification-content]');
 const notificationBadge = notificationMenu?.querySelector('[data-notification-badge]');
-const notificationPollInterval = 30000;
+const notificationPollInterval = 60000;
 
 let isFetchingNotifications = false;
 
@@ -115,6 +179,24 @@ if (notificationMenu) {
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) refreshNotifications();
     });
+}
+
+// Terima notifikasi baru secara real-time melalui Reverb.
+if (notificationMenu && notificationUserId && import.meta.env.VITE_REVERB_APP_KEY) {
+    window.Pusher = Pusher;
+
+    window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: import.meta.env.VITE_REVERB_APP_KEY,
+        wsHost: import.meta.env.VITE_REVERB_HOST,
+        wsPort: Number(import.meta.env.VITE_REVERB_PORT ?? 80),
+        wssPort: Number(import.meta.env.VITE_REVERB_PORT ?? 443),
+        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        enabledTransports: ['ws', 'wss'],
+    });
+
+    window.Echo.private(`App.Models.User.${notificationUserId}`)
+        .notification(() => refreshNotifications());
 }
 
 // Hapus sorotan baris data setelah dua detik.

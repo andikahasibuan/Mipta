@@ -29,7 +29,7 @@ it('menampilkan formulir laporan pengawasan', function () {
         ->assertSee('Simpan Laporan')
         ->assertSee('Batal')
         ->assertDontSee('Batal / Kembali')
-        ->assertSee('value="'.now()->toDateString().'"', false);
+        ->assertSee('value="'.now()->format('d/m/Y').'"', false);
 });
 
 it('menyimpan laporan pengawasan dengan tanggal hari ini dan mengabaikan tanggal mundur', function () {

@@ -158,7 +158,7 @@
                         <td class="break-words px-5 py-4 align-middle text-slate-700">
                             {{ $titleOrDash($distribution->store?->alamat_lengkap) }}
                         </td>
-                        <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
+                        <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-600">
                             {{ $distribution->store?->nib ?: '—' }}
                         </td>
                     </tr>

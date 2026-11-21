@@ -1,4 +1,4 @@
-<aside id="app-sidebar" class="no-scrollbar flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-white/15 bg-[#018F98]">
+<aside id="app-sidebar" data-sidebar-drawer class="no-scrollbar fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 -translate-x-full flex-col overflow-y-auto border-r border-white/15 bg-[#018F98] transition-transform duration-200 ease-in-out lg:static lg:translate-x-0">
     <div data-sidebar-logo-wrapper class="px-6 py-6">
         <div class="flex w-full items-center justify-center">
             <img

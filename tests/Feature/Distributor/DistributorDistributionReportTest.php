@@ -60,7 +60,7 @@ it('menampilkan formulir laporan penyaluran', function () {
         ->assertSee('data-alamat="Pasar Raya Padang, Jln. Merdeka No. 1"', false)
         ->assertSee('data-nib="1234567890123"', false)
         ->assertSee('action="'.route('distributor.distribution-reports.store').'"', false)
-        ->assertSee('value="'.now()->toDateString().'"', false)
+        ->assertSee('value="'.now()->format('d/m/Y').'"', false)
         ->assertDontSee('MIPTA / MANAJEMEN LAPORAN PENYALURAN');
 });
 
@@ -178,7 +178,7 @@ it('menampilkan form edit dan memperbarui laporan tanpa mengubah tanggal', funct
         ->assertSee('Laporan Penyaluran')
         ->assertSee($store->name)
         ->assertSee('value="50"', false)
-        ->assertSee('value="'.$originalDate.'"', false);
+        ->assertSee('value="'.$report->distribution_date->format('d/m/Y').'"', false);
 
     $this->put(route('distributor.distribution-reports.update', $report), [
         'distribution_date' => now()->toDateString(),
