@@ -88,8 +88,8 @@
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Alamat</th>
-                        <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">NIB</th>
+                        <th scope="col" class="w-[21%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[15%] px-5 py-3 align-middle font-semibold">NIB</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Distributor</th>
                         <th scope="col" class="w-[10%] px-5 py-3 align-middle font-semibold">Status</th>
                         <th scope="col" class="w-[12%] px-5 py-3 align-middle font-semibold">Aksi</th>
@@ -107,7 +107,7 @@
                             <td class="px-5 py-3 text-left capitalize text-slate-700">
                                 {{ $store->alamat_lengkap ?: '—' }}
                             </td>
-                            <td class="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
+                            <td class="whitespace-nowrap px-5 py-3 text-slate-600">
                                 {{ $store->nib ?? '—' }}
                             </td>
                             <td class="px-5 py-3 text-left capitalize text-slate-700">

@@ -65,8 +65,8 @@
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Tanggal Penyaluran</th>
                         <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
                         <th scope="col" class="w-[18%] px-5 py-3 text-center align-middle font-semibold">Jumlah Disalurkan (Karton)</th>
-                        <th scope="col" class="w-[23%] px-5 py-3 align-middle font-semibold">Alamat</th>
-                        <th scope="col" class="w-[14%] px-5 py-3 text-center align-middle font-semibold">Nomor NIB</th>
+                        <th scope="col" class="w-[22%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[15%] px-5 py-3 text-center align-middle font-semibold">Nomor NIB</th>
                         <th scope="col" class="w-[12%] px-5 py-3 text-center align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
@@ -94,7 +94,7 @@
                                 {{ $titleOrDash($report->store?->alamat_lengkap) }}
                             </td>
 
-                            <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-700">
+                            <td class="whitespace-nowrap px-5 py-4 text-center align-middle text-slate-600">
                                 {{ $report->store?->nib ?: '—' }}
                             </td>
 

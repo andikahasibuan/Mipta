@@ -4,13 +4,27 @@
     <meta charset="UTF-8">
     <title>Laporan Penyaluran - {{ $month_label }}</title>
     <style>
+        @font-face {
+            font-family: 'Plus Jakarta Sans';
+            font-style: normal;
+            font-weight: normal;
+            src: url('{{ str_replace('\\', '/', resource_path('fonts/PlusJakartaSans-Regular.ttf')) }}') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Plus Jakarta Sans';
+            font-style: normal;
+            font-weight: bold;
+            src: url('{{ str_replace('\\', '/', resource_path('fonts/PlusJakartaSans-Bold.ttf')) }}') format('truetype');
+        }
+
         @page {
             margin: 10mm;
         }
 
         body {
             margin: 0;
-            font-family: 'DejaVu Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 10px;
             line-height: 1.4;
             color: #000;

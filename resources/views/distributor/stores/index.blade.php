@@ -62,8 +62,8 @@
                     <tr>
                         <th scope="col" class="w-[6%] px-3 py-3 align-middle font-semibold">NO</th>
                         <th scope="col" class="w-[24%] px-5 py-3 align-middle font-semibold">Nama Toko</th>
-                        <th scope="col" class="w-[38%] px-5 py-3 align-middle font-semibold">Alamat</th>
-                        <th scope="col" class="w-[18%] px-5 py-3 align-middle font-semibold">NIB</th>
+                        <th scope="col" class="w-[36%] px-5 py-3 align-middle font-semibold">Alamat</th>
+                        <th scope="col" class="w-[20%] px-5 py-3 align-middle font-semibold">NIB</th>
                         <th scope="col" class="w-[14%] px-5 py-3 align-middle font-semibold">Aksi</th>
                     </tr>
                 </thead>
@@ -79,7 +79,7 @@
                             <td class="px-5 py-3 capitalize text-left text-slate-700">
                                 {{ $store->alamat_lengkap ?: '—' }}
                             </td>
-                            <td class="whitespace-nowrap px-5 py-3 font-mono text-xs text-slate-600">
+                            <td class="whitespace-nowrap px-5 py-3 font-mono text-slate-600">
                                 {{ $store->nib ?? '—' }}
                             </td>
                             <td class="whitespace-nowrap px-5 py-3">
